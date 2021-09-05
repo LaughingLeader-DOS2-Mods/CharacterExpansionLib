@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<save>
+    <header version="2" />
+    <version major="3" minor="6" revision="6" build="0" />
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="Module" value="3ab43741-6654-44a0-b46e-b5e47a5dbe93" type="23" />
+            <attribute id="Name" value="CharacterExpansionLib" type="23" />
+            <attribute id="Type" value="Add-on" type="23" />
+            <attribute id="UUID" value="b8f3b064-b467-4716-aef3-38557dec932e" type="23" />
+        </node>
+    </region>
+</save>

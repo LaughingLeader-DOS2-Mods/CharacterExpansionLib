@@ -1,0 +1,122 @@
+# SourceControlGenerator #
+##########################
+SourceControlGenerator.json
+
+# Levels
+######################
+Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
+Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Globals/*
+Editor/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
+
+# Story files        #
+######################
+*.div
+!story_header.div
+*.raw
+story_orphanqueries_ignore.txt
+Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Autosave/*
+Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Recovered/*
+
+# Asset Folders      #
+######################
+Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Assets/*
+#Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/*
+
+# Editor files       #
+######################
+RootTemplateSelectorConfig_*
+ResourceSelectorConfig_*
+StatsEditorConfig.xml
+EffectEditorConfig.xml
+DockPanel.config
+EditorBrowserMetadata_*
+EditorBrowserMetadata.xml
+Autosave/*
+Recovered/*
+ReConHistory.txt
+story.debugInfo
+
+# Assets             #
+######################
+*.gr2
+*.dae
+*.swf
+*.bullet
+*.dds
+*.tga
+*.png
+*.ttf
+*.lsb
+*.lsf
+*.lsfx
+*.lsefx
+#*.lsx
+*.lsmg
+*.wem
+
+# Logs               #
+######################
+*.log
+*.ailog
+log.txt
+errors.txt
+dialoglog.txt
+personallog.txt
+
+# Binary Files       #
+######################
+*.dat
+*.data
+*.bik
+*.bnk
+*.bshd
+*.cur
+*.fnt
+*.iggy
+*.iggytex
+*.osi
+*.patch
+*.tmpl
+
+# Dump files         #
+######################
+*.stackdump
+*.dmp
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# VS Code #
+############
+launch.json
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.lnk
+
+
+
