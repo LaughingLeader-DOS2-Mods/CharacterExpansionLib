@@ -1,0 +1,21 @@
+Ext.Require("SheetManager/Core/Classes/Base/SheetBaseData.lua")
+Ext.Require("SheetManager/Core/Classes/Base/SheetCustomStatBase.lua")
+Ext.Require("SheetManager/Core/Classes/Types/SheetTalentData.lua")
+Ext.Require("SheetManager/Core/Classes/Types/SheetAbilityData.lua")
+Ext.Require("SheetManager/Core/Classes/Types/SheetStatData.lua")
+Ext.Require("SheetManager/Core/Classes/Types/SheetCustomStatCategoryData.lua")
+Ext.Require("SheetManager/Core/Classes/Types/SheetCustomStatData.lua")
+Ext.Require("SheetManager/Core/SheetManager.lua")
+Ext.Require("SheetManager/Core/Managers/Abilities.lua")
+Ext.Require("SheetManager/Core/Managers/Talents.lua")
+Ext.Require("SheetManager/Core/Managers/Stats.lua")
+Ext.Require("SheetManager/Core/Managers/CustomStats.lua")
+
+if Ext.IsClient() then
+	Ext.Require("SheetManager/UI/CC/CharacterCreation.lua")
+	Ext.Require("SheetManager/UI/CharacterSheet.lua")
+	Ext.Require("SheetManager/UI/Fixes.lua")
+	Ext.Require("SheetManager/UI/TooltipCreator.lua")
+	Ext.Require("SheetManager/UI/ValueChangedHandler.lua")
+	Ext.Require("SheetManager/UI/CustomStatsUI.lua")
+end

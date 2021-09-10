@@ -118,5 +118,6 @@ ehthumbs.db
 Thumbs.db
 *.lnk
 
-
-
+# Extras #
+##########################
+FlashReferences/*

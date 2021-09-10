@@ -1,0 +1,8 @@
+{
+    "RequiredExtensionVersion": 55,
+    "ModTable": "CharacterExpansionLib",
+    "FeatureFlags": [
+        "OsirisExtensions",
+        "Lua"
+    ]
+}
