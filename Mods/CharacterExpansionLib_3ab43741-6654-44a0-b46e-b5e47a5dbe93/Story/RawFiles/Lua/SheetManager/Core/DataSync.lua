@@ -238,7 +238,8 @@ else
 			Mod = entry.Mod,
 			NetID = netid,
 			Value = value,
-			StatType = entry.StatType
+			StatType = entry.StatType,
+			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed
 		}))
 	end
 

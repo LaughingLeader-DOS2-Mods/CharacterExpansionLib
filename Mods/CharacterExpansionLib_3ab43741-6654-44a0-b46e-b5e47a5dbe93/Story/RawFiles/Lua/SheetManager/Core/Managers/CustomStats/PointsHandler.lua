@@ -456,8 +456,6 @@ function CustomStatSystem:UpdateAvailablePoints(ui)
 	end
 end
 
-Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
-Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
 end
 
 --[[

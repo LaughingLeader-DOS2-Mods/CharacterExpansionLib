@@ -128,15 +128,22 @@ else
 			local characterId = GameHelpers.GetCharacterID(data.NetID)
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
 			if characterId and stat then
-				if stat.UsePoints then
-					local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
-					if points > 0 then
-						if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, -1) then
-							SheetManager:SetEntryValue(stat, characterId, data.Value)
+				if data.IsGameMaster or not stat.UsePoints then
+					SheetManager:SetEntryValue(stat, characterId, data.Value)
+				else
+					local modifyPointsBy = stat:GetValue(characterId) - data.Value
+					if modifyPointsBy ~= 0 then
+						if modifyPointsBy < 0 then
+							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
+							if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
+								SheetManager:SetEntryValue(stat, characterId, data.Value)
+							end
+						else
+							if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
+								SheetManager:SetEntryValue(stat, characterId, data.Value)
+							end
 						end
 					end
-				else
-					SheetManager:SetEntryValue(stat, characterId, data.Value)
 				end
 			end
 		end

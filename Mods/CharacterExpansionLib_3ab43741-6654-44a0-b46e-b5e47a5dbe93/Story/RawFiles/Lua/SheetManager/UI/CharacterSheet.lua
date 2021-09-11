@@ -640,6 +640,9 @@ end
 Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableLabels", ResetAbilityPoints)
 Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "hideLevelUpAbilityButtons", ResetAbilityPoints)
 
+Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
+Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
+
 ---@param ui UIObject
 ---@param method string
 ---@param pointType number One of 4 values: 0,1,2,3 | 0 = attribute, 1 = combat ability points, 2 = civil points, 3 = talent points
@@ -672,13 +675,14 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 	if this and this.isExtended then
 		local points = SheetManager:GetBuiltinAvailablePointsForType(entry.StatType, character, entry.IsCivil)
 		local defaultCanAdd = (entry.UsePoints and points > 0) or GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
+		local defaultCanRemove = entry.UsePoints and GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
 
 		this = this.stats_mc
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
 		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc)
 		if arr and mc then
 			local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
-			local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanAdd, value)
+			local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
 
 			if entry.StatType == "Ability" then
 				mc.texts_mc.plus_mc.visible = plusVisible
