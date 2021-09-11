@@ -1,5 +1,5 @@
 ModuleFolder = Ext.GetModInfo(ModuleUUID).Directory
-Mods.LeaderLib.ImportUnsafe(Mods.CharacterExpansionLib)
+Mods.LeaderLib.Import(Mods.CharacterExpansionLib)
 
 Ext.Require("SheetManager/Init.lua")
 
@@ -36,28 +36,8 @@ Ext.RegisterListener("SessionLoading", function()
 	--CheckOsiToolsConfig()
 end)
 
-function Import(targetTable)
-	local targetOriginalGetIndex = nil
-	local getIndex = function(tbl, k)
-		if _G[k] then
-			return _G[k]
-		end
-		if Mods.LeaderLib[k] then
-			return Mods.LeaderLib[k]
-		end
-		if targetOriginalGetIndex then
-			return targetOriginalGetIndex(tbl, k)
-		end
-	end
-	local targetMeta = getmetatable(targetTable)
-	if not targetMeta then
-		setmetatable(targetTable, {
-			__index = getIndex
-		})
-	else
-		if targetMeta.__index then
-			targetOriginalGetIndex = targetMeta.__index
-		end
-		targetMeta.__index = getIndex
-	end
+---Makes CharacterExpansionLib's and LeaderLib's globals accessible using metamethod magic. Pass it a mod table, such as Mods.MyModTable.
+---@param targetModTable table
+function Import(targetModTable)
+	Mods.LeaderLib.Import(targetModTable, Mods.CharacterExpansionLib)
 end
