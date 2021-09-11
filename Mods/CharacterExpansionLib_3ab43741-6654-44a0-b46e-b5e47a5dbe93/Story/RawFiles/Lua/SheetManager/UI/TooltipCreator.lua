@@ -102,7 +102,7 @@ local function CreateTooltip(tooltipType, requestedUI, call, id)
 	end
 end
 
-local function HideTooltip(ui, call)
+local function HideTooltip(callingUI, call)
 	if isVisible then
 		isVisible = false
 		local ui = Ext.GetUIByType(Data.UIType.tooltip)
@@ -123,6 +123,13 @@ local function HideTooltip(ui, call)
 end
 
 Ext.RegisterUINameCall("hideTooltip", HideTooltip, "Before")
+Ext.RegisterUITypeCall(Data.UIType.characterSheet, "hideUI", HideTooltip, "Before")
+Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, "hideUI", HideTooltip, "Before")
+Ext.RegisterUITypeInvokeListener(Data.UIType.hotBar, "setButtonActive", function(ui, method, buttonId, isActive)
+	if buttonId == 1 and not isActive then
+		HideTooltip(ui, method)
+	end
+end)
 
 for t,v in pairs(SheetManager.Config.Calls.Tooltip) do
 	local func = function(...)
