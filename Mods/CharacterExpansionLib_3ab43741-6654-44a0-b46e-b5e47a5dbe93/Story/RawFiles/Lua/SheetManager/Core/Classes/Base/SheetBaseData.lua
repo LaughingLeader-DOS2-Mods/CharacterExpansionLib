@@ -66,23 +66,28 @@ function SheetBaseData.SetDefaults(data)
 	end
 end
 
-local function FormatText(txt, forceCheckForStringKey)
+---@param txt string
+---@param forceCheckForStringKey boolean|nil
+---@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+local function FormatText(txt, forceCheckForStringKey, character)
 	if forceCheckForStringKey or string.find(txt, "_", 1, true) then
 		txt = GameHelpers.GetStringKeyText(txt)
 	end
-	return GameHelpers.Tooltip.ReplacePlaceholders(txt)
+	return GameHelpers.Tooltip.ReplacePlaceholders(txt, character)
 end
 
-function SheetBaseData:GetDisplayName()
+---@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+function SheetBaseData:GetDisplayName(character)
 	if self.DisplayName then
-		return FormatText(self.DisplayName, self.LoadStringKey)
+		return FormatText(self.DisplayName, self.LoadStringKey, character)
 	end
 	return self.ID
 end
 
-function SheetBaseData:GetDescription()
+---@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+function SheetBaseData:GetDescription(character)
 	if self.Description then
-		local text = FormatText(self.Description, self.LoadStringKey)
+		local text = FormatText(self.Description, self.LoadStringKey, character)
 		if self.Mod then
 			local info = Ext.GetModInfo(self.Mod)
 			if info and not StringHelpers.IsNullOrWhitespace(info.Name) then
@@ -101,7 +106,7 @@ function SheetBaseData:GetBoostValue(character, fallback)
 	if character then
 		local value = character.Stats.DynamicStats[2][self.BoostAttribute]
 		if value == nil then
-			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetTalentData:GetValue] BoostAttribute(%s) for entry (%s) does not exist within StatCharacter!", self.BoostAttribute, self.ID)
+			fprint(LOGLEVEL.ERROR, "[LeaderLib:SheetTalentData:GetValue] BoostAttribute(%s) for entry (%s) does not exist within StatCharacter!", self.BoostAttribute, self.ID)
 			return fallback
 		end
 		return value

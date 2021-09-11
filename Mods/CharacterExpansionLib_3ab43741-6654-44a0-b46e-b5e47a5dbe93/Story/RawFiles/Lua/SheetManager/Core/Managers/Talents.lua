@@ -809,7 +809,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 			local hasTalent = data:GetValue(player) == true
 			if SheetManager:IsEntryVisible(data, player, hasTalent, isCharacterCreation, isGM) then
 				local talentState = data:GetState(player)
-				local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName())
+				local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))
 				local isRacial = data.IsRacial
 				local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
 				local canAdd = not hasTalent and isChoosable and talentPoints > 0

@@ -518,14 +518,6 @@ function CharacterSheet.Update(ui, method, updateTalents, updateAbilities, updat
 				this.mainpanel_mc.stats_mc.talents_mc.addTalent(talent.DisplayName, talent.ID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
 			end
 		end
-		for id,entry in pairs(modChanges.Talents) do
-			if not Vars.ControllerEnabled then
-				this.stats_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd, entry.CanRemove)
-			else
-				this.mainpanel_mc.stats_mc.talents_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd, entry.CanRemove)
-			end
-		end
-		--this.stats_mc.addTalent("Test", 404, 1, true, false, true)
 	end
 
 	if updateTargets.Abilities then
@@ -553,7 +545,6 @@ end
 function CharacterSheet.PostUpdate(ui, method)
 	---@type CharacterSheetMainTimeline
 	local this = self.Root
-	PrintDebug("CharacterSheet.Update", method, Lib.inspect(updateTargets))
 	if not this or this.isExtended ~= true then
 		return
 	end
@@ -571,7 +562,6 @@ end
 function CharacterSheet.UpdateComplete(ui, method)
 	---@type CharacterSheetMainTimeline
 	local this = self.Root
-	PrintDebug("CharacterSheet.Update", method, Lib.inspect(updateTargets))
 	if not this or this.isExtended ~= true then
 		return
 	end
