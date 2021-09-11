@@ -131,7 +131,12 @@ else
 				if data.IsGameMaster or not stat.UsePoints then
 					SheetManager:SetEntryValue(stat, characterId, data.Value)
 				else
-					local modifyPointsBy = stat:GetValue(characterId) - data.Value
+					local modifyPointsBy = 0
+					if stat.ValueType == "number" then
+						modifyPointsBy = stat:GetValue(characterId) - data.Value
+					elseif stat.ValueType == "boolean" then
+						modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
+					end
 					if modifyPointsBy ~= 0 then
 						if modifyPointsBy < 0 then
 							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
