@@ -62,6 +62,3 @@ end
 --Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateTalents", CharacterCreation.UpdateTalents)
 --Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation, "updateAbilities", CharacterCreation.UpdateAbilities)
 --Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateAbilities", CharacterCreation.UpdateAbilities)
-
-local contentParser = Ext.Require("SheetManager/UI/CC/ContentParser.lua")
-contentParser.Init(CharacterCreation)

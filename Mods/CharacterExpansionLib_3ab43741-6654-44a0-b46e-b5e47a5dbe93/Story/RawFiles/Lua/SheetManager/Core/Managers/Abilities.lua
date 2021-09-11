@@ -152,70 +152,14 @@ if Ext.IsClient() then
 		return false
 	end
 
-	local availableCombatPoints = {}
-	local availableCivilPoints = {}
-	local setAvailablePoints = {}
-
-	local function SetAvailablePointsFromStored(main)
-		if main == nil then
-			if not Vars.ControllerEnabled then
-				main = Ext.GetUIByType(Data.UIType.characterSheet):GetRoot()
-			else
-				main = Ext.GetUIByType(Data.UIType.statsPanel_c):GetRoot()
-			end
-		end
-		local id = GameHelpers.Client.GetCharacterSheetCharacter(main).NetID
-		if not Vars.ControllerEnabled then
-			availableCombatPoints[id] = main.stats_mc.pointsWarn[1].avPoints
-			availableCivilPoints[id] = main.stats_mc.pointsWarn[2].avPoints
-		else
-			availableCombatPoints[id] = tonumber(main.mainpanel_mc.stats_mc.combatAbilities_mc.pointsValue_txt.text) or 0
-			availableCivilPoints[id] = tonumber(main.mainpanel_mc.stats_mc.civilAbilities_mc.pointsValue_txt.text) or 0
-		end
-	end
-
-	local function GetAvailablePoints(pointType, main)
-		local id = GameHelpers.Client.GetCharacterSheetCharacter(main).NetID
-		if setAvailablePoints[id] ~= true then
-			SetAvailablePointsFromStored(main)
-		end
-		local points = 0
-		if pointType == "combat" then
-			points = availableCombatPoints[id]
-			if points == nil then
-				if not Vars.ControllerEnabled then
-					points = main.stats_mc.pointsWarn[1].avPoints
-				else
-					points = tonumber(main.mainpanel_mc.stats_mc.combatAbilities_mc.pointsValue_txt.text) or 0
-				end
-			end
-		else
-			points = availableCivilPoints[id]
-			if points == nil then
-				if not Vars.ControllerEnabled then
-					points = main.stats_mc.pointsWarn[2].avPoints
-				else
-					points = tonumber(main.mainpanel_mc.stats_mc.civilAbilities_mc.pointsValue_txt.text) or 0
-				end
-			end
-		end
-		return points or 0
-	end
-
 	function SheetManager.Abilities.UpdateCharacterSheetPoints(ui, method, main, amount)
-		print("Client", Client)
 		local character = Client:GetCharacter()
-		local id = character.NetID
-		if method == "setAvailableCombatAbilityPoints" then
-			availableCombatPoints[id] = amount
-			setAvailablePoints[id] = true
-		elseif method == "setAvailableCivilAbilityPoints" then
-			availableCivilPoints[id] = amount
-			setAvailablePoints[id] = true
+		if not character then
+			return
 		end
 
-		local abilityPoints = GetAvailablePoints("combat", main)
-		local civilPoints = GetAvailablePoints("civil", main)
+		local abilityPoints = Client.Character.Points.Ability
+		local civilPoints = Client.Character.Points.Civil
 
 		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
 		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
@@ -240,12 +184,6 @@ if Ext.IsClient() then
 				end
 			end
 		end
-	end
-
-	if Vars.DebugMode then
-		Ext.RegisterConsoleCommand("leaderlib_ap_resetfromstored", function()
-			SetAvailablePointsFromStored()
-		end)
 	end
 
 	---@class SheetManager.AbilitiesUIEntry
@@ -281,8 +219,6 @@ if Ext.IsClient() then
 
 		local abilityPoints = Client.Character.Points.Ability
 		local civilPoints = Client.Character.Points.Civil
-		--local abilityPoints = GetAvailablePoints("combat", this)
-		--local civilPoints = GetAvailablePoints("civil", this)
 	
 		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
 		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
