@@ -166,7 +166,7 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
 			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsPlusVisible] Error calling CanAdd listener for entry (%s):\n%s", entry.ID, result)
-		elseif result ~= nil then
+		elseif type(result) == "boolean" then
 			bResult = result
 		end
 	end
@@ -189,7 +189,7 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
 			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsMinusVisible] Error calling CanRemove listener for entry (%s):\n%s", entry.ID, result)
-		elseif result ~= nil then
+		elseif type(result) == "boolean" then
 			bResult = result
 		end
 	end
@@ -217,37 +217,9 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
 			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsEntryVisible] Error calling IsEntryVisible listener for entry (%s):\n%s", entry.ID, result)
-		elseif result ~= nil then
+		elseif type(result) == "boolean" then
 			bResult = result
 		end
 	end
 	return bResult
-end
-
-
-
-if Vars.DebugMode then
-	--[[ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
-		fprint(LOGLEVEL.TRACE, "[SheetManager.Listeners.OnEntryChanged] id(%s) character(%s) lastValue(%s) value(%s) [%s]\n%s", id, character, lastValue, value, isClientSide and "CLIENT" or "SERVER", Lib.inspect(entry))
-	end) ]]
-	-- SheetManager:RegisterCanAddListener("All", function(id, entry, character, currentValue, b)
-	-- 	if entry.Type == "SheetStatData" and entry.StatType ~= "PrimaryStat" then
-	-- 		return false
-	-- 	end
-	-- 	--return true
-	-- end)
-	-- SheetManager:RegisterCanRemoveListener("All", function(id, entry, character, currentValue, b)
-	-- 	if entry.Type == "SheetStatData" and entry.StatType ~= "PrimaryStat" then
-	-- 		return false
-	-- 	end
-	-- 	return true
-	-- end)
-	SheetManager:RegisterVisibilityListener("Demon", function(id, entry, character, currentValue, b)
-		if entry.StatType == "Talent" and entry.IsRacial then
-			if character:HasTag("DEMON") then
-				return true
-			end
-		end
-		--fprint(LOGLEVEL.TRACE, "[SheetManager.Listeners.IsEntryVisible] id(%s) character(%s) value(%s) visibility(%s) [CLIENT]", id, character.DisplayName, currentValue, b)
-	end)
 end

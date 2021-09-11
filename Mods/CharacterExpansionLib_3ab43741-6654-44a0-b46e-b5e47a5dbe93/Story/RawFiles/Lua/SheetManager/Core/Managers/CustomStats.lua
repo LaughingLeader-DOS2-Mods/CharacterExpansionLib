@@ -72,7 +72,6 @@ local loader = Ext.Require("SheetManager/Core/Managers/CustomStats/ConfigLoader.
 Ext.Require("SheetManager/Core/Managers/CustomStats/Getters.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/DataSync.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/PointsHandler.lua")
-Ext.Require("SheetManager/Core/Managers/CustomStats/_Debug.lua")
 
 ---Returns true if actual custom stats can be used, which are currently disabled if not in GM mode.
 ---This is due to the fact that custom stats may be added to every NPC, which can be an issue in story mode.

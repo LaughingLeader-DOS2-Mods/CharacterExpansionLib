@@ -65,3 +65,30 @@ Ext.RegisterConsoleCommand("contextRollTest", function()
         registeredContextListeners = true
     end
 end)
+
+Input.RegisterListener("ToggleCraft", function(event, pressed, id, keys, controllerEnabled)
+    if Input.IsPressed("ToggleInfo") then
+        local this = Ext.GetUIByType(Data.UIType.characterSheet):GetRoot()
+        Ext.Print("Toggling GM mode in character sheet: ", not this.isGameMasterChar)
+        if this.isGameMasterChar then
+            this.setGameMasterMode(false, false, false)
+            this.stats_mc.setVisibilityStatButtons(false)
+            this.stats_mc.setVisibilityAbilityButtons(true, false)
+            this.stats_mc.setVisibilityAbilityButtons(false, false)
+            this.stats_mc.setVisibilityTalentButtons(false)
+            Ext.PostMessageToServer("LeaderLib_RefreshCharacterSheet", Client.Character.UUID)
+
+            this.setAvailableStatPoints(Client.Character.Points.Attribute)
+            this.setAvailableCombatAbilityPoints(Client.Character.Points.Ability)
+            this.setAvailableCivilAbilityPoints(Client.Character.Points.Civil)
+            this.setAvailableTalentPoints(Client.Character.Points.Talent)
+            this.setAvailableCustomStatPoints(CustomStatSystem:GetTotalAvailablePoints())
+        else
+            this.setGameMasterMode(true, true, false)
+            this.stats_mc.setVisibilityStatButtons(true)
+            this.stats_mc.setVisibilityAbilityButtons(true, true)
+            this.stats_mc.setVisibilityAbilityButtons(false, true)
+            this.stats_mc.setVisibilityTalentButtons(true)
+        end
+    end
+end)
