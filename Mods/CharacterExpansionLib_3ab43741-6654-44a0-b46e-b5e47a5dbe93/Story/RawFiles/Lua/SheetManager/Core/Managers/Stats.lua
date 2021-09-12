@@ -446,7 +446,7 @@ if isClient then
 
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
-		local points = Client.Character.Points.Attribute
+		local points = SheetManager:GetBuiltinAvailablePointsForType("PrimaryStat", player)
 
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]

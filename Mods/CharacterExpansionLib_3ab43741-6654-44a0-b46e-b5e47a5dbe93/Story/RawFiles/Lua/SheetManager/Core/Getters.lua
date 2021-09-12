@@ -123,6 +123,20 @@ function SheetManager:GetBuiltinAvailablePointsForType(entryType, character, isC
 		entryType = "Ability"
 		isCivil = true
 	end
+	local sessionData = SheetManager.SessionManager:GetSession(character)
+	if sessionData then
+		if entryType == "PrimaryStat" then
+			return sessionData.Points.Attribute + sessionData.ModifyPoints.Attribute
+		elseif entryType == "Ability" then
+			if isCivil == true then
+				return sessionData.Points.Civil + sessionData.ModifyPoints.Civil
+			else
+				return sessionData.Points.Ability + sessionData.ModifyPoints.Ability
+			end
+		elseif entryType == "Talent" then
+			return sessionData.Points.Talent + sessionData.ModifyPoints.Talent
+		end
+	end
 	if isClient then
 		if entryType == "PrimaryStat" then
 			return Client.Character.Points.Attribute

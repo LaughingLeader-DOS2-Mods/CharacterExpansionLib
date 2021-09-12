@@ -154,8 +154,8 @@ if Ext.IsClient() then
 			return
 		end
 
-		local abilityPoints = Client.Character.Points.Ability
-		local civilPoints = Client.Character.Points.Civil
+		local abilityPoints = SheetManager:GetBuiltinAvailablePointsForType("Ability", character, false)
+		local civilPoints = SheetManager:GetBuiltinAvailablePointsForType("Ability", character, true)
 
 		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
 		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
@@ -236,6 +236,7 @@ if Ext.IsClient() then
 					local isCivil = data.Civil == true
 					local groupID = data.Group
 					local statVal = player.Stats[id] or 0
+					local delta = statVal - Ext.ExtraData.AbilityBaseValue
 
 					local groupName = SheetManager.Abilities.Data.GroupDisplayName[groupID]
 					if groupName then
@@ -254,7 +255,7 @@ if Ext.IsClient() then
 						GroupDisplayName = groupName,
 						IsCustom = false,
 						Value = statVal,
-						Delta = statVal,
+						Delta = delta,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
 						CanAdd = canAddPoints,

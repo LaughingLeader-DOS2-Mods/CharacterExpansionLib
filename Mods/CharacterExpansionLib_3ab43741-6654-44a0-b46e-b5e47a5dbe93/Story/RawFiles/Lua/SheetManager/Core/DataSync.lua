@@ -9,8 +9,7 @@ local isClient = Ext.IsClient()
 
 ---@type table<UUID|NETID, SheetManagerSaveData>
 SheetManager.CurrentValues = {}
----@type table<UUID|NETID, SheetManagerSaveData>
-SheetManager.PendingValues = {}
+
 if not isClient then
 	local Handler = {
 		__index = function(tbl,k)
@@ -112,7 +111,8 @@ end
 ---@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
 function SheetManager.Save.GetPendingValue(characterId, entry)
 	characterId = GameHelpers.GetCharacterID(characterId)
-	local pendingValues = SheetManager.PendingValues[characterId]
+	local sessionData = SheetManager.SessionManager:GetSession(characterId)
+	local pendingValues = sessionData and sessionData.PendingChanges or nil
 	if pendingValues then
 		local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 		if tableName ~= nil then
@@ -200,8 +200,10 @@ end
 function SheetManager.Save.SetEntryValue(characterId, entry, value)
 	characterId = GameHelpers.GetCharacterID(characterId)
 	local data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
-	if SheetManager.IsInCharacterCreation(characterId) then
-		data = SheetManager.PendingValues[characterId] or { Stats = {}, Abilities = {}, Talents = {}, CustomStats = {} }
+	local sessionData = SheetManager.SessionManager:GetSession(characterId)
+	if sessionData then
+		data = sessionData.PendingChanges
+		assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
 	end
 	local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 	assert(tableName ~= nil, string.format("Failed to find data table for stat type (%s)", entry.StatType))
@@ -218,30 +220,10 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	if not isClient then
 		characterId = GameHelpers.GetCharacterID(characterId)
 		if applyChanges then
-			local pendingData = SheetManager.PendingValues[characterId]
-			if pendingData then
-				local data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
-				for statType,mods in pairs(pendingData) do
-					if not data[statType] then
-						data[statType] = {}
-					end
-					for modId,entries in pairs(mods) do
-						if data[statType][modId] == nil then
-							data[statType][modId] = entries
-						else
-							for id,value in pairs(entries) do
-								if type(data[statType][modId][id]) == "number" then
-									data[statType][modId][id] = data[statType][modId][id] + value
-								else
-									data[statType][modId][id] = value
-								end
-							end
-						end
-					end
-				end
-			end
+			SheetManager.SessionManager:ApplySession(characterId)
+		else
+			SheetManager.SessionManager:ClearSession(characterId)
 		end
-		SheetManager.PendingValues[characterId] = nil
 		SheetManager:SyncData()
 	else
 		local netid = GameHelpers.GetNetID(characterId)
@@ -275,14 +257,10 @@ if not isClient then
 			local characterId = GameHelpers.GetCharacterID(character)
 			local data = {
 				NetID = GameHelpers.GetNetID(character),
-				Values = {},
-				PendingValues = {}
+				Values = {}
 			}
 			if PersistentVars.CharacterSheetValues[characterId] ~= nil then
 				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[characterId])
-			end
-			if SheetManager.PendingValues[characterId] ~= nil then
-				data.PendingValues = TableHelpers.SanitizeTable(SheetManager.PendingValues[characterId])
 			end
 			data = Ext.JsonStringify(data)
 			if user then
@@ -372,7 +350,6 @@ else
 			assert(data.Values ~= nil, "Payload has no Values table.")
 
 			self.CurrentValues[data.NetID] = data.Values
-			self.PendingValues[data.NetID] = data.PendingValues
 		end
 	end)
 	

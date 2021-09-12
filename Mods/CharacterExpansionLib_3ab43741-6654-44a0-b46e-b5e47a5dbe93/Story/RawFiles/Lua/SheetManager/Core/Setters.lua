@@ -117,21 +117,37 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount)
 	local entryType = entry.StatType
 	local isCivil = entryType == "Ability" and entry.IsCivil
 	local characterId = GameHelpers.GetCharacterID(character)
-
+	
 	if characterId then
-		local points = GetPoints(characterId, entryType, isCivil)
-		if entryType == "PrimaryStat" then
-			CharacterAddAttributePoint(characterId, amount)
-		elseif entryType == "Ability" then
-			if isCivil == true then
-				CharacterAddCivilAbilityPoint(characterId, amount)
-			else
-				CharacterAddAbilityPoint(characterId, amount)
+		local sessionData = SheetManager.SessionManager:GetSession(characterId)
+		if sessionData then
+			if entryType == "PrimaryStat" then
+				sessionData.ModifyPoints.Attribute = sessionData.ModifyPoints.Attribute + amount
+			elseif entryType == "Ability" then
+				if isCivil == true then
+					sessionData.ModifyPoints.Civil = sessionData.ModifyPoints.Civil + amount
+				else
+					sessionData.ModifyPoints.Ability = sessionData.ModifyPoints.Ability + amount
+				end
+			elseif entryType == "Talent" then
+				sessionData.ModifyPoints.Talent = sessionData.ModifyPoints.Talent + amount
 			end
-		elseif entryType == "Talent" then
-			CharacterAddTalentPoint(characterId, amount)
+			return true
+		else
+			local points = GetPoints(characterId, entryType, isCivil)
+			if entryType == "PrimaryStat" then
+				CharacterAddAttributePoint(characterId, amount)
+			elseif entryType == "Ability" then
+				if isCivil == true then
+					CharacterAddCivilAbilityPoint(characterId, amount)
+				else
+					CharacterAddAbilityPoint(characterId, amount)
+				end
+			elseif entryType == "Talent" then
+				CharacterAddTalentPoint(characterId, amount)
+			end
+			assert(points ~= GetPoints(characterId, entryType, isCivil), errorMessage("Failed to alter character(%s)'s (%s) points.", characterId, (entryType and isCivil) and "CivilAbility" or entryType))
 		end
-		assert(points ~= GetPoints(characterId, entryType, isCivil), errorMessage("Failed to alter character(%s)'s (%s) points.", characterId, (entryType and isCivil) and "CivilAbility" or entryType))
 		return true
 	end
 	return false
