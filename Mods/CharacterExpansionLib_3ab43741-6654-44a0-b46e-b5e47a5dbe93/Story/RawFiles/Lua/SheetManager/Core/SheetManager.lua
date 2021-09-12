@@ -122,38 +122,6 @@ if isClient then
 		SheetManager.UI = {}
 	end
 else
-	Ext.RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
-		local data = Common.JsonParse(payload)
-		if data then
-			local characterId = GameHelpers.GetCharacterID(data.NetID)
-			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
-			if characterId and stat then
-				if data.IsGameMaster or not stat.UsePoints then
-					SheetManager:SetEntryValue(stat, characterId, data.Value)
-				else
-					local modifyPointsBy = 0
-					if stat.ValueType == "number" then
-						modifyPointsBy = stat:GetValue(characterId) - data.Value
-					elseif stat.ValueType == "boolean" then
-						modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
-					end
-					if modifyPointsBy ~= 0 then
-						if modifyPointsBy < 0 then
-							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
-							if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value)
-							end
-						else
-							if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value)
-							end
-						end
-					end
-				end
-			end
-		end
-	end)
-
 	--Query support
 
 	local function Query_GetAttribute(uuid, id, val, boostCheck, statType)

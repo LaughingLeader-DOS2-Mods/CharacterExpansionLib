@@ -12,7 +12,7 @@ Ext.Require("SheetManager/Core/Managers/Stats.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats.lua")
 
 if Ext.IsClient() then
-	Ext.Require("SheetManager/UI/CC/CharacterCreation.lua")
+	Ext.Require("SheetManager/UI/CharacterCreation.lua")
 	Ext.Require("SheetManager/UI/CharacterSheet.lua")
 	Ext.Require("SheetManager/UI/Fixes.lua")
 	Ext.Require("SheetManager/UI/TooltipCreator.lua")

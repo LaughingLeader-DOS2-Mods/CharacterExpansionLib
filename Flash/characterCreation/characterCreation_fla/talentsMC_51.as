@@ -97,9 +97,9 @@ package characterCreation_fla
 			this.positionLists();
 		}
 		
-		public function addTalentElement(statID:*, talentLabel:String, isUnlocked:Boolean, isChoosable:Boolean, isRacial:Boolean, isCustom:Boolean=false) : *
+		public function addTalentElement(statID:Number, talentLabel:String, isUnlocked:Boolean, isChoosable:Boolean, isRacial:Boolean, isCustom:Boolean=false) : *
 		{
-			var talent_mc:MovieClip = !isCustom ? this.talentList.getElementByNumber("statID",statID) : this.talentList.getElementByString("statID",statID);
+			var talent_mc:MovieClip = this.talentList.getElementByNumber("statID", statID);
 			if(!talent_mc)
 			{
 				talent_mc = new talentEl();

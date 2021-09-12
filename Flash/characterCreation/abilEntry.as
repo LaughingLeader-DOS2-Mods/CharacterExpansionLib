@@ -21,11 +21,11 @@ package
 		public var value:uint;
 
 		//CharacterExpansionLib Changes
-		public var statID:*;
+		public var statID:Number;
 		public var callbackStr:String = "showAbilityTooltip";
 		public var isCustom:Boolean = false;
 
-		public function MakeCustom(id:*, b:Boolean=true) : *
+		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
 			this.statID = id;
 			this.isCustom = b;

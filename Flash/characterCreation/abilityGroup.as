@@ -33,9 +33,9 @@ package
 			this.title_txt.htmlText = param1;
 		}
 		
-		public function addAbility(statID:*, label:String, value:int, delta:int, isCivil:Boolean, isCustom:Boolean=false) : *
+		public function addAbility(statID:Number, label:String, value:int, delta:int, isCivil:Boolean, isCustom:Boolean=false) : *
 		{
-			var ability_mc:MovieClip = !isCustom ? this.abilities.getElementByNumber("statID",statID) : this.abilities.getElementByString("statID",statID);
+			var ability_mc:MovieClip = this.abilities.getElementByNumber("statID", statID);
 			if(!ability_mc)
 			{
 				ability_mc = new abilEntry();

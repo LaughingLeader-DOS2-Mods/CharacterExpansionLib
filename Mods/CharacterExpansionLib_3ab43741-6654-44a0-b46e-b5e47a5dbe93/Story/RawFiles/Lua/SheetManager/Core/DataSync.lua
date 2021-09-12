@@ -9,6 +9,8 @@ local isClient = Ext.IsClient()
 
 ---@type table<UUID|NETID, SheetManagerSaveData>
 SheetManager.CurrentValues = {}
+---@type table<UUID|NETID, SheetManagerSaveData>
+SheetManager.PendingValues = {}
 if not isClient then
 	local Handler = {
 		__index = function(tbl,k)
@@ -103,6 +105,29 @@ function SheetManager.Save.GetCharacterData(characterId, statType, mod, entryId)
 	return nil
 end
 
+---Get the pending value from character creation, if any.
+---@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
+---@return integer|boolean
+---@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
+function SheetManager.Save.GetPendingValue(characterId, entry)
+	characterId = GameHelpers.GetCharacterID(characterId)
+	local pendingValues = SheetManager.PendingValues[characterId]
+	if pendingValues then
+		local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
+		if tableName ~= nil then
+			local statTypeTable = pendingValues[tableName]
+			if statTypeTable then
+				local modTable = statTypeTable[entry.Mod]
+				if modTable then
+					return modTable[entry.ID]
+				end
+			end
+		end
+	end
+	return nil
+end
+
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean
@@ -120,22 +145,52 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 		if data then
 			local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 			if tableName ~= nil then
+				local pendingValue = SheetManager.Save.GetPendingValue(characterId, entry)
+				if pendingValue == nil then
+					pendingValue = defaultValue
+				end
 				local statTypeTable = data[tableName]
 				if statTypeTable then
 					local modTable = statTypeTable[entry.Mod]
 					if modTable then
 						local value = modTable[entry.ID]
-						if value == nil then
-							value = defaultValue
+						if entry.ValueType ~= "boolean" then
+							if value == nil then
+								value = 0
+							end
+							return pendingValue+value,modTable
+						elseif value == nil then
+							return defaultValue,modTable
 						end
-						return value,modTable
 					end
 				end
+				return pendingValue
 			end
 		end
 		return defaultValue
 	end
 	return nil
+end
+
+function SheetManager.IsInCharacterCreation(characterId)
+	characterId = GameHelpers.GetCharacterID(characterId)
+	if isClient then
+		if characterId == Client.Character.NetID then
+			return Client.Character.IsInCharacterCreation
+		end
+		local ui = not Vars.ControllerEnabled and Ext.GetUIByType(Data.UIType.characterCreation) or Ext.GetUIByType(Data.UIType.characterCreation_c)
+		local player = GameHelpers.Client.GetCharacterCreationCharacter()
+		if player then
+			return GameHelpers.GetCharacterID(player) == characterId
+		end
+	else
+		local db = Osi.DB_Illusionist:Get(nil,nil)
+		if db and #db > 0 then
+			local playerId = StringHelpers.GetUUID(db[1][1])
+			return playerId == characterId
+		end
+	end
+	return false
 end
 
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
@@ -145,6 +200,9 @@ end
 function SheetManager.Save.SetEntryValue(characterId, entry, value)
 	characterId = GameHelpers.GetCharacterID(characterId)
 	local data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+	if SheetManager.IsInCharacterCreation(characterId) then
+		data = SheetManager.PendingValues[characterId] or { Stats = {}, Abilities = {}, Talents = {}, CustomStats = {} }
+	end
 	local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 	assert(tableName ~= nil, string.format("Failed to find data table for stat type (%s)", entry.StatType))
 	if data[tableName][entry.Mod] == nil then
@@ -154,7 +212,61 @@ function SheetManager.Save.SetEntryValue(characterId, entry, value)
 	return true
 end
 
+---@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param applyChanges boolean
+function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
+	if not isClient then
+		characterId = GameHelpers.GetCharacterID(characterId)
+		if applyChanges then
+			local pendingData = SheetManager.PendingValues[characterId]
+			if pendingData then
+				local data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+				for statType,mods in pairs(pendingData) do
+					if not data[statType] then
+						data[statType] = {}
+					end
+					for modId,entries in pairs(mods) do
+						if data[statType][modId] == nil then
+							data[statType][modId] = entries
+						else
+							for id,value in pairs(entries) do
+								if type(data[statType][modId][id]) == "number" then
+									data[statType][modId][id] = data[statType][modId][id] + value
+								else
+									data[statType][modId][id] = value
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		SheetManager.PendingValues[characterId] = nil
+		SheetManager:SyncData()
+	else
+		local netid = GameHelpers.GetNetID(characterId)
+		Ext.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", Ext.JsonStringify({
+			NetID = netid,
+			ApplyChanges = applyChanges
+		}))
+	end
+end
+
 if not isClient then
+	Ext.RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			local character = Ext.GetCharacter(data.NetID)
+			if character then
+				local applyChanges = data.ApplyChanges
+				if applyChanges == nil then
+					applyChanges = false
+				end
+				SheetManager.Save.CharacterCreationDone(character.MyGuid, applyChanges)
+			end
+		end
+	end)
+
 	---@private
 	---@param character UUID|EsvCharacter
 	---@param user integer|nil
@@ -163,10 +275,14 @@ if not isClient then
 			local characterId = GameHelpers.GetCharacterID(character)
 			local data = {
 				NetID = GameHelpers.GetNetID(character),
-				Values = {}
+				Values = {},
+				PendingValues = {}
 			}
 			if PersistentVars.CharacterSheetValues[characterId] ~= nil then
 				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[characterId])
+			end
+			if SheetManager.PendingValues[characterId] ~= nil then
+				data.PendingValues = TableHelpers.SanitizeTable(SheetManager.PendingValues[characterId])
 			end
 			data = Ext.JsonStringify(data)
 			if user then
@@ -209,6 +325,38 @@ if not isClient then
 		end
 		return false
 	end
+
+	Ext.RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			local characterId = GameHelpers.GetCharacterID(data.NetID)
+			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
+			if characterId and stat then
+				if data.IsGameMaster or not stat.UsePoints then
+					SheetManager:SetEntryValue(stat, characterId, data.Value)
+				else
+					local modifyPointsBy = 0
+					if stat.ValueType == "number" then
+						modifyPointsBy = stat:GetValue(characterId) - data.Value
+					elseif stat.ValueType == "boolean" then
+						modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
+					end
+					if modifyPointsBy ~= 0 then
+						if modifyPointsBy < 0 then
+							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
+							if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
+								SheetManager:SetEntryValue(stat, characterId, data.Value)
+							end
+						else
+							if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
+								SheetManager:SetEntryValue(stat, characterId, data.Value)
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
 else
 	Ext.RegisterNetListener("CEL_SheetManager_LoadSyncData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
@@ -224,6 +372,7 @@ else
 			assert(data.Values ~= nil, "Payload has no Values table.")
 
 			self.CurrentValues[data.NetID] = data.Values
+			self.PendingValues[data.NetID] = data.PendingValues
 		end
 	end)
 	
@@ -231,7 +380,7 @@ else
 	---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 	---@param character EclCharacter|NETID
 	---@param value integer|boolean
-	function SheetManager:RequestValueChange(entry, character, value)
+	function SheetManager:RequestValueChange(entry, character, value, isInCharacterCreation)
 		local netid = GameHelpers.GetNetID(character)
 		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Ext.JsonStringify({
 			ID = entry.ID,
@@ -239,7 +388,8 @@ else
 			NetID = netid,
 			Value = value,
 			StatType = entry.StatType,
-			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed
+			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed,
+			IsInCharacterCreation = isInCharacterCreation
 		}))
 	end
 
@@ -253,7 +403,7 @@ else
 				if skipInvoke == nil then
 					skipInvoke = false
 				end
-				SheetManager:SetEntryValue(stat, characterId, data.Value, skipInvoke, true)
+				SheetManager:SetEntryValue(stat, characterId, data.Value, skipInvoke, true, data.IsInCharacterCreation)
 			end
 		end
 	end)

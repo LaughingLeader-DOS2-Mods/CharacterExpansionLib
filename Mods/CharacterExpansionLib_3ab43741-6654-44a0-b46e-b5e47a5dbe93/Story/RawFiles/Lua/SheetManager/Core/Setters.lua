@@ -9,7 +9,6 @@ local function ErrorMessage(prefix, txt, ...)
 	end
 end
 
-
 ---@param stat SheetAbilityData|SheetStatData|SheetTalentData
 ---@param characterId UUID|NETID
 ---@param value integer|boolean
@@ -25,7 +24,8 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 		else
 			characterId = GameHelpers.GetCharacterID(characterId)
 		end
-		if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+		local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
+		if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) and not isInCharacterCreation then
 			if character and character.Stats then
 				if not isClient then
 					if stat.StatType == "Talent" then
@@ -47,7 +47,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 		else
 			SheetManager.Save.SetEntryValue(characterId, stat, value)
 		end
-		if not skipListenerInvoke then
+		if not skipListenerInvoke and not isInCharacterCreation then
 			for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
 				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
 				if not b then
@@ -66,19 +66,21 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 				end
 			end
 		end
-		if not skipSync and isClient then
+		if not skipSync then
 			--Server-side updating
-			self:RequestValueChange(stat, characterId, value)
+			if isClient then
+				self:RequestValueChange(stat, characterId, value, isInCharacterCreation)
+			else
+				Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
+					ID = stat.ID,
+					Mod = stat.Mod,
+					NetID = GameHelpers.GetNetID(characterId),
+					Value = value,
+					StatType = stat.StatType,
+					IsInCharacterCreation = isInCharacterCreation
+				}))
+			end
 		end
-	end
-	if not skipSync and not isClient then
-		Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
-			ID = stat.ID,
-			Mod = stat.Mod,
-			NetID = GameHelpers.GetNetID(characterId),
-			Value = value,
-			StatType = stat.StatType
-		}))
 	end
 end
 

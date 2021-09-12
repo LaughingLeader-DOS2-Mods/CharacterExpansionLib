@@ -16,6 +16,7 @@ SheetManager.Stats = {
 					TooltipID = 0,
 					Attribute = "Strength",
 					Type = "PrimaryStat",
+					CCFrame = 1,
 				},
 				Finesse = {
 					DisplayName = LocalizedText.CharacterSheet.Finesse,
@@ -23,6 +24,7 @@ SheetManager.Stats = {
 					TooltipID = 1,
 					Attribute = "Finesse",
 					Type = "PrimaryStat",
+					CCFrame = 2,
 				},
 				Intelligence = {
 					DisplayName = LocalizedText.CharacterSheet.Intelligence,
@@ -30,6 +32,7 @@ SheetManager.Stats = {
 					TooltipID = 2,
 					Attribute = "Intelligence",
 					Type = "PrimaryStat",
+					CCFrame = 3,
 				},
 				Constitution = {
 					DisplayName = LocalizedText.CharacterSheet.Constitution,
@@ -37,6 +40,7 @@ SheetManager.Stats = {
 					TooltipID = 3,
 					Attribute = "Constitution",
 					Type = "PrimaryStat",
+					CCFrame = 4,
 				},
 				Memory = {
 					DisplayName = LocalizedText.CharacterSheet.Memory,
@@ -44,6 +48,7 @@ SheetManager.Stats = {
 					TooltipID = 4,
 					Attribute = "Memory",
 					Type = "PrimaryStat",
+					CCFrame = 5,
 				},
 				Wits = {
 					DisplayName = LocalizedText.CharacterSheet.Wits,
@@ -51,6 +56,7 @@ SheetManager.Stats = {
 					TooltipID = 5,
 					Attribute = "Wits",
 					Type = "PrimaryStat",
+					CCFrame = 6,
 				},
 				Dodging = {
 					StatID = 11,
@@ -437,6 +443,7 @@ if isClient then
 		if isGM == nil then
 			isGM = false
 		end
+
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 		local points = Client.Character.Points.Attribute
@@ -444,71 +451,93 @@ if isClient then
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
 			local data = SheetManager.Stats.Data.Default.Entries[id]
-			if id == "Spacing" then
-				local entry = {
-					StatType = SheetManager.Stats.Data.StatType.Spacing,
-					SpacingHeight = data.Height,
-				}
-				entries[#entries+1] = entry
-			else
-				local value = nil
-				if type(data.Attribute) == "function" then
-					value = data.Attribute(player.Stats)
+			if not isCharacterCreation or data.Type == "PrimaryStat" then
+				if id == "Spacing" then
+					local entry = {
+						StatType = SheetManager.Stats.Data.StatType.Spacing,
+						SpacingHeight = data.Height,
+					}
+					entries[#entries+1] = entry
 				else
-					value = player.Stats[data.Attribute]
+					local value = nil
+					if type(data.Attribute) == "function" then
+						value = data.Attribute(player.Stats)
+					else
+						value = player.Stats[data.Attribute]
+					end
+					local canAdd = points > 0 and data.Type == "PrimaryStat"
+					local canRemove = data.Type == "PrimaryStat" and (isCharacterCreation or isGM) and value > Ext.ExtraData.AttributeBaseValue
+					local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
+					if isCharacterCreation and data.CCFrame then
+						frame = data.CCFrame
+					end
+
+					local delta = 0
+					if data.Type == "PrimaryStat" then
+						delta = value - Ext.ExtraData.AttributeBaseValue
+					end
+
+					local entry = {
+						ID = data.StatID,
+						DisplayName = data.DisplayName.Value,
+						Description = "",
+						Value = string.format("%s", value) .. (data.Suffix or ""),
+						Delta = delta,
+						CanAdd = canAdd,
+						CanRemove = canRemove,
+						IsCustom = false,
+						StatType = data.Type,
+						Frame = frame,
+						SecondaryStatTypeInteger = data.StatType or 0,
+						Icon = "",
+						IconWidth = 0,
+						IconHeight = 0,
+						IconClipName = "",
+						IconDrawCallName = ""
+					}
+					entries[#entries+1] = entry
 				end
-				local canAdd = points > 0 and data.Type == "PrimaryStat"
-				local canRemove = data.Type == "PrimaryStat" and (isCharacterCreation or isGM) and value > Ext.ExtraData.AttributeBaseValue
-				local entry = {
-					ID = data.StatID,
-					DisplayName = data.DisplayName.Value,
-					Value = string.format("%s", value) .. (data.Suffix or ""),
-					CanAdd = canAdd,
-					CanRemove = canRemove,
-					IsCustom = false,
-					StatType = data.Type,
-					Frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0),
-					SecondaryStatTypeInteger = data.StatType or 0,
-					Icon = "",
-					IconWidth = 0,
-					IconHeight = 0,
-					IconClipName = "",
-					IconDrawCallName = ""
-				}
-				entries[#entries+1] = entry
 			end
 		end
 
 		local defaultCanRemove = isGM or isCharacterCreation
 		for mod,dataTable in pairs(SheetManager.Data.Stats) do
 			for id,data in pairs(dataTable) do
-				local value = data:GetValue(player)
-				if SheetManager:IsEntryVisible(data, player, value) then
-					local defaultCanAdd =  data.StatType == "PrimaryStat" and ((data.UsePoints == true and points > 0) or isGM)
-					local entry = {
-						ID = data.GeneratedID,
-						DisplayName = data:GetDisplayName(),
-						Value = string.format("%s", value) .. data.Suffix,
-						CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),
-						CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
-						IsCustom = true,
-						StatType = data.StatType,
-						Frame = data.Frame or (data.StatType == "PrimaryStat" and -1 or 0),
-						SecondaryStatType = data.SecondaryStatType,
-						SecondaryStatTypeInteger = SheetManager.Stats.Data.SecondaryStatType[data.SecondaryStatType] or 0,
-						SpacingHeight = data.SpacingHeight,
-						Icon = data.SheetIcon or "",
-						IconWidth = data.SheetIconWidth or 28,
-						IconHeight = data.SheetIconHeight or 28,
-						IconClipName = "",
-						IconDrawCallName = ""
-					}
-					if not StringHelpers.IsNullOrEmpty(data.SheetIcon) then
-						entry.Frame = 99
-						entry.IconDrawCallName = string.format("LL_%s", data.ID)
-						entry.IconClipName = "iggy_" .. entry.IconDrawCallName
+				if not isCharacterCreation or data.StatType == "PrimaryStat" then
+					local value = data:GetValue(player)
+					if SheetManager:IsEntryVisible(data, player, value) then
+						local defaultCanAdd =  data.StatType == "PrimaryStat" and ((data.UsePoints == true and points > 0) or isGM)
+						local delta = 0
+						if data.StatType == "PrimaryStat" then
+							delta = math.max(0, value - Ext.ExtraData.AttributeBaseValue)
+						end
+						local entry = {
+							ID = data.GeneratedID,
+							DisplayName = data:GetDisplayName(player),
+							Description = data:GetDescription(player),
+							Value = string.format("%s", value) .. data.Suffix,
+							Delta = delta,
+							CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),
+							CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
+							IsCustom = true,
+							StatType = data.StatType,
+							Frame = data.Frame or (data.StatType == "PrimaryStat" and -1 or 0),
+							SecondaryStatType = data.SecondaryStatType,
+							SecondaryStatTypeInteger = SheetManager.Stats.Data.SecondaryStatType[data.SecondaryStatType] or 0,
+							SpacingHeight = data.SpacingHeight,
+							Icon = data.SheetIcon or "",
+							IconWidth = data.SheetIconWidth or 28,
+							IconHeight = data.SheetIconHeight or 28,
+							IconClipName = "",
+							IconDrawCallName = ""
+						}
+						if not StringHelpers.IsNullOrEmpty(data.SheetIcon) then
+							entry.Frame = 99
+							entry.IconDrawCallName = string.format("LL_%s", data.ID)
+							entry.IconClipName = "iggy_" .. entry.IconDrawCallName
+						end
+						entries[#entries+1] = entry
 					end
-					entries[#entries+1] = entry
 				end
 			end
 		end

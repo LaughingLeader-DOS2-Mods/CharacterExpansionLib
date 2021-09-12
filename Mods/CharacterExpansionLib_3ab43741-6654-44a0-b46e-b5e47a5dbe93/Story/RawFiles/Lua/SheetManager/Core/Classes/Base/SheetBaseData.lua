@@ -91,7 +91,7 @@ function SheetBaseData:GetDescription(character)
 		if self.Mod then
 			local info = Ext.GetModInfo(self.Mod)
 			if info and not StringHelpers.IsNullOrWhitespace(info.Name) then
-				text = string.format("%s<br><font color='#2299FF' size='18'>(%s)</font>", text, info.Name)
+				text = string.format("%s<br><font color='#2299FF' size='18'>%s</font>", text, info.Name)
 			end
 		end
 		return text

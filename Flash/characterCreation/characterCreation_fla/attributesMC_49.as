@@ -79,17 +79,17 @@ package characterCreation_fla
 		
 		public function onPlus(mc:MovieClip) : *
 		{
-			ExternalInterface.call(mc.plus_mc.callbackStr,mc.statID);
+			ExternalInterface.call(mc.plus_mc.callbackStr, mc.callbackID);
 		}
 		
 		public function onMin(mc:MovieClip) : *
 		{
-			ExternalInterface.call(mc.min_mc.callbackStr,mc.statID);
+			ExternalInterface.call(mc.min_mc.callbackStr, mc.callbackID);
 		}
 		
-		public function addAttribute(statID:*, label:String, attributeInfo:String, value:Number, delta:Number, frame:uint=0, isCustom:Boolean=false) : *
+		public function addAttribute(statID:Number, label:String, attributeInfo:String, value:Number, delta:Number, frame:uint=0, isCustom:Boolean=false, iggyIconName:String = "", iconOffsetX:Number = 0, iconOffsetY:Number = 0, iconScale:Number = 0.5) : *
 		{
-			var attribute_mc:MovieClip = !isCustom ? this.attributes.getElementByNumber("statID", statID) : this.attributes.getElementByString("statID", statID);
+			var attribute_mc:MovieClip = this.attributes.getElementByNumber("statID", statID);
 			if(!attribute_mc)
 			{
 				attribute_mc = new attributeEntry();
@@ -100,6 +100,15 @@ package characterCreation_fla
 				this.attributes.addElement(attribute_mc,false);
 			}
 			attribute_mc.MakeCustom(statID, isCustom);
+			if(iggyIconName != "") {
+				attribute_mc.SetCustomIcon(iggyIconName, iconOffsetX, iconOffsetY, iconScale);
+			}
+			if(!isCustom) {
+				// Why? Who knows. The attributes attrID were originally ID + 1, then they did ID - 1 when displaying tooltips.
+				attribute_mc.callbackID = statID + 1;
+			} else {
+				attribute_mc.callbackID = statID;
+			}
 			attribute_mc.setAttribute(label,attributeInfo);
 			attribute_mc.setValue(value,delta);
 			attribute_mc.isUpdated = true;

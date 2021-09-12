@@ -5,8 +5,7 @@ SheetManager.Config.Calls = {
 	Tooltip = {
 		Ability = "showAbilityTooltipCustom",
 		Talent = "showTalentTooltipCustom",
-		PrimaryStat = "showStatTooltipCustom",
-		SecondaryStat = "showStatTooltipCustom",
+		Stat = "showStatTooltipCustom"
 	},
 	TooltipController = {
 		Ability = "selectAbilityCustom",

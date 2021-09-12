@@ -2,7 +2,15 @@ local isVisible = false
 local lastTooltipX = nil
 local lastTooltipY = nil
 
-local function CreateTooltip(tooltipType, requestedUI, call, id)
+local function CreateTooltip(tooltipType, requestedUI, call, idOrCharacter, idOrOther)
+	local targetSide = "left"
+	local id = idOrCharacter
+	local requestedUIType = requestedUI:GetTypeId()
+	if requestedUIType == Data.UIType.characterCreation or requestedUIType == Data.UIType.characterCreation_c then
+		id = idOrOther
+		targetSide = "right"
+	end
+	print("CreateTooltip", tooltipType, requestedUI, call, idOrCharacter, idOrOther, id)
 	local ui = Ext.GetUIByType(Data.UIType.tooltip)
 	if ui then
 		local this = ui:GetRoot()
@@ -48,7 +56,7 @@ local function CreateTooltip(tooltipType, requestedUI, call, id)
 					Game.Tooltip.PrepareIcon(ui, string.format("tt_talent_%i", data.GeneratedID), data.Icon, data.IconWidth or 128, data.IconHeight or 128)
 				end
 				resolved = true
-			elseif tooltipType == "PrimaryStat" or tooltipType == "SecondaryStat" then
+			elseif tooltipType == "Stat" or tooltipType == "PrimaryStat" or tooltipType == "SecondaryStat" then
 				this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 				this.tooltip_array[1] = data:GetDisplayName()
 
@@ -91,7 +99,7 @@ local function CreateTooltip(tooltipType, requestedUI, call, id)
 				lastTooltipY = tf.y
 			end
 
-			ui:ExternalInterfaceCall("setAnchor","left","mouse","left")
+			ui:ExternalInterfaceCall("setAnchor", targetSide, "mouse", targetSide)
 			ui:Invoke("addFormattedTooltip",0,0,true)
 			local tf = this.formatTooltip or this.tf
 			if tf then

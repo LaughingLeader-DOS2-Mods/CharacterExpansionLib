@@ -20,11 +20,11 @@ package
 		public var dColour:Number;
 
 		//CharacterExpansionLib Changes
-		public var statID:*;
+		public var statID:Number;
 		public var callbackStr:String = "showTalentTooltip";
 		public var isCustom:Boolean = false;
 
-		public function MakeCustom(id:*, b:Boolean=true) : *
+		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
 			this.statID = id;
 			this.isCustom = b;
@@ -88,9 +88,8 @@ package
 		
 		public function onOver(e:MouseEvent) : *
 		{
-			//var globalPos:Point = this.localToGlobal(new Point(0,0));
-			//this.base.showCustomTooltipForMC(this, this.callbackStr, this.statID);
-			ExternalInterface.call(this.callbackStr,this.root_mc.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
+			var globalPos:Point = this.localToGlobal(new Point(0,0));
+			ExternalInterface.call(this.callbackStr,this.base.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
 			//ExternalInterface.call("showTalentTooltip",this.root_mc.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
 		}
 		

@@ -410,19 +410,21 @@ package characterCreation_fla
 		
 		public function updateAttributes() : *
 		{
-			this.CCPanel_mc.attributes_mc.updateAttributes(this.attributeArray);
+			//CharacterExpansionLib - Disabled since we're adding attributes through Lua.
+			//this.CCPanel_mc.attributes_mc.updateAttributes(this.attributeArray);
 			this.attributeArray = new Array();
 		}
 		
 		public function updateAbilities() : *
 		{
-			this.CCPanel_mc.abilities_mc.updateAbilities(this.abilityArray);
+			//CharacterExpansionLib - Disabled since we're adding abilities through Lua.
+			//this.CCPanel_mc.abilities_mc.updateAbilities(this.abilityArray);
 			this.abilityArray = new Array();
 		}
 		
 		public function updateTalents() : *
 		{
-			//CharacterExpansionLib - Disabled since we're just adding talents through Lua.
+			//CharacterExpansionLib - Disabled since we're adding talents through Lua.
 			/*this.CCPanel_mc.talents_mc.updateTalents(this.talentArray,this.racialTalentArray);*/
 			this.talentArray = new Array();
 			this.racialTalentArray = new Array();

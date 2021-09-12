@@ -7,18 +7,6 @@ SheetManager.Abilities = {
 	RegisteredAbilities = {},
 	RegisteredCount = {},
 	Data = {
-		GroupTitle = {
-			Combat = {
-				[0] = ts:Create("h5fb2ef9cg4258g446eg9522gd6be58f3ab23", "Weapons"), -- May be a different handle
-				[1] = ts:Create("ha65cecedg819dg4d17g9f0ag1bf646ec4f6c", "Defence"),
-				[2] = ts:Create("hb5277ad5gafbcg4f31g8022gaeedf7a516aa", "Skills"), -- May be a different handle
-			},
-			Civil = {
-				[0] = ts:Create("h3df7f54fg51f4g4355g93ecgb0b7add14018", "Personality"), -- or h5b78d698gab2ag4423g88d5gbfb549b015f8
-				[1] = ts:Create("h2890aceag6c58g41a7gb286g5044fc11d7f1", "Craftsmanship"), -- or h7cc0941cg4b22g43a6gae93g3f3b240741cd
-				[2] = ts:Create("he920062fg4553g4b1eg9935gec94a4c1aa59", "Nasty Deeds"), -- or hc92a5451g8a18g40f4g9a80g40bb23b98a8a
-			}
-		},
 		GroupID = {
 			Weapons = 0,
 			Defense = 1,
@@ -26,6 +14,14 @@ SheetManager.Abilities = {
 			Personality = 3,
 			Craftsmanship = 4,
 			NastyDeeds = 5,
+		},
+		GroupDisplayName = {
+			[0] = ts:Create("h5fb2ef9cg4258g446eg9522gd6be58f3ab23", "Weapons"), -- May be a different handle
+			[1] = ts:Create("ha65cecedg819dg4d17g9f0ag1bf646ec4f6c", "Defence"),
+			[2] = ts:Create("hb5277ad5gafbcg4f31g8022gaeedf7a516aa", "Skills"), -- May be a different handle
+			[3] = ts:Create("h3df7f54fg51f4g4355g93ecgb0b7add14018", "Personality"), -- or h5b78d698gab2ag4423g88d5gbfb549b015f8
+			[4] = ts:Create("h2890aceag6c58g41a7gb286g5044fc11d7f1", "Craftsmanship"), -- or h7cc0941cg4b22g43a6gae93g3f3b240741cd
+			[5] = ts:Create("he920062fg4553g4b1eg9935gec94a4c1aa59", "Nasty Deeds"), -- or hc92a5451g8a18g40f4g9a80g40bb23b98a8a
 		},
 		GroupIDInteger = {
 			[0] = "Weapons",
@@ -240,6 +236,14 @@ if Ext.IsClient() then
 					local isCivil = data.Civil == true
 					local groupID = data.Group
 					local statVal = player.Stats[id] or 0
+
+					local groupName = SheetManager.Abilities.Data.GroupDisplayName[groupID]
+					if groupName then
+						groupName = groupName.Value
+					else
+						groupName = ""
+					end
+
 					---@type TalentManagerUITalentEntry
 					local data = {
 						--ID = id,
@@ -247,6 +251,7 @@ if Ext.IsClient() then
 						DisplayName = name,
 						IsCivil = isCivil,
 						GroupID = groupID,
+						GroupDisplayName = groupName,
 						IsCustom = false,
 						Value = statVal,
 						Delta = statVal,
