@@ -171,7 +171,6 @@ package characterCreation_fla
 		
 		public function onEventUp(id:Number, param2:Number) : *
 		{
-			trace("onEventUp", id, param2);
 			if(this.events[id] == "IE ToggleInGameMenu")
 			{
 				this.header_mc.textFieldName_mc.escapePressed();
@@ -182,7 +181,6 @@ package characterCreation_fla
 		
 		public function onEventDown(id:Number, param2:Number) : *
 		{
-			trace("onEventDown", id, param2);
 			return false;
 		}
 		
@@ -437,9 +435,11 @@ package characterCreation_fla
 			this.racialTagArray = new Array();
 		}
 		
-		public function setTextField(param1:uint, param2:String, param3:Boolean) : *
+		public function setTextField(index:uint, text:String, canInput:Boolean) : *
 		{
-			this.CCPanel_mc.setTextField(param1,param2,param3);
+			//this.CCPanel_mc.setTextField(index,text,canInput);
+			//CharacterExpansionLib - Makes the name always editable
+			this.CCPanel_mc.setTextField(index,text,true);
 		}
 		
 		public function setClassEditTabLabel(param1:uint, param2:String) : *

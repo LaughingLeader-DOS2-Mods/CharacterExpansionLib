@@ -1,7 +1,6 @@
 local function OnPointsAdded(statType, ui, event, generatedId, ...)
 	print("OnPointsAdded", statType, event, generatedId, ...)
 	local stat = SheetManager:GetEntryByGeneratedID(generatedId, statType)
-	print(stat, generatedId, statType)
 	if stat then
 		if statType ~= "Talent" then
 			stat:ModifyValue(Client:GetCharacter(), 1)
@@ -9,6 +8,17 @@ local function OnPointsAdded(statType, ui, event, generatedId, ...)
 			stat:SetValue(Client:GetCharacter(), true)
 		end
 	end
+	--[[ local uiType = ui:GetTypeId()
+	if uiType == Data.UIType.characterCreation or uiType == Data.UIType.characterCreation_c then
+		if statType == "PrimaryStat" then
+			SheetManager.UI.CharacterCreation:UpdateAttributes(ui)
+		--elseif statType == "SecondaryStat" then
+		elseif statType == "Ability" then
+			SheetManager.UI.CharacterCreation:UpdateAbilities(ui)
+		elseif statType == "Talent" then
+			SheetManager.UI.CharacterCreation:UpdateTalents(ui)
+		end
+	end ]]
 	-- if statType == "PrimaryStat" then
 	-- elseif statType == "SecondaryStat" then
 	-- elseif statType == "Ability" then

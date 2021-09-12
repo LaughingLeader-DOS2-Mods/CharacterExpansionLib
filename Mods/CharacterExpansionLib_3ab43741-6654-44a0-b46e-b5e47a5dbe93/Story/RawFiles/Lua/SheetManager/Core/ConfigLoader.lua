@@ -28,6 +28,7 @@ local basePropertyMap = {
 	DISPLAYNAME = {Name="DisplayName", Type = "string"},
 	DESCRIPTION = {Name="Description", Type = "string"},
 	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
+	BASEVALUE = {Name="BaseValue", Type = "number"},
 	VISIBLE = {Name="Visible", Type = "boolean"},
 	SORTNAME = {Name="SortName", Type = "string"},
 	SORTVALUE = {Name="SortValue", Type = "number"},

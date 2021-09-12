@@ -17,6 +17,9 @@ local SheetStatData = {
 }
 
 SheetStatData.__index = function(t,k)
+	if k == "BaseValue" and t.StatType == "PrimaryStat" then
+		return Ext.ExtraData.AttributeBaseValue
+	end
 	local v = Classes.SheetStatData[k] or Classes.SheetBaseData[k]
 	if v then
 		t[k] = v
@@ -50,17 +53,10 @@ end
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return integer
 function SheetStatData:GetValue(character)
-	if StringHelpers.IsNullOrWhitespace(self.ID) then
-		return 0
-	end
-	if not StringHelpers.IsNullOrWhitespace(self.BoostAttribute) then
-		return self:GetBoostValue(character, 0)
+	if not isClient then
+		return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character)) or 0
 	else
-		if not isClient then
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character))
-		else
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character))
-		end
+		return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
 	end
 end
 

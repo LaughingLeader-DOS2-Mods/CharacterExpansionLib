@@ -73,9 +73,10 @@ function CharacterCreation.UpdateAttributes(ui, method)
 	local attributes_mc = this.CCPanel_mc.attributes_mc
 	
 	for stat in SheetManager.Stats.GetVisible(player, true) do
+		print(stat.DisplayName, stat.Value)
 		attributes_mc.addAttribute(stat.ID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3)
 		if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
-			ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
+			self.Instance:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
 		end
 	end
 
@@ -89,24 +90,24 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation, "updateAttribute
 Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateAttributes", CharacterCreation.UpdateAttributes)
 
 function CharacterCreation.Started(ui, call)
-	CharacterCreation.WasOpen = true
+	CharacterCreation.IsOpen = true
 end
 
 Ext.RegisterUITypeCall(Data.UIType.characterCreation, "characterCreationStarted", CharacterCreation.Started)
 Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, "characterCreationStarted", CharacterCreation.Started)
 
-local function MessageBoxButtonPressed(ui, call, buttonId, currentDeviceId)
-	if CharacterCreation.WasOpen then
-		if buttonId == 1 then
-			--YES
-			SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
-		elseif buttonId == 2 then
-			--NO
-			SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), false)
-		end
-		CharacterCreation.WasOpen = false
+MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
+	if isConfirmed and CharacterCreation.IsOpen then
+		SheetManager.Save.CharacterCreationDone(player, true)
+		CharacterCreation.IsOpen = false
 	end
-end
+end)
 
-Ext.RegisterUITypeCall(Data.UIType.msgBox, "ButtonPressed", MessageBoxButtonPressed)
-Ext.RegisterUITypeCall(Data.UIType.msgBox_c, "ButtonPressed", MessageBoxButtonPressed)
+MessageBox:RegisterListener("CharacterCreationCancel", function(event, isConfirmed, player)
+	if isConfirmed and CharacterCreation.IsOpen then
+		SheetManager.Save.CharacterCreationDone(player, false)
+		CharacterCreation.IsOpen = false
+	end
+end)
+
+SheetManager.UI.CharacterCreation = CharacterCreation

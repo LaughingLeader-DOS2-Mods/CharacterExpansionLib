@@ -54,9 +54,9 @@ function SheetAbilityData:GetValue(character)
 		return self:GetBoostValue(character, 0)
 	else
 		if not isClient then
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character))
+			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character)) or 0
 		else
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character))
+			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
 		end
 	end
 end

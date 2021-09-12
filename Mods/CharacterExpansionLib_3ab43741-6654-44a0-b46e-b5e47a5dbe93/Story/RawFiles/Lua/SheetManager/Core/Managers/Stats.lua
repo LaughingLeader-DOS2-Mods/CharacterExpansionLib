@@ -447,6 +447,7 @@ if isClient then
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 		local points = SheetManager:GetBuiltinAvailablePointsForType("PrimaryStat", player)
+		print("PrimaryStat points", points)
 
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
@@ -504,19 +505,15 @@ if isClient then
 		for mod,dataTable in pairs(SheetManager.Data.Stats) do
 			for id,data in pairs(dataTable) do
 				if not isCharacterCreation or data.StatType == "PrimaryStat" then
-					local value = data:GetValue(player)
+					local value = data:GetValue(player) or 0
 					if SheetManager:IsEntryVisible(data, player, value) then
 						local defaultCanAdd =  data.StatType == "PrimaryStat" and ((data.UsePoints == true and points > 0) or isGM)
-						local delta = 0
-						if data.StatType == "PrimaryStat" then
-							delta = math.max(0, value - Ext.ExtraData.AttributeBaseValue)
-						end
 						local entry = {
 							ID = data.GeneratedID,
 							DisplayName = data:GetDisplayName(player),
 							Description = data:GetDescription(player),
 							Value = string.format("%s", value) .. data.Suffix,
-							Delta = delta,
+							Delta = value - data.BaseValue,
 							CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),
 							CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
 							IsCustom = true,

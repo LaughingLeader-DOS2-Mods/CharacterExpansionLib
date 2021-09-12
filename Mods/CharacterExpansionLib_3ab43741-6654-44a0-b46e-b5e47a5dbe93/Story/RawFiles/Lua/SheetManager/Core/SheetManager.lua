@@ -62,10 +62,6 @@ SheetManager.Data = {
 local loader = Ext.Require("SheetManager/Core/ConfigLoader.lua")
 
 local function LoadData()
-	if Vars.DebugMode then
-		Vars.LeaderDebugMode = Ext.LoadFile("LeaderDebug") ~= nil
-	end
-	
 	local b,data = xpcall(loader, debug.traceback)
 	if b and data then
 		for uuid,entryData in pairs(data) do

@@ -29,6 +29,7 @@ local SheetBaseData = {
 	IconWidth = 128,
 	IconHeight = 128,
 	ValueType = "number",
+	BaseValue = 0,
 }
 
 local defaults = {

@@ -20,9 +20,15 @@ local self = SessionManager
 
 if not isClient then
 	---@param character EsvCharacter|EclCharacter|UUID|NETID
-	function SessionManager:CreateSession(character, skipSync)
+	---@param respec boolean
+	---@param skipSync boolean|nil
+	function SessionManager:CreateSession(character, respec, skipSync)
 		character = GameHelpers.GetCharacter(character)
 		local characterId = character.MyGuid
+
+		if respec == nil then
+			respec = false
+		end
 
 		local data = {
 			UUID = characterId,
@@ -39,7 +45,8 @@ if not isClient then
 				Civil = 0,
 				Talent = 0,
 			},
-			PendingChanges = {}
+			PendingChanges = {},
+			Respec = respec
 		}
 
 		self.Sessions[characterId] = data
@@ -51,29 +58,24 @@ if not isClient then
 		return self.Sessions[characterId]
 	end
 
+	---@param character string
+	---@param respec boolean
+	---@param success boolean
 	local function OnCharacterCreationStarted(character, respec, success)
-		SessionManager:CreateSession(character)
+		SessionManager:CreateSession(StringHelpers.GetUUID(character), respec)
 	end
 
-	Ext.RegisterOsirisListener("CharacterAddToCharacterCreation", 3, "before", function(character, respec, success)
+	Ext.RegisterOsirisListener("CharacterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
-			OnCharacterCreationStarted(character, respec, success)
+			OnCharacterCreationStarted(character, respec == 2, true)
 		end
 	end)
 
-	Ext.RegisterOsirisListener("GameMasterAddToCharacterCreation", 3, "before", function(character, respec, success)
+	Ext.RegisterOsirisListener("GameMasterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
-			OnCharacterCreationStarted(character, respec, success)
+			OnCharacterCreationStarted(character, respec == 2, true)
 		end
 	end)
-
-	---@param character EsvCharacter|EclCharacter|UUID|NETID
-	function SessionManager:ClearSession(character, skipSync)
-		character = GameHelpers.GetCharacter(character)
-		if skipSync ~= true then
-			Ext.PostMessageToClient(character.MyGuid, "CEL_SessionManager_ClearCharacterData", character.NetID)
-		end
-	end
 
 	--[[ Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
 		if character ~= StringHelpers.NULL_UUID then
@@ -84,6 +86,7 @@ if not isClient then
 	end) ]]
 else
 	Ext.RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
+		print(cmd,payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			self.Sessions[data.NetID] = data
@@ -92,7 +95,7 @@ else
 
 	Ext.RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netid)
 		netid = tonumber(netid)
-		SessionManager.Sessions[netid] = nil
+		SessionManager:ClearSession(netid, true)
 	end)
 
 	Ext.RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, netid)
@@ -102,59 +105,72 @@ else
 end
 
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
+function SessionManager:ClearSession(character, skipSync)
+	character = GameHelpers.GetCharacter(character)
+	local characterId = GameHelpers.GetCharacterID(character)
+	SessionManager.Sessions[characterId] = nil
+	fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
+	if skipSync ~= true and not isClient then
+		Ext.PostMessageToClient(character.MyGuid, "CEL_SessionManager_ClearCharacterData", character.NetID)
+	end
+end
+
+---@param character EsvCharacter|EclCharacter|UUID|NETID
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
 	
 	if isClient then
 		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
-		return
-	end
-
-	local characterId = character.MyGuid
-	local sessionData = self.Sessions[characterId]
-	if sessionData then
-		local currentPoints = {
-			Attribute = CharacterGetAttributePoints(characterId),
-			Ability = CharacterGetAbilityPoints(characterId),
-			Civil = CharacterGetCivilAbilityPoints(characterId),
-			Talent = CharacterGetTalentPoints(characterId),
-		}
-		if sessionData.ModifyPoints.Attribute ~= 0 and sessionData.ModifyPoints.Attribute + currentPoints.Attribute >= 0 then
-			CharacterAddAttributePoint(characterId, sessionData.ModifyPoints.Attribute)
-		end
-		if sessionData.ModifyPoints.Ability ~= 0 and sessionData.ModifyPoints.Ability + currentPoints.Ability >= 0 then
-			CharacterAddAbilityPoint(characterId, sessionData.ModifyPoints.Ability)
-		end
-		if sessionData.ModifyPoints.Civil ~= 0 and sessionData.ModifyPoints.Civil + currentPoints.Civil >= 0 then
-			CharacterAddCivilAbilityPoint(characterId, sessionData.ModifyPoints.Civil)
-		end
-		if sessionData.ModifyPoints.Talent ~= 0 and sessionData.ModifyPoints.Talent + currentPoints.Talent >= 0 then
-			CharacterAddTalentPoint(characterId, sessionData.ModifyPoints.Talent)
-		end
-
-		if sessionData.PendingChanges then
-			local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
-			for statType,mods in pairs(sessionData.PendingChanges) do
-				if not data[statType] then
-					data[statType] = {}
-				end
-				for modId,entries in pairs(mods) do
-					if data[statType][modId] == nil then
-						data[statType][modId] = entries
-					else
-						for id,value in pairs(entries) do
-							if type(data[statType][modId][id]) == "number" then
-								data[statType][modId][id] = data[statType][modId][id] + value
-							else
-								data[statType][modId][id] = value
+	else
+		local characterId = character.MyGuid
+		local sessionData = self.Sessions[characterId]
+		if sessionData then
+			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData))
+			local currentPoints = {
+				Attribute = CharacterGetAttributePoints(characterId),
+				Ability = CharacterGetAbilityPoints(characterId),
+				Civil = CharacterGetCivilAbilityPoints(characterId),
+				Talent = CharacterGetTalentPoints(characterId),
+			}
+			if sessionData.ModifyPoints.Attribute ~= 0 and sessionData.ModifyPoints.Attribute + currentPoints.Attribute >= 0 then
+				CharacterAddAttributePoint(characterId, sessionData.ModifyPoints.Attribute)
+			end
+			if sessionData.ModifyPoints.Ability ~= 0 and sessionData.ModifyPoints.Ability + currentPoints.Ability >= 0 then
+				CharacterAddAbilityPoint(characterId, sessionData.ModifyPoints.Ability)
+			end
+			if sessionData.ModifyPoints.Civil ~= 0 and sessionData.ModifyPoints.Civil + currentPoints.Civil >= 0 then
+				CharacterAddCivilAbilityPoint(characterId, sessionData.ModifyPoints.Civil)
+			end
+			if sessionData.ModifyPoints.Talent ~= 0 and sessionData.ModifyPoints.Talent + currentPoints.Talent >= 0 then
+				CharacterAddTalentPoint(characterId, sessionData.ModifyPoints.Talent)
+			end
+	
+			if sessionData.PendingChanges then
+				local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+				for statType,mods in pairs(sessionData.PendingChanges) do
+					if not data[statType] then
+						data[statType] = {}
+					end
+					for modId,entries in pairs(mods) do
+						if data[statType][modId] == nil then
+							data[statType][modId] = entries
+						else
+							for id,value in pairs(entries) do
+								if type(data[statType][modId][id]) == "number" then
+									data[statType][modId][id] = data[statType][modId][id] + value
+								else
+									data[statType][modId][id] = value
+								end
 							end
 						end
 					end
 				end
 			end
+
+			SheetManager:SyncData(character)
 		end
-		self.Sessions[characterId] = nil
 	end
+	SessionManager:ClearSession(character)
 end
 
 ---@param character EsvCharacter|EclCharacter|UUID|NETID

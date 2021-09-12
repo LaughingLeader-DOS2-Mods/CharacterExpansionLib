@@ -284,7 +284,7 @@ if Ext.IsClient() then
 						GroupID = data.GroupID,
 						IsCustom = true,
 						Value = string.format("%s", value) .. data.Suffix,
-						Delta = value,
+						Delta = value - Ext.ExtraData.AbilityBaseValue,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),

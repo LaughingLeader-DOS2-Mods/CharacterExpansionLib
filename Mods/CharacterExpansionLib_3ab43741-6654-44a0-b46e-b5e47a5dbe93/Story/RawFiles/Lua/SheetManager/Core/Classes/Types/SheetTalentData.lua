@@ -10,6 +10,7 @@ local SheetTalentData = {
 	IconWidth = 128,
 	IconHeight = 128,
 	IsRacial = false,
+	BaseValue = false
 }
 
 SheetTalentData.__index = function(t,k)
