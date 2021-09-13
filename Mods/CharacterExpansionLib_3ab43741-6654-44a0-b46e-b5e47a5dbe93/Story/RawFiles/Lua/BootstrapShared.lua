@@ -1,6 +1,21 @@
 ModuleFolder = Ext.GetModInfo(ModuleUUID).Directory
 Mods.LeaderLib.Import(Mods.CharacterExpansionLib)
 
+---@param id string
+---@param callback fun(id:string, payload:string, user:integer|nil):void
+function RegisterNetListener(id, callback)
+	Ext.RegisterNetListener(id, function(id, payload, user)
+		if Vars.LeaderDebugMode then
+			fprint(LOGLEVEL.DEFAULT, "[NetListener:%s] id(%s) user(%s) payload:\n%s", Ext.IsClient() and "CLIENT" or "SERVER", id, user, payload)
+		end
+		local b,err = xpcall(callback, debug.traceback, id, payload, user)
+		if not b then
+			Ext.PrintError(err)
+		end
+	end)
+end
+
+
 Ext.Require("SheetManager/Init.lua")
 
 local function TryFindOsiToolsConfig(info)

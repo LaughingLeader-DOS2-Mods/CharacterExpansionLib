@@ -44,7 +44,7 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 end
 
 if not isClient then
-	Ext.RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local character = Ext.GetCharacter(data.NetID)

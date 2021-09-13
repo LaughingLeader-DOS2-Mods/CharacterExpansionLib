@@ -7,7 +7,7 @@ local isClient = Ext.IsClient()
 ---@field Talent integer
 
 ---@class CharacterCreationSessionData
----@field Points CharacterCreationSessionPointsData
+---@field Stats table
 ---@field ModifyPoints CharacterCreationSessionPointsData
 ---@field PendingChanges table
 
@@ -33,12 +33,7 @@ if not isClient then
 		local data = {
 			UUID = characterId,
 			NetID = character.NetID,
-			Points = {
-				Attribute = CharacterGetAttributePoints(characterId),
-				Ability = CharacterGetAbilityPoints(characterId),
-				Civil = CharacterGetCivilAbilityPoints(characterId),
-				Talent = CharacterGetTalentPoints(characterId),
-			},
+			Stats = {},
 			ModifyPoints = {
 				Attribute = 0,
 				Ability = 0,
@@ -49,13 +44,30 @@ if not isClient then
 			Respec = respec
 		}
 
+		for k,v in pairs(Data.AttributeEnum) do
+			data.Stats[k] = character.Stats[k]
+		end
+		for k,v in pairs(Data.AbilityEnum) do
+			data.Stats[k] = character.Stats[k]
+		end
+		for k,v in pairs(Data.TalentEnum) do
+			data.Stats["TALENT_" .. k] = character.Stats["TALENT_" .. k]
+		end
+
 		self.Sessions[characterId] = data
 
 		if skipSync ~= true then
-			Ext.PostMessageToClient(characterId, "CEL_SessionManager_SyncCharacterData", Ext.JsonStringify(data))
+			self:SyncSession(character)
 		end
 
 		return self.Sessions[characterId]
+	end
+
+	function SessionManager:SyncSession(character)
+		local characterId = GameHelpers.GetCharacterID(character)
+		if self.Sessions[characterId] then
+			Ext.PostMessageToClient(characterId, "CEL_SessionManager_SyncCharacterData", Ext.JsonStringify(self.Sessions[characterId]))
+		end
 	end
 
 	---@param character string
@@ -85,20 +97,19 @@ if not isClient then
 		end
 	end) ]]
 else
-	Ext.RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
-		print(cmd,payload)
+	RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			self.Sessions[data.NetID] = data
 		end
 	end)
 
-	Ext.RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netid)
+	RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netid)
 		netid = tonumber(netid)
 		SessionManager:ClearSession(netid, true)
 	end)
 
-	Ext.RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, netid)
+	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, netid)
 		netid = tonumber(netid)
 		SessionManager:ApplySession(netid)
 	end)

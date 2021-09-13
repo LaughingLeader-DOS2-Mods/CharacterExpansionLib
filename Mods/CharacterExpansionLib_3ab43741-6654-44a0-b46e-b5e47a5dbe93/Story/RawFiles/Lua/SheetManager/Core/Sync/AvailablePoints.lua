@@ -10,7 +10,6 @@ local isClient = Ext.IsClient()
 ---@type table<UUID|NETID, SheetManagerAvailablePointsData>
 SheetManager.AvailablePoints = {}
 
----@protected
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
 function SheetManager.Sync.AvailablePoints(characterId)
 	if not isClient then
@@ -48,23 +47,23 @@ function SheetManager.Sync.AvailablePoints(characterId)
 end
 
 if not isClient then
-	Ext.RegisterNetListener("CEL_SheetManager_RequestAvailablePoints", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_RequestAvailablePoints", function(cmd, payload)
 		local netid = tonumber(payload)
 		if netid then
 			local character = Ext.GetCharacter(netid)
 			if character then
-				SheetManager.Save.SyncPoints(character)
+				SheetManager.Sync.AvailablePoints(character)
 			end
 		end
 	end)
 else
-	Ext.RegisterNetListener("CEL_SheetManager_LoadAvailablePointsForCharacter", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_LoadAvailablePointsForCharacter", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data and data.NetID and data.Points then
 			SheetManager.AvailablePoints[data.NetID] = data.Points
 		end
 	end)
-	Ext.RegisterNetListener("CEL_SheetManager_LoadAllAvailablePoints", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_LoadAllAvailablePoints", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			SheetManager.AvailablePoints = data

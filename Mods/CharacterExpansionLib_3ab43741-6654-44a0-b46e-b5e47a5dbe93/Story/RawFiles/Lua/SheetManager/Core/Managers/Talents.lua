@@ -770,12 +770,18 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 		isGM = false
 	end
 
-	local talentPoints = Client.Character.Points.Talent
+	local talentPoints = SheetManager:GetAvailablePoints(player, "Talent")
+
+	local targetStats = player.Stats
+	local sessionData = SheetManager.SessionManager:GetSession(player)
+	if sessionData then
+		targetStats = sessionData.Stats
+	end
 
 	local entries = {}
 	--Default entries
 	for numId,talentId in Data.Talents:Get() do
-		local hasTalent = player.Stats[SheetManager.Talents.Data.TalentStatAttributes[talentId]] == true
+		local hasTalent = targetStats[SheetManager.Talents.Data.TalentStatAttributes[talentId]] == true
 		if SheetManager.Talents.CanAddTalent(talentId, hasTalent) then
 			local talentState = SheetManager.Talents.GetTalentState(player, talentId, hasTalent)
 			local name = SheetManager.Talents.GetTalentDisplayName(talentId, talentState)

@@ -53,11 +53,7 @@ end
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return integer
 function SheetStatData:GetValue(character)
-	if not isClient then
-		return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character)) or 0
-	else
-		return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
-	end
+	return SheetManager:GetValueByEntry(self, GameHelpers.GetCharacterID(character)) or 0
 end
 
 ---@param character EsvCharacter|EclCharacter|string|number

@@ -113,62 +113,6 @@ function SheetManager:EntryHasValue(id, character, value, mod, statType)
 	return false
 end
 
----Gets the builtin available points for a stat type, such as PrimaryStat (attribute points), Ability (ability points), and Talent (talent points).
----@param entryType SheetEntryType
----@param character EsvCharacter|EclCharacter|UUID|NETID
----@param isCivil boolean|nil
----@return integer
-function SheetManager:GetBuiltinAvailablePointsForType(entryType, character, isCivil)
-	if entryType == "CivilAbility" then
-		entryType = "Ability"
-		isCivil = true
-	end
-	local sessionData = SheetManager.SessionManager:GetSession(character)
-	if sessionData then
-		if entryType == "PrimaryStat" then
-			return sessionData.Points.Attribute + sessionData.ModifyPoints.Attribute
-		elseif entryType == "Ability" then
-			if isCivil == true then
-				return sessionData.Points.Civil + sessionData.ModifyPoints.Civil
-			else
-				return sessionData.Points.Ability + sessionData.ModifyPoints.Ability
-			end
-		elseif entryType == "Talent" then
-			return sessionData.Points.Talent + sessionData.ModifyPoints.Talent
-		end
-	end
-	if isClient then
-		if entryType == "PrimaryStat" then
-			return Client.Character.Points.Attribute
-		elseif entryType == "Ability" then
-			if isCivil == true then
-				return Client.Character.Points.Civil
-			else
-				return Client.Character.Points.Ability
-			end
-		elseif entryType == "Talent" then
-			return Client.Character.Points.Talent
-		end
-	elseif character then
-		local characterId = GameHelpers.GetCharacterID(character)
-		if characterId then
-			if entryType == "PrimaryStat" then
-				return CharacterGetAttributePoints(characterId) or 0
-			elseif entryType == "Ability" then
-				if isCivil == true then
-					return CharacterGetCivilAbilityPoints(characterId) or 0
-				else
-					return CharacterGetAbilityPoints(characterId) or 0
-				end
-			elseif entryType == "Talent" then
-				return CharacterGetTalentPoints(characterId) or 0
-			end
-		end
-	end
-
-	return 0
-end
-
 ---Gets the builtin available points for a stat.
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
@@ -177,34 +121,59 @@ function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 	local entryType = entry.StatType
 	local isCivil = entryType == "Ability" and entry.IsCivil
 
-	if isClient then
-		if entryType == "PrimaryStat" then
-			return Client.Character.Points.Attribute
-		elseif entryType == "Ability" then
-			if isCivil == true then
-				return Client.Character.Points.Civil
-			else
-				return Client.Character.Points.Ability
-			end
-		elseif entryType == "Talent" then
-			return Client.Character.Points.Talent
+	if entryType == "PrimaryStat" then
+		return self:GetAvailablePoints(character, "Attribute")
+	elseif entryType == "Ability" then
+		if isCivil == true then
+			return self:GetAvailablePoints(character, "Civil")
+		else
+			return self:GetAvailablePoints(character, "Ability")
 		end
-	elseif character then
-		local characterId = GameHelpers.GetCharacterID(character)
-		if characterId then
-			if entryType == "PrimaryStat" then
-				return CharacterGetAttributePoints(characterId) or 0
-			elseif entryType == "Ability" then
-				if isCivil == true then
-					return CharacterGetCivilAbilityPoints(characterId) or 0
-				else
-					return CharacterGetAbilityPoints(characterId) or 0
-				end
-			elseif entryType == "Talent" then
-				return CharacterGetTalentPoints(characterId) or 0
-			end
+	elseif entryType == "Talent" then
+		return self:GetAvailablePoints(character, "Talent")
+	end
+
+	return 0
+end
+
+---@alias AvailablePointsType string|'"Attribute"'|'"Ability"'|'"Civil"'|'"Talent"'|'"Custom"'
+
+---@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
+---@param pointType AvailablePointsType
+function SheetManager:GetAvailablePoints(characterId, pointType)
+	characterId = GameHelpers.GetCharacterID(characterId)
+
+	local sessionData = SheetManager.SessionManager:GetSession(characterId)
+	if sessionData then
+		local base = 0
+		if SheetManager.AvailablePoints[characterId] then
+			base = SheetManager.AvailablePoints[characterId][pointType] or 0
+		end
+		if pointType == "Attribute" then
+			return base + sessionData.ModifyPoints.Attribute
+		elseif pointType == "Ability" then
+			return base + sessionData.ModifyPoints.Ability
+		elseif pointType == "Civil" then
+			return base + sessionData.ModifyPoints.Civil
+		elseif pointType == "Talent" then
+			return base + sessionData.ModifyPoints.Talent
 		end
 	end
 
+	if isClient then
+		if SheetManager.AvailablePoints[characterId] then
+			return SheetManager.AvailablePoints[characterId][pointType] or 0
+		end
+	else
+		if pointType == "Attribute" then
+			return CharacterGetAttributePoints(characterId) or 0
+		elseif pointType == "Ability" then
+			return CharacterGetAbilityPoints(characterId) or 0
+		elseif pointType == "Civil" then
+			return CharacterGetCivilAbilityPoints(characterId) or 0
+		elseif entryType == "Talent" then
+			return CharacterGetTalentPoints(characterId) or 0
+		end
+	end
 	return 0
 end

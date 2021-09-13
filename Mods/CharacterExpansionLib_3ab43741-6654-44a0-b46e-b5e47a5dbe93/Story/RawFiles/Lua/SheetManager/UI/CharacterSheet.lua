@@ -633,6 +633,25 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "hideLevelUpAbility
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
 
+Ext.RegisterConsoleCommand("addpoints", function()
+	SheetManager.Sync.AvailablePoints(Client:GetCharacter())
+end)
+
+local function OnCharacterSelected(wrapper, ui, event, doubleHandle)
+	if doubleHandle and not GameHelpers.Math.IsNaN(doubleHandle) and doubleHandle ~= 0 then
+		local handle = Ext.DoubleToHandle(doubleHandle)
+		if handle then
+			local player = Ext.GetCharacter(handle)
+			if player then
+				SheetManager.Sync.AvailablePoints(player)
+			end
+		end
+	end
+end
+
+CharacterSheet:RegisterInvokeListener("selectCharacter", OnCharacterSelected, "After", "Keyboard")
+CharacterSheet:RegisterInvokeListener("setPlayer", OnCharacterSelected, "After", "Controller")
+
 ---@param ui UIObject
 ---@param method string
 ---@param pointType number One of 4 values: 0,1,2,3 | 0 = attribute, 1 = combat ability points, 2 = civil points, 3 = talent points
@@ -663,7 +682,7 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 	---@type CharacterSheetMainTimeline
 	local this = CharacterSheet.Root
 	if this and this.isExtended then
-		local points = SheetManager:GetBuiltinAvailablePointsForType(entry.StatType, character, entry.IsCivil)
+		local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 		local defaultCanAdd = (entry.UsePoints and points > 0) or GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
 		local defaultCanRemove = entry.UsePoints and GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
 

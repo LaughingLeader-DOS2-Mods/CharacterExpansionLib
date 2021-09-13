@@ -33,8 +33,7 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.GMPanelHUD, "showTargetBar", functi
 	UpdateSheetHandlesAfterHotbar(ui, event, doubleHandle)
 end)
 
-Ext.RegisterNetListener("CEL_CCStarted", function(cmd, netid)
-	PrintDebug(cmd, netid)
+RegisterNetListener("CEL_CCStarted", function(cmd, netid)
 	-- local ui = Ext.GetUIByType(Data.UIType.characterCreation)
 	-- if ui then
 	-- 	ui:CaptureExternalInterfaceCalls()

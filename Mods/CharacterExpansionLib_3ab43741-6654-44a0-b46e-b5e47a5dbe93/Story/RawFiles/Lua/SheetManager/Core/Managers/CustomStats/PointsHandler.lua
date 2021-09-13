@@ -184,7 +184,7 @@ function CustomStatSystem:SetStatByID(character, statId, value, mod)
 end
 
 if not isClient then
-	Ext.RegisterNetListener("CEL_CustomStatSystem_AvailablePointsChanged", function(cmd, payload)
+	RegisterNetListener("CEL_CustomStatSystem_AvailablePointsChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local character = Ext.GetCharacter(data.NetID)
@@ -200,7 +200,7 @@ if not isClient then
 		end
 	end)
 
-	Ext.RegisterNetListener("CEL_CustomStatSystem_StatValuesChanged", function(cmd, payload)
+	RegisterNetListener("CEL_CustomStatSystem_StatValuesChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local character = Ext.GetCharacter(data.NetID)

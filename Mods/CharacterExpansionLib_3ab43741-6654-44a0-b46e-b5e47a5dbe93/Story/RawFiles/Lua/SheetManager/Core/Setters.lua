@@ -25,52 +25,59 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			characterId = GameHelpers.GetCharacterID(characterId)
 		end
 		local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
-		if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) and not isInCharacterCreation then
-			if character and character.Stats then
-				if not isClient then
-					if stat.StatType == "Talent" then
-						NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
-						CharacterAddAttribute(characterId, "Dummy", 0)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					else
-						NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					end
-				else
-					character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-				end
-				local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
-				fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
+		if isInCharacterCreation then
+			if not isClient then
+				SheetManager.Save.SetEntryValue(characterId, stat, value)
 			else
-				fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
+				self:RequestValueChange(stat, characterId, value, true)
 			end
 		else
-			SheetManager.Save.SetEntryValue(characterId, stat, value)
-		end
-		if not skipListenerInvoke and not isInCharacterCreation then
-			for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
-				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
-				if not b then
-					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+			if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+				if character and character.Stats then
+					if not isClient then
+						if stat.StatType == "Talent" then
+							NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
+							CharacterAddAttribute(characterId, "Dummy", 0)
+							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+						else
+							NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
+							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+						end
+					else
+						character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+					end
+					local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
+					fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
+				else
+					fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
+				end
+			else
+				if isClient then
+					self:RequestValueChange(stat, characterId, value, false)
+				else
+					SheetManager.Save.SetEntryValue(characterId, stat, value)
 				end
 			end
-			if not isClient then
-				if stat.StatType == "Ability" then
-					Osi.CharacterBaseAbilityChanged(character.MyGuid, stat.ID, last, value)
-				elseif stat.StatType == "Talent" then
-					if value then
-						Osi.CharacterUnlockedTalent(character.MyGuid, stat.ID)
-					else
-						Osi.CharacterLockedTalent(character.MyGuid, stat.ID)
+			if not skipListenerInvoke then
+				for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
+					local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
+					if not b then
+						fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+					end
+				end
+				if not isClient then
+					if stat.StatType == "Ability" then
+						Osi.CharacterBaseAbilityChanged(character.MyGuid, stat.ID, last, value)
+					elseif stat.StatType == "Talent" then
+						if value then
+							Osi.CharacterUnlockedTalent(character.MyGuid, stat.ID)
+						else
+							Osi.CharacterLockedTalent(character.MyGuid, stat.ID)
+						end
 					end
 				end
 			end
-		end
-		if not skipSync then
-			--Server-side updating
-			if isClient then
-				self:RequestValueChange(stat, characterId, value, isInCharacterCreation)
-			else
+			if not skipSync and not isClient then
 				Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
 					ID = stat.ID,
 					Mod = stat.Mod,
@@ -146,6 +153,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount)
 			elseif entryType == "Talent" then
 				CharacterAddTalentPoint(characterId, amount)
 			end
+			SheetManager.Sync.AvailablePoints(characterId)
 			assert(points ~= GetPoints(characterId, entryType, isCivil), errorMessage("Failed to alter character(%s)'s (%s) points.", characterId, (entryType and isCivil) and "CivilAbility" or entryType))
 		end
 		return true

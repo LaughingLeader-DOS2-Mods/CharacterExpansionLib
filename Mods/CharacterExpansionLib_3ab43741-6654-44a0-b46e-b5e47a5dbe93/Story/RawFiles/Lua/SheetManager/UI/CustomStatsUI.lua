@@ -791,7 +791,7 @@ function CustomStatSystem:NetRequestCustomStatTooltip(cmd, payload)
 	end
 end
 
-Ext.RegisterNetListener("CEL_CreateCustomStatTooltip", function(...)
+RegisterNetListener("CEL_CreateCustomStatTooltip", function(...)
 	CustomStatSystem:NetRequestCustomStatTooltip(...)
 end)
 

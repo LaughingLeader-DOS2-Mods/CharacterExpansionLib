@@ -99,7 +99,7 @@ if not isClient then
 		CustomStatSystem:SyncData(id)
 	end)
 
-	Ext.RegisterNetListener("CEL_SyncCustomStatAvailablePoints", function(cmd, payload)
+	RegisterNetListener("CEL_SyncCustomStatAvailablePoints", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data and data.NetID and data.Stats then
 			local character = Ext.GetCharacter(data.NetID)
@@ -178,14 +178,14 @@ else
 		end
 	end
 
-	Ext.RegisterNetListener("CEL_SharedData_StoreCustomStatData", function(cmd, payload)
+	RegisterNetListener("CEL_SharedData_StoreCustomStatData", function(cmd, payload)
 		local b,err = xpcall(LoadSyncedCustomStatData, debug.traceback, cmd, payload)
 		if not b then
 			Ext.PrintError(err)
 		end
 	end)
 
-	Ext.RegisterNetListener("CEL_SharedData_StoreAvailablePoints", function(cmd, payload)
+	RegisterNetListener("CEL_SharedData_StoreAvailablePoints", function(cmd, payload)
 		local availablePoints = Common.JsonParse(payload)
 		if availablePoints then
 			self:LoadSyncData(nil, availablePoints)
@@ -193,7 +193,7 @@ else
 	end)
 end
 
-Ext.RegisterNetListener("CEL_CustomStatSystem_RemoveStatByUUID", function(cmd, payload)
+RegisterNetListener("CEL_CustomStatSystem_RemoveStatByUUID", function(cmd, payload)
 	local data = Ext.JsonParse(payload)
 	if data then
 		if StringHelpers.IsNullOrEmpty(data.UUID) then

@@ -154,8 +154,8 @@ if Ext.IsClient() then
 			return
 		end
 
-		local abilityPoints = SheetManager:GetBuiltinAvailablePointsForType("Ability", character, false)
-		local civilPoints = SheetManager:GetBuiltinAvailablePointsForType("Ability", character, true)
+		local abilityPoints = SheetManager:GetAvailablePoints(character, "Ability")
+		local civilPoints = SheetManager:GetAvailablePoints(character, "Civil")
 
 		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
 		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
@@ -188,7 +188,7 @@ if Ext.IsClient() then
 	---@field DisplayName string
 	---@field IsCivil boolean
 	---@field GroupID integer
-	---@field GroupTitle string
+	---@field GroupDisplayName string
 	---@field AddPointsTooltip string
 	---@field RemovePointsTooltip string
 	---@field Value integer
@@ -213,29 +213,35 @@ if Ext.IsClient() then
 		local entries = {}
 		local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 
-		local abilityPoints = Client.Character.Points.Ability
-		local civilPoints = Client.Character.Points.Civil
+		local abilityPoints = SheetManager:GetAvailablePoints(player, "Ability")
+		local civilPoints = SheetManager:GetAvailablePoints(player, "Civil")
 	
 		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
 		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
 
+		local targetStats = player.Stats
+		local sessionData = SheetManager.SessionManager:GetSession(player)
+		if sessionData then
+			targetStats = sessionData.Stats
+		end
+
 		--Defaults
 		for numId,id in Data.Ability:Get() do
 			local data = SheetManager.Abilities.Data.Abilities[id] or SheetManager.Abilities.Data.DOSAbilities[id]
-			if data ~= nil and (civilOnly == true and data.Civil) or (civilOnly == false and not data.Civil) then
+			if data ~= nil and (civilOnly == nil or (civilOnly == true and data.Civil) or (civilOnly == false and not data.Civil)) then
 				if SheetManager.Abilities.CanAddAbility(id, player) then
 					local canAddPoints = isGM
 					if not canAddPoints then
 						if civilOnly then
-							canAddPoints = civilPoints > 0 and player.Stats[id] < maxCivil
+							canAddPoints = civilPoints > 0 and targetStats[id] < maxCivil
 						else
-							canAddPoints = abilityPoints > 0 and player.Stats[id] < maxAbility
+							canAddPoints = abilityPoints > 0 and targetStats[id] < maxAbility
 						end
 					end
 					local name = GameHelpers.GetAbilityName(id)
 					local isCivil = data.Civil == true
 					local groupID = data.Group
-					local statVal = player.Stats[id] or 0
+					local statVal = targetStats[id] or 0
 					local delta = statVal - Ext.ExtraData.AbilityBaseValue
 
 					local groupName = SheetManager.Abilities.Data.GroupDisplayName[groupID]
@@ -276,12 +282,21 @@ if Ext.IsClient() then
 					else
 						canAddPoints = abilityPoints > 0
 					end
+
+					local groupName = SheetManager.Abilities.Data.GroupDisplayName[data.GroupID]
+					if groupName then
+						groupName = groupName.Value
+					else
+						groupName = ""
+					end
+
 					---@type TalentManagerUITalentEntry
 					local data = {
 						ID = data.GeneratedID,
 						DisplayName = data:GetDisplayName(),
 						IsCivil = data.IsCivil,
 						GroupID = data.GroupID,
+						GroupDisplayName = groupName,
 						IsCustom = true,
 						Value = string.format("%s", value) .. data.Suffix,
 						Delta = value - Ext.ExtraData.AbilityBaseValue,

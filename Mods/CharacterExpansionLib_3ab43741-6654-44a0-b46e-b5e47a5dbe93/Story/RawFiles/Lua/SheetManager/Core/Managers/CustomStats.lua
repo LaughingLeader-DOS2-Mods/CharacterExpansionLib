@@ -215,7 +215,7 @@ end
 
 if not isClient then
 	local canFix = Ext.GetCustomStatByName ~= nil
-	Ext.RegisterNetListener("CEL_CheckCustomStatCallback", function(cmd, payload)
+	RegisterNetListener("CEL_CheckCustomStatCallback", function(cmd, payload)
 		if not payload then
 			return
 		end
@@ -239,7 +239,7 @@ if not isClient then
 			end
 		end
 	end)
-	Ext.RegisterNetListener("CEL_RequestCustomStatData", function(cmd, payload)
+	RegisterNetListener("CEL_RequestCustomStatData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local uuid = data.UUID

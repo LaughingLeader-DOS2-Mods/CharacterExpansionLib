@@ -13,6 +13,12 @@ if not isClient then
 	function SheetManager:SyncData(character)
 		SheetManager.Sync.EntryValues(character)
 		SheetManager.Sync.AvailablePoints(character)
+		if character ~= nil then
+			SheetManager.SessionManager:SyncSession(character)
+			Ext.PostMessageToClient(GameHelpers.GetCharacterID(character), "CEL_SheetManager_NotifyDataSynced", "")
+		else
+			Ext.BroadcastMessage("CEL_SheetManager_NotifyDataSynced", "")
+		end
 	end
 else
 	---@private
@@ -23,4 +29,8 @@ else
 			SheetManager.UI.CharacterCreation:UpdateTalents()
 		end
 	end
+
+	RegisterNetListener("CEL_SheetManager_NotifyDataSynced", function()
+		SheetManager:OnDataSynced()
+	end)
 end

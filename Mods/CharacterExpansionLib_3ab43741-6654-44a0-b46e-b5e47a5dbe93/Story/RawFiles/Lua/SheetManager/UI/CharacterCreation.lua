@@ -44,7 +44,7 @@ function CharacterCreation.UpdateAbilities(ui, method)
 	local class_mc = this.CCPanel_mc.class_mc
 	local classEdit = class_mc.classEditList[1]
 	classEdit.contentList.clearElements()
-	for ability in SheetManager.Abilities.GetVisible(player, false, true) do
+	for ability in SheetManager.Abilities.GetVisible(player, nil, true) do
 		classEdit.addContentString(1,ability.ID,ability.DisplayName)
 		abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.ID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 	end
@@ -71,9 +71,10 @@ function CharacterCreation.UpdateAttributes(ui, method)
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 	local attributes_mc = this.CCPanel_mc.attributes_mc
+
+	this.availableAttributePoints = SheetManager:GetAvailablePoints(player, "Attribute")
 	
 	for stat in SheetManager.Stats.GetVisible(player, true) do
-		print(stat.DisplayName, stat.Value)
 		attributes_mc.addAttribute(stat.ID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3)
 		if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 			self.Instance:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)

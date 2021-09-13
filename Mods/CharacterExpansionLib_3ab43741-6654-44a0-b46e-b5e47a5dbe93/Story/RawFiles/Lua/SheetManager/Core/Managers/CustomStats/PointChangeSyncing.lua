@@ -2,7 +2,7 @@ local self = CustomStatSystem
 local isClient = Ext.IsClient()
 
 if not isClient then
-	Ext.RegisterNetListener("CEL_CustomStatSystem_RequestValueChange", function(cmd, payload, user)
+	RegisterNetListener("CEL_CustomStatSystem_RequestValueChange", function(cmd, payload, user)
 		local data = Common.JsonParse(payload)
 		if data then
 			local character = Ext.GetCharacter(data.NetID)
@@ -13,7 +13,7 @@ if not isClient then
 		end
 	end)
 else
-	Ext.RegisterNetListener("CEL_CustomStatSystem_SyncSuccess", function(cmd, payload)
+	RegisterNetListener("CEL_CustomStatSystem_SyncSuccess", function(cmd, payload)
 		self.Syncing = false
 	end)
 

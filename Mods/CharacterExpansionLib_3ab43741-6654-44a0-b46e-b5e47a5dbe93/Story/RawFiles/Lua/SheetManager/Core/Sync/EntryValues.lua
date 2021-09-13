@@ -147,6 +147,7 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 			local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 			if tableName ~= nil then
 				local pendingValue = SheetManager.Save.GetPendingValue(characterId, entry, tableName)
+				print(entry.ID, pendingValue)
 				if pendingValue ~= nil then
 					return pendingValue
 				end
@@ -203,7 +204,7 @@ if isClient then
 	---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 	---@param character EclCharacter|NETID
 	---@param value integer|boolean
-	function SheetManager:RequestValueChange(entry, character, value, isInCharacterCreation)
+	function SheetManager:RequestValueChange(entry, character, value)
 		local netid = GameHelpers.GetNetID(character)
 		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Ext.JsonStringify({
 			ID = entry.ID,
@@ -212,11 +213,11 @@ if isClient then
 			Value = value,
 			StatType = entry.StatType,
 			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed,
-			IsInCharacterCreation = isInCharacterCreation
+			IsInCharacterCreation = SheetManager.IsInCharacterCreation(character)
 		}))
 	end
 else
-	Ext.RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local characterId = GameHelpers.GetCharacterID(data.NetID)
@@ -235,16 +236,17 @@ else
 						if modifyPointsBy < 0 then
 							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
 							if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value)
+								SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
+								SheetManager:SyncData(characterId)
 							end
 						else
 							if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value)
+								SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
+								SheetManager:SyncData(characterId)
 							end
 						end
 					end
 				end
-				SheetManager:SyncData(characterId)
 			end
 		end
 	end)
@@ -256,17 +258,16 @@ if not isClient then
 	---@param character UUID|EsvCharacter
 	function SheetManager.Sync.EntryValues(character)
 		if character then
-			local characterId = GameHelpers.GetCharacterID(character)
+			local character = GameHelpers.GetCharacter(character)
 			local data = {
-				NetID = GameHelpers.GetNetID(character),
+				NetID = character.NetID,
 				Values = {}
 			}
-			if PersistentVars.CharacterSheetValues[characterId] ~= nil then
-				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[characterId])
+			if PersistentVars.CharacterSheetValues[character.MyGuid] ~= nil then
+				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
 			end
-			data = Ext.JsonStringify(data)
-			fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", characterId, data.NetID)
-			Ext.PostMessageToClient(characterId, "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
+			fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
+			Ext.PostMessageToClient(character.MyGuid, "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
 			return true
 		else
 			--Sync all characters
@@ -297,30 +298,27 @@ if not isClient then
 		return false
 	end
 else
-	Ext.RegisterNetListener("CEL_SheetManager_LoadSyncData", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_LoadSyncData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			self.CurrentValues = data
-			SheetManager.OnDataSynced()
 		end
 	end)
 
-	Ext.RegisterNetListener("CEL_SheetManager_LoadCharacterSyncData", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_LoadCharacterSyncData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			assert(type(data.NetID) == "number", "NetID is invalid.")
 			assert(data.Values ~= nil, "Payload has no Values table.")
 			self.CurrentValues[data.NetID] = data.Values
 			fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
-
-			SheetManager.OnDataSynced()
 		end
 	end)
 end
 --endregion
 
 if isClient then
-	Ext.RegisterNetListener("CEL_SheetManager_EntryValueChanged", function(cmd, payload)
+	RegisterNetListener("CEL_SheetManager_EntryValueChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local characterId = GameHelpers.GetCharacterID(data.NetID)

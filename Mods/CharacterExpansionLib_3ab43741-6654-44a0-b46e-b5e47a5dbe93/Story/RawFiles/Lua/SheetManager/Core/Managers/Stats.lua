@@ -446,8 +446,13 @@ if isClient then
 
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
-		local points = SheetManager:GetBuiltinAvailablePointsForType("PrimaryStat", player)
-		print("PrimaryStat points", points)
+		local points = SheetManager:GetAvailablePoints(player, "Attribute")
+		
+		local targetStats = player.Stats
+		local sessionData = SheetManager.SessionManager:GetSession(player)
+		if sessionData then
+			targetStats = sessionData.Stats
+		end
 
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
@@ -462,9 +467,9 @@ if isClient then
 				else
 					local value = nil
 					if type(data.Attribute) == "function" then
-						value = data.Attribute(player.Stats)
+						value = data.Attribute(targetStats)
 					else
-						value = player.Stats[data.Attribute]
+						value = targetStats[data.Attribute]
 					end
 					local canAdd = points > 0 and data.Type == "PrimaryStat"
 					local canRemove = data.Type == "PrimaryStat" and (isCharacterCreation or isGM) and value > Ext.ExtraData.AttributeBaseValue
