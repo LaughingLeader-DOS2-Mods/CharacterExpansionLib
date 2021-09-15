@@ -1,4 +1,5 @@
 --[[
+Mods/ModName_UUID/CharacterSheetConfig.json
 Format:
 {
 	"Talents": {
