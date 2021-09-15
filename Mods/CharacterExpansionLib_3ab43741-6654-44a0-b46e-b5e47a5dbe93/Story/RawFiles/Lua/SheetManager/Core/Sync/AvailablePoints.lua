@@ -1,6 +1,8 @@
 local self = SheetManager
 local isClient = Ext.IsClient()
 
+if SheetManager.Sync == nil then SheetManager.Sync = {} end
+
 ---@class SheetManagerAvailablePointsData:table
 ---@field Attribute integer
 ---@field Ability integer

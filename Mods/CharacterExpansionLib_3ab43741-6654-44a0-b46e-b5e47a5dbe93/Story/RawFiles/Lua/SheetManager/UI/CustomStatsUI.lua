@@ -209,7 +209,6 @@ function CustomStatSystem.Update(ui, method, this)
 		end
 		for stat in CustomStatSystem:GetAllStats(false, true, true) do
 			local visible = CustomStatSystem:GetStatVisibility(ui, stat.Double, stat, client)
-			print(stat.ID, visible)
 			if visible then
 				local value = stat:GetValue(client)
 				local groupId = CustomStatSystem:GetCategoryGroupId(stat.Category, stat.Mod)

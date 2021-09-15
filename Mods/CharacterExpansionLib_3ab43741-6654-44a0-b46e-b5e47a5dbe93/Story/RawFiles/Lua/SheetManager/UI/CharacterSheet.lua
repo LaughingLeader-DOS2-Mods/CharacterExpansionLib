@@ -1,3 +1,4 @@
+if SheetManager.UI == nil then SheetManager.UI = {} end
 
 ---@class CharacterSheetWrapper:LeaderLibUIWrapper
 local CharacterSheet = Classes.UIWrapper:CreateFromType(Data.UIType.characterSheet, {ControllerID = Data.UIType.statsPanel_c, IsControllerSupported = true})
@@ -633,17 +634,13 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "hideLevelUpAbility
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
 
-Ext.RegisterConsoleCommand("addpoints", function()
-	SheetManager.Sync.AvailablePoints(Client:GetCharacter())
-end)
-
 local function OnCharacterSelected(wrapper, ui, event, doubleHandle)
 	if doubleHandle and not GameHelpers.Math.IsNaN(doubleHandle) and doubleHandle ~= 0 then
 		local handle = Ext.DoubleToHandle(doubleHandle)
 		if handle then
 			local player = Ext.GetCharacter(handle)
 			if player then
-				SheetManager.Sync.AvailablePoints(player)
+				SheetManager:SyncData(player)
 			end
 		end
 	end
@@ -679,6 +676,7 @@ local function getTalentStateFrame(talentState)
 end
 
 SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
+	fprint(LOGLEVEL.TRACE, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetCharacterID(character), lastValue, value, isClientSide)
 	---@type CharacterSheetMainTimeline
 	local this = CharacterSheet.Root
 	if this and this.isExtended then

@@ -45,18 +45,7 @@ end
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return boolean
 function SheetTalentData:GetValue(character)
-	if StringHelpers.IsNullOrWhitespace(self.ID) then
-		return false
-	end
-	if not StringHelpers.IsNullOrWhitespace(self.BoostAttribute) then
-		return self:GetBoostValue(character, false)
-	else
-		if not isClient then
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character))
-		else
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character))
-		end
-	end
+	return SheetManager:GetValueByEntry(self, GameHelpers.GetCharacterID(character))
 end
 
 ---@class TalentState

@@ -1,6 +1,8 @@
 local self = SheetManager
 local isClient = Ext.IsClient()
 
+if SheetManager.Save == nil then SheetManager.Save = {} end
+
 ---@class SheetManagerSaveData:table
 ---@field Stats table<MOD_UUID, table<SHEET_ENTRY_ID, integer>>
 ---@field Abilities table<MOD_UUID, table<SHEET_ENTRY_ID, integer>>
@@ -132,7 +134,6 @@ end
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean
----@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
 function SheetManager.Save.GetEntryValue(characterId, entry)
 	local t = type(entry)
 	assert(t == "table", string.format("[SheetManager.Save.GetEntryValue] Entry type invalid (%s). Must be one of the following types: SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData", t))
@@ -147,7 +148,6 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 			local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 			if tableName ~= nil then
 				local pendingValue = SheetManager.Save.GetPendingValue(characterId, entry, tableName)
-				print(entry.ID, pendingValue)
 				if pendingValue ~= nil then
 					return pendingValue
 				end
@@ -156,17 +156,13 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 					local modTable = statTypeTable[entry.Mod]
 					if modTable then
 						local value = modTable[entry.ID]
-						if entry.ValueType ~= "boolean" then
-							if value == nil then
-								value = 0
-							end
-							return value,modTable
-						elseif value == nil then
-							return defaultValue,modTable
+						if value == nil then
+							return defaultValue
+						else
+							return value
 						end
 					end
 				end
-				return pendingValue
 			end
 		end
 		return defaultValue
@@ -224,7 +220,8 @@ else
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
 			if characterId and stat then
 				if data.IsGameMaster or not stat.UsePoints then
-					SheetManager:SetEntryValue(stat, characterId, data.Value)
+					SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
+					SheetManager:SyncData(characterId)
 				else
 					local modifyPointsBy = 0
 					if stat.ValueType == "number" then
@@ -298,10 +295,38 @@ if not isClient then
 		return false
 	end
 else
+	local function NotifyValueChanges(character, lastValues, values)
+		for entryType,mods in pairs(values) do
+			for modId,entries in pairs(mods) do
+				for entryId,value in pairs(entries) do
+					local entry = SheetManager:GetEntryByID(entryId, modId, entryType)
+					local last = entryType == "Talents" and false or 0
+					if lastValues[entryType] and lastValues[entryType][modId] and lastValues[entryType][modId][entryId] then
+						last = lastValues[entryType][modId][entryId]
+					end
+					for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[entry.ID], self.Listeners.OnEntryChanged.All) do
+						local b,err = xpcall(listener, debug.traceback, entry.ID, entry, character, last, value, isClient)
+						if not b then
+							fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", entry.ID, err)
+						end
+					end
+				end
+			end
+		end
+	end
+
 	RegisterNetListener("CEL_SheetManager_LoadSyncData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
+			local lastValues = TableHelpers.Clone(self.CurrentValues)
 			self.CurrentValues = data
+
+			for netid,data in pairs(self.CurrentValues) do
+				local character = Ext.GetCharacter(netid)
+				if character then
+					NotifyValueChanges(character, lastValues[netid], data)
+				end
+			end
 		end
 	end)
 
@@ -310,8 +335,14 @@ else
 		if data then
 			assert(type(data.NetID) == "number", "NetID is invalid.")
 			assert(data.Values ~= nil, "Payload has no Values table.")
+			local lastValues = TableHelpers.Clone(self.CurrentValues[data.NetID] or {})
 			self.CurrentValues[data.NetID] = data.Values
 			fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
+
+			local character = Ext.GetCharacter(data.NetID)
+			if character then
+				NotifyValueChanges(character, lastValues, self.CurrentValues[data.NetID])
+			end
 		end
 	end)
 end

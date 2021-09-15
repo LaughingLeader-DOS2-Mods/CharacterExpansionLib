@@ -2,19 +2,19 @@ local self = SheetManager
 local isClient = Ext.IsClient()
 
 
----Gets custom sheet data from a string id.
+---Get a sheet entry from a string id.
 ---@param id string
 ---@param mod string|nil
----@param statType SheetEntryType|nil Optional stat type.
+---@param statType SheetEntryType|nil Stat type.
 ---@return SheetAbilityData|SheetStatData|SheetTalentData
 function SheetManager:GetEntryByID(id, mod, statType)
 	local targetTable = nil
 	if statType then
-		if statType == "Stat" or statType == "PrimaryStat" or statType == "SecondaryStat" then
+		if statType == "Stat" or statType == "Stats" or statType == "PrimaryStat" or statType == "SecondaryStat" then
 			targetTable = self.Data.Stats
-		elseif statType == "Ability" then
+		elseif statType == "Ability" or statType == "Abilities" then
 			targetTable = self.Data.Abilities
-		elseif statType == "Talent" then
+		elseif statType == "Talent" or statType == "Talents" then
 			targetTable = self.Data.Talents
 		end
 	end
@@ -56,21 +56,24 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	return nil
 end
 
----@param stat SheetAbilityData|SheetStatData|SheetTalentData
+---@param entry SheetAbilityData|SheetStatData|SheetTalentData
 ---@param characterId UUID|NETID
-function SheetManager:GetValueByEntry(stat, characterId)
-	if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+function SheetManager:GetValueByEntry(entry, characterId)
+	if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
 		local character = GameHelpers.GetCharacter(characterId)
 		if character and character.Stats then
-			local charValue = character.Stats.DynamicStats[2][stat.BoostAttribute]
+			local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
 			if charValue ~= nil then
 				return charValue
 			end
 		end
 	else
-		return SheetManager.Save.GetEntryValue(characterId, stat)
+		local value = SheetManager.Save.GetEntryValue(characterId, entry)
+		if value ~= nil then
+			return value
+		end
 	end
-	if stat.StatType == "Talent" then
+	if entry.StatType == "Talent" then
 		return false
 	end
 	return 0
@@ -171,7 +174,7 @@ function SheetManager:GetAvailablePoints(characterId, pointType)
 			return CharacterGetAbilityPoints(characterId) or 0
 		elseif pointType == "Civil" then
 			return CharacterGetCivilAbilityPoints(characterId) or 0
-		elseif entryType == "Talent" then
+		elseif pointType == "Talent" then
 			return CharacterGetTalentPoints(characterId) or 0
 		end
 	end

@@ -1,3 +1,4 @@
+if SheetManager.UI == nil then SheetManager.UI = {} end
 
 ---@class CharacterCreationWrapper:LeaderLibUIWrapper
 local CharacterCreation = Classes.UIWrapper:CreateFromType(Data.UIType.characterCreation, {ControllerID = Data.UIType.characterCreation_c, IsControllerSupported = true})
