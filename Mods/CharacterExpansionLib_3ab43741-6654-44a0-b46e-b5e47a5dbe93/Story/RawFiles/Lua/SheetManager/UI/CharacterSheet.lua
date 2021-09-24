@@ -716,8 +716,10 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 			elseif entry.StatType == "Talent" then
 				local talentState = entry:GetState(character)
 				local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), entry:GetDisplayName())
-				mc.label_txt.htmlText = name
-				mc.label = mc.label_txt.text
+				if mc.label_txt then
+					mc.label_txt.htmlText = name
+				end
+				mc.label = name
 				mc.talentState = talentState
 				mc.bullet_mc.gotoAndStop(this.getTalentStateFrame(talentState))
 

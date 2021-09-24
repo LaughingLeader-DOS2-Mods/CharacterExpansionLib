@@ -300,8 +300,9 @@ else
 			for modId,entries in pairs(mods) do
 				for entryId,value in pairs(entries) do
 					local entry = SheetManager:GetEntryByID(entryId, modId, entryType)
+					assert(entry ~= nil, string.format("Failed to get sheet entry from id(%s) mod(%s) entryType(%s)", entryId, modId, entryType))
 					local last = entryType == "Talents" and false or 0
-					if lastValues[entryType] and lastValues[entryType][modId] and lastValues[entryType][modId][entryId] then
+					if lastValues and lastValues[entryType] and lastValues[entryType][modId] and lastValues[entryType][modId][entryId] then
 						last = lastValues[entryType][modId][entryId]
 					end
 					for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[entry.ID], self.Listeners.OnEntryChanged.All) do

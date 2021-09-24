@@ -1,5 +1,26 @@
 ModuleFolder = Ext.GetModInfo(ModuleUUID).Directory
+
+---@class CharacterExpansionLibListeners:table
+local listeners = {}
+Mods.CharacterExpansionLib.Listeners = listeners
+
 Mods.LeaderLib.Import(Mods.CharacterExpansionLib)
+
+local isClient = Ext.IsClient()
+
+---@alias SetCharacterCreationOriginSkillsCallback fun(player:EclCharacter, origin:string, race:string, skills:string[]):string[]
+
+if isClient then
+	listeners.SetCharacterCreationOriginSkills = {
+		---@private
+		---@type SetCharacterCreationOriginSkillsCallback[]
+		Callbacks = {},
+		---@param callback SetCharacterCreationOriginSkillsCallback
+		Register = function(callback)
+			table.insert(listeners.SetCharacterCreationOriginSkills.Callbacks, callback)
+		end
+	}
+end
 
 ---@param id string
 ---@param callback fun(id:string, payload:string, user:integer|nil):void
@@ -17,6 +38,7 @@ end
 
 
 Ext.Require("SheetManager/Init.lua")
+Ext.Require("OriginManager/Init.lua")
 
 local function TryFindOsiToolsConfig(info)
 	local filePath = string.format("Mods/%s/OsiToolsConfig.json", info.Directory)

@@ -6,11 +6,11 @@ SheetManager.Save = {}
 ---Functions for data syncing.
 SheetManager.Sync = {}
 
-if not isClient then
-	---Sync all current values and available points for a specific character, or all characters if nil.
-	---@param character UUID|EsvCharacter
-	---@param user integer|nil
-	function SheetManager:SyncData(character)
+---Sync all current values and available points for a specific character, or all characters if nil.
+---@param character UUID|EsvCharacter
+---@param user integer|nil
+function SheetManager:SyncData(character)
+	if not isClient then
 		SheetManager.Sync.EntryValues(character)
 		SheetManager.Sync.AvailablePoints(character)
 		if character ~= nil then
@@ -19,7 +19,23 @@ if not isClient then
 		else
 			Ext.BroadcastMessage("CEL_SheetManager_NotifyDataSynced", "")
 		end
+	else
+		if character then
+			Ext.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", GameHelpers.GetNetID(character))
+		end
 	end
+end
+
+if not isClient then
+	RegisterNetListener("CEL_SheetManager_RequestCharacterSync", function(cmd, payload)
+		local netid = tonumber(payload)
+		if netid then
+			local character = Ext.GetCharacter(netid)
+			if character then
+				SheetManager:SyncData(character)
+			end
+		end
+	end)
 else
 	---@private
 	function SheetManager:OnDataSynced()

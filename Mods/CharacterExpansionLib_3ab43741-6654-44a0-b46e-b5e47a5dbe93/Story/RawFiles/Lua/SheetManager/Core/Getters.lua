@@ -16,6 +16,8 @@ function SheetManager:GetEntryByID(id, mod, statType)
 			targetTable = self.Data.Abilities
 		elseif statType == "Talent" or statType == "Talents" then
 			targetTable = self.Data.Talents
+		elseif statType == "CustomStats" then
+			return SheetManager.CustomStats:GetStatByID(id, mod)
 		end
 	end
 	if targetTable then

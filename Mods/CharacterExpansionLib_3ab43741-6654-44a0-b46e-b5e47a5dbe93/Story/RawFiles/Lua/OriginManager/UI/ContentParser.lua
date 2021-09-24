@@ -182,13 +182,40 @@ local function SetSkills(self, ui, event)
 		local origin = player.PlayerCustomData.OriginName
 		local race = player.PlayerCustomData.Race
 
-		InvokeListenerCallbacks(Listeners.SetCharacterCreationOriginSkills, player, origin, race, this.racialSkills)
-
+		local skills = {}
 		for i=0,#this.racialSkills-1 do
-			local icon = Ext.StatGetAttribute(this.racialSkills[i], "Icon")
-			ui:SetCustomIcon(string.format("cel_racial%i", i), icon, this.iconSize, this.iconSize)
+			if this.racialSkills[i] then
+				table.insert(skills, this.racialSkills[i])
+			end
 		end
-		--ui:SetCustomIcon("p", "Skill_Fire_EpidemicOfFire", 64, 64)
+
+		local callbacks = Mods.CharacterExpansionLib.Listeners.SetCharacterCreationOriginSkills.Callbacks
+		if callbacks then
+			for i=1,#callbacks do
+				local callback = callbacks[i]
+				local b,result = xpcall(callback, debug.traceback, player, origin, race, skills)
+				if not b then
+					Ext.PrintError(result)
+				else
+					if type(result) == "table" then
+						skills = result
+					end
+				end
+			end
+		end
+
+		this.clearArray("racialSkills")
+		local i = 0
+		for _,v in pairs(skills) do
+			local icon = Ext.StatGetAttribute(v, "Icon")
+			print(i, v, icon)
+			if not StringHelpers.IsNullOrWhitespace(icon) then
+				ui:SetCustomIcon(string.format("cel_racial%i", i), icon, this.iconSize, this.iconSize)
+			end
+			this.racialSkills[i] = v
+			i = i + 1
+		end
+		print(Lib.serpent.block(skills))
 	end
 end
 
