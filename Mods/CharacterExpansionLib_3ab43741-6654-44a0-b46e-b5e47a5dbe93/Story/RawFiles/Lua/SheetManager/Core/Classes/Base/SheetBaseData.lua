@@ -62,9 +62,6 @@ function SheetBaseData.SetDefaults(data)
 			end
 		end
 	end
-	if isClient then
-		data.ListHolder = ""
-	end
 end
 
 ---@param txt string
@@ -112,6 +109,7 @@ function SheetBaseData:GetBoostValue(character, fallback)
 		end
 		return value
 	end
+	return fallback
 end
 
 Classes.SheetBaseData = SheetBaseData

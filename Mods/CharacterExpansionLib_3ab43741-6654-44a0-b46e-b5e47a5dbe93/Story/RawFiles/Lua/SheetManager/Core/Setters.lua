@@ -16,77 +16,72 @@ end
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
 function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync)
 	local last = stat:GetValue(characterId)
-	if last ~= value then
-		---@type EsvCharacter|EclCharacter
-		local character = characterId
-		if type(characterId) ~= "userdata" then
-			character = Ext.GetCharacter(characterId)
+	characterId = GameHelpers.GetCharacterID(characterId)
+	local character = GameHelpers.GetCharacter(characterId)
+	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
+	if isInCharacterCreation then
+		if not isClient then
+			SheetManager.Save.SetEntryValue(characterId, stat, value)
 		else
-			characterId = GameHelpers.GetCharacterID(characterId)
+			self:RequestValueChange(stat, characterId, value, true)
 		end
-		local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
-		if isInCharacterCreation then
-			if not isClient then
-				SheetManager.Save.SetEntryValue(characterId, stat, value)
+	else
+		if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+			if character and character.Stats then
+				if not isClient then
+					if stat.StatType == "Talent" then
+						NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
+						CharacterAddAttribute(characterId, "Dummy", 0)
+						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+					else
+						NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
+						-- Sync boost changes
+						CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+					end
+				else
+					character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+				end
+				local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
+				fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
 			else
-				self:RequestValueChange(stat, characterId, value, true)
+				fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
 			end
 		else
-			if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
-				if character and character.Stats then
-					if not isClient then
-						if stat.StatType == "Talent" then
-							NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
-							CharacterAddAttribute(characterId, "Dummy", 0)
-							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-						else
-							NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
-							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-						end
-					else
-						character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					end
-					local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
-					fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
-				else
-					fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
-				end
+			if isClient then
+				self:RequestValueChange(stat, characterId, value, false)
 			else
-				if isClient then
-					self:RequestValueChange(stat, characterId, value, false)
-				else
-					SheetManager.Save.SetEntryValue(characterId, stat, value)
+				SheetManager.Save.SetEntryValue(characterId, stat, value)
+			end
+		end
+		if not skipListenerInvoke then
+			for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
+				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
+				if not b then
+					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:SetEntryValue] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 				end
 			end
-			if not skipListenerInvoke then
-				for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
-					local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
-					if not b then
-						fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:SetEntryValue] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
-					end
-				end
-				if not isClient then
-					if stat.StatType == "Ability" then
-						Osi.CharacterBaseAbilityChanged(character.MyGuid, stat.ID, last, value)
-					elseif stat.StatType == "Talent" then
-						if value then
-							Osi.CharacterUnlockedTalent(character.MyGuid, stat.ID)
-						else
-							Osi.CharacterLockedTalent(character.MyGuid, stat.ID)
-						end
+			if not isClient then
+				if stat.StatType == "Ability" then
+					Osi.CharacterBaseAbilityChanged(character.MyGuid, stat.ID, last, value)
+				elseif stat.StatType == "Talent" then
+					if value then
+						Osi.CharacterUnlockedTalent(character.MyGuid, stat.ID)
+					else
+						Osi.CharacterLockedTalent(character.MyGuid, stat.ID)
 					end
 				end
 			end
-			if not skipSync and not isClient then
-				Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
-					ID = stat.ID,
-					Mod = stat.Mod,
-					NetID = GameHelpers.GetNetID(characterId),
-					Value = value,
-					StatType = stat.StatType,
-					IsInCharacterCreation = isInCharacterCreation
-				}))
-			end
+		end
+		if not skipSync and not isClient then
+			Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
+				ID = stat.ID,
+				Mod = stat.Mod,
+				NetID = GameHelpers.GetNetID(characterId),
+				Value = value,
+				StatType = stat.StatType,
+				IsInCharacterCreation = isInCharacterCreation
+			}))
 		end
 	end
 end

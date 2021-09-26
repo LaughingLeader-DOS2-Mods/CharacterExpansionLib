@@ -253,7 +253,8 @@ end
 if not isClient then
 	---@protected
 	---@param character UUID|EsvCharacter
-	function SheetManager.Sync.EntryValues(character)
+	---@param user number|string|nil Optional client to sync to if character is nil.
+	function SheetManager.Sync.EntryValues(character, user)
 		if character then
 			local character = GameHelpers.GetCharacter(character)
 			local data = {

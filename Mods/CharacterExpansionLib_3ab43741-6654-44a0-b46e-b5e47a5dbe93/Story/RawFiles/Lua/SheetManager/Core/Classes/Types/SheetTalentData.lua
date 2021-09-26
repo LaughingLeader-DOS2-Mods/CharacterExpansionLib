@@ -25,7 +25,7 @@ local defaults = {
 	Icon = "",
 	IconWidth = SheetTalentData.IconWidth,
 	IconHeight = SheetTalentData.IconHeight,
-	IsRacial = false
+	IsRacial = false,
 }
 
 ---@protected

@@ -45,13 +45,13 @@ SheetManager.Data = {
 	Stats = {},
 	ID_MAP = {
 		Abilities = {
-			NEXT_ID = 1999,
+			NEXT_ID = 7999,
 			---@type table<integer, SheetAbilityData>
 			Entries = {}
 		},
 		---@type table<integer, SheetTalentData>
 		Talents = {
-			NEXT_ID = 1999,
+			NEXT_ID = 4999,
 			Entries = {}
 		},
 		---@type table<integer, SheetTalentData>

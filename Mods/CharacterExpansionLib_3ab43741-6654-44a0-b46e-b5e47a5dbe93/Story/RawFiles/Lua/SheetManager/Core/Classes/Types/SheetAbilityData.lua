@@ -59,6 +59,7 @@ function SheetAbilityData:GetValue(character)
 			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
 		end
 	end
+	return 0
 end
 
 ---[SERVER]

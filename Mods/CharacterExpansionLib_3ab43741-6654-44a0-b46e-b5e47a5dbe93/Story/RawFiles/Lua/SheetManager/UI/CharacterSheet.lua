@@ -104,7 +104,8 @@ end
 ---@param entry SheetAbilityData|SheetStatData
 ---@return FlashMovieClip,FlashArray,integer
 CharacterSheet.TryGetEntryMovieClip = function(entry, this)
-	if StringHelpers.IsNullOrWhitespace(entry.ListHolder) then
+	local listHolder = nil
+	--[[ if StringHelpers.IsNullOrWhitespace(entry.ListHolder) then
 		if entry.StatType == "PrimaryStat" then
 			entry.ListHolder = "primaryStatList"
 		elseif entry.StatType == "SecondaryStat" then
@@ -126,8 +127,29 @@ CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 		elseif entry.StatType == "Talent" then
 			entry.ListHolder = "talentHolder_mc"
 		end
+	end ]]
+	if entry.StatType == "PrimaryStat" then
+		listHolder = "primaryStatList"
+	elseif entry.StatType == "SecondaryStat" then
+		if entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Info then
+			listHolder = "infoStatList"
+		elseif entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Stat then
+			listHolder = "secondaryStatList"
+		elseif entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Resistance then
+			listHolder = "resistanceStatList"
+		elseif entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Experience then
+			listHolder = "expStatList"
+		end
+	elseif entry.StatType == "Ability" then
+		if entry.IsCivil then
+			listHolder = "civicAbilityHolder_mc"
+		else
+			listHolder = "combatAbilityHolder_mc"
+		end
+	elseif entry.StatType == "Talent" then
+		listHolder = "talentHolder_mc"
 	end
-	return CharacterSheet.TryGetMovieClip(this, entry.ListHolder, entry.GeneratedID, entry.GroupID)
+	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.GroupID)
 end
 
 local function debugExportStatArrays(this)
@@ -596,7 +618,7 @@ Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, "characterSheetUpdateDone", Cha
 --local mc = sheet.stats_mc.resistanceStatList.content_array[8]; print(mc.statID, mc.texts_mc.label_txt.htmlText)
 --for i=5,9 do local mc = sheet.stats_mc.resistanceStatList.content_array[i]; print(mc.statID, mc.texts_mc.label_txt.htmlText) end
 
-Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", function(ui, call, isCustom, statID, listProperty, groupID)
+--[[ Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", function(ui, call, isCustom, statID, listProperty, groupID)
 	--print(call, isCustom, statID, listProperty)
 	if isCustom then
 		local stat = SheetManager:GetEntryByGeneratedID(statID)
@@ -610,7 +632,7 @@ Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", function(ui, ca
 			-- end
 		end
 	end
-end)
+end) ]]
 
 ---@param ui UIObject
 local function UpdateCharacterSheetPoints(ui, method, amount)
@@ -686,7 +708,7 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 
 		this = this.stats_mc
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
-		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc)
+		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
 		if arr and mc then
 			local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
 			local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
