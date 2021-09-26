@@ -182,3 +182,69 @@ function SheetManager:GetAvailablePoints(characterId, pointType)
 	end
 	return 0
 end
+
+---@param boostOnly boolean
+---@param includeCustom boolean
+---@return fun():SheetStatData|SheetAbilityData|SheetTalentData
+function SheetManager:GetAllEntries(boostOnly, includeCustom)
+	local entries = {}
+
+	for t,tbl in pairs(self.Data.Stats) do
+		for id,entry in pairs(tbl) do
+			if boostOnly then
+				if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+					entries[#entries+1] = entry
+				end
+			else
+				entries[#entries+1] = entry
+			end
+		end
+	end
+
+	for t,tbl in pairs(self.Data.Abilities) do
+		for id,entry in pairs(tbl) do
+			if boostOnly then
+				if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+					entries[#entries+1] = entry
+				end
+			else
+				entries[#entries+1] = entry
+			end
+		end
+	end
+
+	for t,tbl in pairs(self.Data.Talents) do
+		for id,entry in pairs(tbl) do
+			if boostOnly then
+				if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+					entries[#entries+1] = entry
+				end
+			else
+				entries[#entries+1] = entry
+			end
+		end
+	end
+
+	if includeCustom then
+		for t,tbl in pairs(self.CustomStats.Stats) do
+			for id,entry in pairs(tbl) do
+				if boostOnly then
+					if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+						entries[#entries+1] = entry
+					end
+				else
+					entries[#entries+1] = entry
+				end
+			end
+		end
+	end
+
+	local i = 0
+	local total = #entries
+	return function ()
+		i = i + 1
+		if i <= total then
+			return entries[i]
+		end
+	end
+end
