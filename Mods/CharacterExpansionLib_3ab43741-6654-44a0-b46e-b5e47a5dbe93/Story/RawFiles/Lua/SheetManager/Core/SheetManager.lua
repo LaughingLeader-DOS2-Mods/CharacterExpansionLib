@@ -102,8 +102,13 @@ local function LoadData()
 
 	if isClient then
 		---Divine Talents
-		if Ext.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") or GameSettings.Settings.Client.DivineTalentsEnabled then
-			SheetManager.Talents.ToggleDivineTalents(true)
+		if Ext.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") then
+			SheetManager.Talents.ToggleDivineTalents(true, "ca32a698-d63e-4d20-92a7-dd83cba7bc56")
+		elseif Mods.LeaderLib then
+			local gameSettings = Mods.LeaderLib.GameSettings
+			if gameSettings.Settings.Client.DivineTalentsEnabled then
+				SheetManager.Talents.ToggleDivineTalents(true, Mods.LeaderLib.ModuleUUID)
+			end
 		end
 	else
 		SheetManager:SyncData()

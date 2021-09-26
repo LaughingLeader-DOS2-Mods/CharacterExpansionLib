@@ -672,14 +672,16 @@ if Vars.DebugMode then
 	end
 end
 
-function SheetManager.Talents.ToggleDivineTalents(enabled)
+---@param enabled boolean
+---@param modId UUID|nil Mod UUID
+function SheetManager.Talents.ToggleDivineTalents(enabled, modId)
 	if enabled then
 		for talent,id in pairs(SheetManager.Talents.Data.VisibleDivineTalents) do
-			SheetManager.Talents.EnableTalent(talent, ModuleUUID)
+			SheetManager.Talents.EnableTalent(talent, modId or ModuleUUID)
 		end
 	else
 		for talent,id in pairs(SheetManager.Talents.Data.VisibleDivineTalents) do
-			SheetManager.Talents.DisableTalent(talent, ModuleUUID)
+			SheetManager.Talents.DisableTalent(talent, modId or ModuleUUID)
 		end
 	end
 end
