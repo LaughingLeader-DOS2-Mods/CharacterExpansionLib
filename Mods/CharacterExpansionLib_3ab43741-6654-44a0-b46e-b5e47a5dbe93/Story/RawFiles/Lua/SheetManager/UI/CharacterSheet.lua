@@ -286,8 +286,8 @@ local function GetArrayValues(this,baseChanges,modChanges)
 				Value = arr[i+2],
 				TooltipID = arr[i+3],
 				Type = "PrimaryStat",
-				CanAdd = false,
-				CanRemove = false
+				CanAdd = this.isGameMasterChar,
+				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -308,8 +308,8 @@ local function GetArrayValues(this,baseChanges,modChanges)
 					Frame = arr[i+5],
 					BoostValue = arr[i+6],
 					Type = "SecondaryStat",
-					CanAdd = false,
-					CanRemove = false
+					CanAdd = this.isGameMasterChar,
+					CanRemove = this.isGameMasterChar
 				}
 			end
 		end
@@ -325,8 +325,8 @@ local function GetArrayValues(this,baseChanges,modChanges)
 			targetTable.Talents[id] = {
 				DisplayName = arr[i],
 				State = arr[i+2],
-				CanAdd = false,
-				CanRemove = false
+				CanAdd = this.isGameMasterChar,
+				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -346,8 +346,8 @@ local function GetArrayValues(this,baseChanges,modChanges)
 				GroupID = arr[i+1],
 				AddPointsTooltip = arr[i+5],
 				RemovePointsTooltip = arr[i+6],
-				CanAdd = false,
-				CanRemove = false
+				CanAdd = this.isGameMasterChar,
+				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -359,9 +359,9 @@ local function GetArrayValues(this,baseChanges,modChanges)
 		local entry = modChanges[id] or baseChanges[id]
 		if entry then
 			if canAddPoints then
-				entry.CanAdd = isVisible
+				entry.CanAdd = isVisible or this.isGameMasterChar
 			else
-				entry.CanRemove = isVisible
+				entry.CanRemove = isVisible or this.isGameMasterChar
 			end
 		end
 	end
@@ -373,11 +373,11 @@ local function GetArrayValues(this,baseChanges,modChanges)
 		if entry then
 			if hasButtons then
 				local showBothButtons = arr[i+1]
-				entry.CanRemove = arr[i+2]
-				entry.CanAdd = arr[i+3]
+				entry.CanRemove = arr[i+2] or this.isGameMasterChar
+				entry.CanAdd = arr[i+3] or this.isGameMasterChar
 			else
-				entry.CanRemove = false
-				entry.CanAdd = false
+				entry.CanRemove = this.isGameMasterChar
+				entry.CanAdd = this.isGameMasterChar
 			end
 		end
 	end
@@ -418,6 +418,11 @@ local function ParseArrayValues(this, skipSort)
 	local baseChanges = {Stats = {},Abilities = {},Talents = {}}
 
 	pcall(GetArrayValues, this, baseChanges, modChanges)
+
+	this.clearArray("lvlBtnStat_array")
+	this.clearArray("lvlBtnTalent_array")
+	this.clearArray("lvlBtnSecStat_array")
+	this.clearArray("lvlBtnAbility_array")
 
 	-- print("baseChanges",Lib.serpent.dump(baseChanges))
 	-- print("modChanges",Lib.serpent.dump(modChanges))

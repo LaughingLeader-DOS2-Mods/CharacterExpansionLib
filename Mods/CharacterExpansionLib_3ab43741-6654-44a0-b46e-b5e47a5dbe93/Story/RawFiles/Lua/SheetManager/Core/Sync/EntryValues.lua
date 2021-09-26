@@ -247,6 +247,28 @@ else
 			end
 		end
 	end)
+	RegisterNetListener("CEL_SheetManager_RequestBaseValueChange", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			assert(type(data.ModifyBy) == "number", "Payload needs a ModifyBy amount.")
+			assert(type(data.NetID) == "number", "Payload needs a NetID.")
+			assert(type(data.ID) == "string", "Payload needs an ID for the attribute/ability/talent.")
+			assert(type(data.StatType) == "string", "Payload needs an StatType string value (Ability,Attribute,Talent).")
+			local character = GameHelpers.GetCharacter(data.NetID)
+			assert(character ~= nil, string.format("Failed to get character for NetID (%s).", data.NetID))
+			
+			if data.StatType == "Attribute" then
+				NRD_PlayerSetBaseAttribute(character.MyGuid, data.ID, CharacterGetBaseAttribute(character.MyGuid, data.ID) + data.ModifyBy)
+			elseif data.StatType == "Ability" then
+				NRD_PlayerSetBaseAbility(character.MyGuid, data.ID, CharacterGetBaseAbility(character.MyGuid, data.ID) + data.ModifyBy)
+			elseif data.StatType == "Talent" then
+				NRD_PlayerSetBaseTalent(character.MyGuid, data.ID, data.ModifyBy)
+			end
+
+			--Force PlayerUpgrade sync
+			CharacterAddCivilAbilityPoint(character.MyGuid, 0)
+		end
+	end)
 end
 
 --region Value Syncing

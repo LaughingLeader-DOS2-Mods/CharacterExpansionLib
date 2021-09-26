@@ -386,7 +386,7 @@ SheetManager.Stats = {
 				[2]="Intelligence",
 				[3]="Constitution",
 				[4]="Memory",
-				[5]="Wit",
+				[5]="Wits",
 				[6]="Damage",
 				[7]="PhysicalArmour",
 				[8]="MagicArmour",
@@ -471,8 +471,9 @@ if isClient then
 					else
 						value = targetStats[data.Attribute]
 					end
-					local canAdd = points > 0 and data.Type == "PrimaryStat"
+					local canAdd = (points > 0 or isGM) and data.Type == "PrimaryStat"
 					local canRemove = data.Type == "PrimaryStat" and (isCharacterCreation or isGM) and value > Ext.ExtraData.AttributeBaseValue
+					
 					local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
 					if isCharacterCreation and data.CCFrame then
 						frame = data.CCFrame

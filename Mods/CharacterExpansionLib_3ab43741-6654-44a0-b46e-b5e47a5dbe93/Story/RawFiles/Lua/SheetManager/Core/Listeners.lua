@@ -156,7 +156,7 @@ end
 ---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
 function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValue)
 	if defaultValue == nil then
-		defaultValue = false
+		defaultValue = GameHelpers.Client.IsGameMaster()
 	end
 	if entryValue == nil then
 		entryValue = entry:GetValue(character)
@@ -179,7 +179,7 @@ end
 ---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
 function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryValue)
 	if defaultValue == nil then
-		defaultValue = false
+		defaultValue = GameHelpers.Client.IsGameMaster()
 	end
 	if entryValue == nil then
 		entryValue = entry:GetValue(character)

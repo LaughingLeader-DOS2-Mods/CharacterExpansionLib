@@ -26,3 +26,29 @@ SheetManager.Config.Calls = {
 		SecondaryStat = "plusSecStatCustom",
 	}
 }
+
+SheetManager.Config.BaseCalls = {
+	Tooltip = {
+		Ability = "showAbilityTooltip",
+		Talent = "showTalentTooltip",
+		Stat = "showStatTooltip"
+	},
+	TooltipController = {
+		Ability = "selectAbility",
+		Talent = "selectTalent",
+		PrimaryStat = "selectStat",
+		SecondaryStat = "selectSecStat",
+	},
+	PointRemoved = {
+		Ability = "minusAbility",
+		Talent = "minusTalent",
+		PrimaryStat = "minusStat",
+		SecondaryStat = "minusSecStat",
+	},
+	PointAdded = {
+		Ability = "plusAbility",
+		Talent = "plusTalent",
+		PrimaryStat = "plusStat",
+		SecondaryStat = "plusSecStat",
+	}
+}

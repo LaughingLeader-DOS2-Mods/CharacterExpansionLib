@@ -926,14 +926,14 @@ package characterSheet_fla
 		
 		public function hideLevelUpStatButtons() : *
 		{
-			this.stats_mc.setVisibilityStatButtons(false);
+			this.stats_mc.setVisibilityStatButtons(this.isGameMasterChar);
 			this.setAvailableStatPoints(0);
 		}
 		
 		public function hideLevelUpAbilityButtons() : *
 		{
-			this.stats_mc.setVisibilityAbilityButtons(false,false);
-			this.stats_mc.setVisibilityAbilityButtons(true,false);
+			this.stats_mc.setVisibilityAbilityButtons(false,this.isGameMasterChar);
+			this.stats_mc.setVisibilityAbilityButtons(true,this.isGameMasterChar);
 			this.setAvailableCombatAbilityPoints(0);
 			this.setAvailableCivilAbilityPoints(0);
 			this.setAvailableCustomStatPoints(0);
@@ -943,7 +943,7 @@ package characterSheet_fla
 		{
 			// What's calling this after the array is parsed?
 			if (!this.justUpdated || force) {
-				this.stats_mc.setVisibilityTalentButtons(false);
+				this.stats_mc.setVisibilityTalentButtons(this.isGameMasterChar);
 				this.setAvailableTalentPoints(0);
 			}
 		}
