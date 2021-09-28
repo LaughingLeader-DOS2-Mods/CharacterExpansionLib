@@ -33,7 +33,6 @@ local SheetBaseData = {
 }
 
 local defaults = {
-	TooltipType = SheetBaseData.TooltipType,
 	ID = SheetBaseData.ID,
 	Mod = SheetBaseData.Mod,
 	DisplayName = SheetBaseData.DisplayName,
