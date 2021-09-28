@@ -413,29 +413,26 @@ function CustomStatSystem:OnStatAdded(ui, call, doubleHandle, index)
 	local stat_mc = this.stats_mc.customStats_mc.stats_array[index]
 	local stat = self:GetStatByDouble(doubleHandle)
 
-	--[[
-		Stat values greater than a certain amount have issues fitting into the UI, 
-		so display a small version and use the tooltip to display the full value.
-	]]
-	if stat_mc.am > self.MaxVisibleValue then
-		stat_mc.text_txt.htmlText = StringHelpers.GetShortNumberString(stat_mc.am)
-		if stat and stat.DisplayValueInTooltip ~= false then
-			self.TooltipValueEnabled[stat.ID] = true
-		end
-		--stat_mc.text_txt.x = 187.5;
-		--stat_mc.text_txt.width = 64
-	elseif stat and stat.DisplayValueInTooltip ~= true then
-		self.TooltipValueEnabled[stat.ID] = nil
-	end
-
 	if stat then
-		stat_mc.label_txt.htmlText = stat:GetDisplayName()
+		--[[
+			Stat values greater than a certain amount have issues fitting into the UI, 
+			so display a small version and use the tooltip to display the full value.
+		]]
 		if stat.DisplayMode == "Percentage" then
-			local text = string.format("%s%%", math.floor(stat_mc.am))
-			if stat_mc.text_txt.htmlText ~= text then
-				stat_mc.text_txt.htmlText = text
+			stat_mc.text_txt.htmlText = string.format("%s%%", math.floor(stat_mc.am))
+		else
+			if stat_mc.am > self.MaxVisibleValue then
+				stat_mc.text_txt.htmlText = StringHelpers.GetShortNumberString(stat_mc.am)
 			end
 		end
+
+		if stat.DisplayValueInTooltip ~= true then
+			self.TooltipValueEnabled[stat.ID] = nil
+		else
+			self.TooltipValueEnabled[stat.ID] = true
+		end
+
+		stat_mc.label_txt.htmlText = stat:GetDisplayName()
 
 		local character = Client:GetCharacter()
 		for listener in self:GetListenerIterator(self.Listeners.StatAdded[stat.ID], self.Listeners.StatAdded.All) do

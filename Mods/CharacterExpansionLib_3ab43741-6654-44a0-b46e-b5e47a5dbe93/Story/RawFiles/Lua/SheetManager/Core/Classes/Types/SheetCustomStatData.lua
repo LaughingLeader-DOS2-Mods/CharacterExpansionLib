@@ -10,7 +10,7 @@ local STAT_DISPLAY_MODE = {
 local SheetCustomStatData = {
 	Type="SheetCustomStatData",
 	StatType = "Custom",
-	---If true, the custom stat is created automatically on the server.
+	---If true, the custom stat is created automatically on the server, if GM custom stats are enabled.
 	Create = false,
 	---A category ID this stat belongs to, if any.
 	Category = "",

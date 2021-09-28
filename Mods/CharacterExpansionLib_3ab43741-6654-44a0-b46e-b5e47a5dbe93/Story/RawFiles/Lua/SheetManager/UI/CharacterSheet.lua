@@ -26,7 +26,7 @@ local updateTargets = TableHelpers.Clone(updateTargetsDefaults)
 ---@param id number
 ---@param groupID integer|nil
 ---@return FlashMovieClip,FlashArray,integer
-local function TryGetMovieClip(this, listHolder, id, groupID)
+local function TryGetMovieClip(this, listHolder, id, groupID, arrayName)
 	if this == nil then
 		this = CharacterSheet.Root
 		if this then
@@ -36,31 +36,38 @@ local function TryGetMovieClip(this, listHolder, id, groupID)
 	if this and not StringHelpers.IsNullOrWhitespace(listHolder) then
 		local holder = this[listHolder]
 		if holder then
-			local list = holder
-			if holder.list then
-				list = holder.list
-			end
-			if groupID ~= nil then
-				for i=0,#list.content_array-1 do
-					local group = list.content_array[i]
-					if group and group.groupId == groupID then
-						list = group.list
-						break
+			local array = nil
+			if not StringHelpers.IsNullOrWhitespace(arrayName) then
+				array = holder[arrayName]
+			else
+				local list = holder
+				if holder.list then
+					list = holder.list
+				end
+				if groupID ~= nil then
+					for i=0,#list.content_array-1 do
+						local group = list.content_array[i]
+						if group and group.groupId == groupID then
+							list = group.list
+							break
+						end
 					end
 				end
+				array = list.content_array
 			end
-			if list and list.content_array then
+
+			if array then
 				local mc = nil
 				local i = 0
-				while i < #list.content_array do
-					local obj = list.content_array[i]
+				while i < #array do
+					local obj = array[i]
 					if obj and obj.statID == id then
 						mc = obj
 						break
 					end
 					i = i + 1
 				end
-				return mc,list.content_array,i
+				return mc,array,i
 			end
 		end
 	end
@@ -71,7 +78,7 @@ end
 ---@param id number
 ---@param groupID integer|nil
 ---@return FlashMovieClip,FlashArray,integer
-local function TryGetMovieClip_Controller(this, listHolder, id, groupID)
+local function TryGetMovieClip_Controller(this, listHolder, id, groupID, arrayName)
 	--TODO
 	if this == nil then
 		this = CharacterSheet.Root
@@ -79,7 +86,7 @@ local function TryGetMovieClip_Controller(this, listHolder, id, groupID)
 			this = this.mainpanel_mc.stats_mc
 		end
 	end
-	return TryGetMovieClip(this, listHolder, id, groupID)
+	return TryGetMovieClip(this, listHolder, id, groupID, arrayName)
 end
 
 ---@param this stats_1
@@ -87,12 +94,12 @@ end
 ---@param id number
 ---@param groupID integer|nil
 ---@return FlashMovieClip,FlashArray,integer
-CharacterSheet.TryGetMovieClip = function(this, listHolder, id, groupID)
+CharacterSheet.TryGetMovieClip = function(this, listHolder, id, groupID, arrayName)
 	local func = TryGetMovieClip
 	if Vars.ControllerEnabled then
 		func = TryGetMovieClip_Controller
 	end
-	local result = {xpcall(func, debug.traceback, this, listHolder, id, groupID)}
+	local result = {xpcall(func, debug.traceback, this, listHolder, id, groupID, arrayName)}
 	if not result[1] then
 		fprint(LOGLEVEL.ERROR, "[CharacterSheet.TryGetMovieClip] Error:\n%s", result[2])
 		return nil
@@ -105,6 +112,7 @@ end
 ---@return FlashMovieClip,FlashArray,integer
 CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 	local listHolder = nil
+	local arrayName = nil
 	--[[ if StringHelpers.IsNullOrWhitespace(entry.ListHolder) then
 		if entry.StatType == "PrimaryStat" then
 			entry.ListHolder = "primaryStatList"
@@ -128,9 +136,9 @@ CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 			entry.ListHolder = "talentHolder_mc"
 		end
 	end ]]
-	if entry.StatType == "PrimaryStat" then
+	if entry.StatType == SheetManager.StatType.PrimaryStat then
 		listHolder = "primaryStatList"
-	elseif entry.StatType == "SecondaryStat" then
+	elseif entry.StatType == SheetManager.StatType.SecondaryStat then
 		if entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Info then
 			listHolder = "infoStatList"
 		elseif entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Stat then
@@ -140,16 +148,19 @@ CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 		elseif entry.SecondaryStatType == SheetManager.Stats.Data.SecondaryStatType.Experience then
 			listHolder = "expStatList"
 		end
-	elseif entry.StatType == "Ability" then
+	elseif entry.StatType == SheetManager.StatType.Ability then
 		if entry.IsCivil then
 			listHolder = "civicAbilityHolder_mc"
 		else
 			listHolder = "combatAbilityHolder_mc"
 		end
-	elseif entry.StatType == "Talent" then
+	elseif entry.StatType == SheetManager.StatType.Talent then
 		listHolder = "talentHolder_mc"
+	elseif entry.StatType == SheetManager.StatType.Custom then
+		listHolder = "customStats_mc"
+		arrayName = "stats_array"
 	end
-	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.GroupID)
+	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.GroupID, arrayName)
 end
 
 local function debugExportStatArrays(this)
@@ -708,8 +719,9 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 	local this = CharacterSheet.Root
 	if this and this.isExtended then
 		local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
-		local defaultCanAdd = (entry.UsePoints and points > 0) or GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
-		local defaultCanRemove = entry.UsePoints and GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
+		local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
+		local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
+		local defaultCanRemove = entry.UsePoints and isGM
 
 		this = this.stats_mc
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
@@ -754,6 +766,28 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 					this.talentHolder_mc.list.positionElements()
 				else
 					this.mainpanel_mc.stats_mc.talents_mc.updateDone()
+				end
+			elseif entry.StatType == SheetManager.StatType.Custom then
+				--TODO Refactor into general SheetManager functions
+				local ui = CharacterSheet.Instance
+				local visible = CustomStatSystem:GetStatVisibility(ui, entry.Double, entry, character)
+				if visible then
+					local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
+					local plusVisible = CustomStatSystem:GetCanAddPoints(ui, entry.Double, character, entry)
+					local minusVisible = CustomStatSystem:GetCanRemovePoints(ui, entry.Double, character, entry)
+
+					mc.setValue(value)
+
+					if entry.DisplayMode == "Percentage" then
+						mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
+					elseif value > CustomStatSystem.MaxVisibleValue then
+						mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
+					end
+
+					mc.plus_mc.visible = plusVisible
+					mc.minus_mc.visible = minusVisible
+					mc.edit_mc.visible = not mc.isCustom and isGM
+					mc.delete_mc.visible = not mc.isCustom and isGM
 				end
 			end
 		end

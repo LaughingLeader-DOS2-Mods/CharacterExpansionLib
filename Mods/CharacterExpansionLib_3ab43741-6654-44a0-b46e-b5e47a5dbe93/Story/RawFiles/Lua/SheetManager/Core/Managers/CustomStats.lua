@@ -70,7 +70,6 @@ CustomStatSystem.Categories = {}
 CustomStatSystem.Stats = {}
 CustomStatSystem.UnregisteredStats = {}
 
-Ext.Require("SheetManager/Core/Managers/CustomStats/PointChangeSyncing.lua")
 ---@type fun():table<string, table<string, SheetCustomStatData>>
 local loader = Ext.Require("SheetManager/Core/Managers/CustomStats/ConfigLoader.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/Getters.lua")

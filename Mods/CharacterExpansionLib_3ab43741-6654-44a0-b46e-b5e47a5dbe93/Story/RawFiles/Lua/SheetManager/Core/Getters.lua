@@ -10,13 +10,13 @@ local isClient = Ext.IsClient()
 function SheetManager:GetEntryByID(id, mod, statType)
 	local targetTable = nil
 	if statType then
-		if statType == "Stat" or statType == "Stats" or statType == "PrimaryStat" or statType == "SecondaryStat" then
+		if statType == "Stat" or statType == "Stats" or statType == self.StatType.PrimaryStat or statType == self.StatType.SecondaryStat then
 			targetTable = self.Data.Stats
-		elseif statType == "Ability" or statType == "Abilities" then
+		elseif statType == self.StatType.Ability or statType == "Abilities" then
 			targetTable = self.Data.Abilities
-		elseif statType == "Talent" or statType == "Talents" then
+		elseif statType == self.StatType.Talent or statType == "Talents" then
 			targetTable = self.Data.Talents
-		elseif statType == "CustomStats" then
+		elseif statType == self.StatType.Custom or statType == "CustomStats" then
 			return SheetManager.CustomStats:GetStatByID(id, mod)
 		end
 	end

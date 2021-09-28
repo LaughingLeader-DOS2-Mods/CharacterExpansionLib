@@ -218,7 +218,9 @@ else
 		if data then
 			local characterId = GameHelpers.GetCharacterID(data.NetID)
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
+			print(cmd, stat, characterId, data.ID, data.Mod, data.StatType)
 			if characterId and stat then
+				--TODO CustomStat support
 				if data.IsGameMaster or not stat.UsePoints then
 					SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
 					SheetManager:SyncData(characterId)

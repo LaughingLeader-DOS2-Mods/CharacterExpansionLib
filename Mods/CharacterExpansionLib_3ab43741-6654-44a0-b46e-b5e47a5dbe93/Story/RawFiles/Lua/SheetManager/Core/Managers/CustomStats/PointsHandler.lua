@@ -150,26 +150,7 @@ function CustomStatSystem:SetStat(character, stat, value, ...)
 		local mod = table.unpack({...}) or ""
 		stat = self:GetStatByID(stat, mod)
 	end
-	if not isClient then
-		if type(character) ~= "userdata" then
-			character = GameHelpers.GetCharacter(character)
-		end
-		
-		assert(character ~= nil, string.format("Character is nil!"))
-		assert(stat ~= nil, string.format("stat is nil!"))
-
-		if self:GMStatsEnabled() then
-			if StringHelpers.IsNullOrWhitespace(stat.UUID) then
-				stat.UUID = Ext.CreateCustomStat(stat.DisplayName, stat.Description)
-			end
-			character:SetCustomStat(stat.UUID, value)
-		else
-			SheetManager.Save.SetEntryValue(character, stat, value)
-		end
-		return true
-	else
-		self:RequestValueChange(character, stat.ID, value, stat.Mod)
-	end
+	SheetManager:SetEntryValue(stat, character, value)
 end
 
 ---@param character EsvCharacter|UUID|NETID

@@ -21,7 +21,16 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
 	if isInCharacterCreation then
 		if not isClient then
-			SheetManager.Save.SetEntryValue(characterId, stat, value)
+			if stat.StatType ~= SheetManager.StatType.Custom or not CustomStatSystem:GMStatsEnabled() then
+				SheetManager.Save.SetEntryValue(characterId, stat, value)
+			else
+				if StringHelpers.IsNullOrWhitespace(stat.UUID) then
+					stat.UUID = Ext.CreateCustomStat(stat.DisplayName, stat.Description)
+				end
+				if StringHelpers.IsNullOrWhitespace(stat.UUID) then
+					character:SetCustomStat(stat.UUID, value)
+				end
+			end
 		else
 			self:RequestValueChange(stat, characterId, value, true)
 		end
@@ -51,10 +60,30 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			if isClient then
 				self:RequestValueChange(stat, characterId, value, false)
 			else
-				SheetManager.Save.SetEntryValue(characterId, stat, value)
+				if stat.StatType ~= SheetManager.StatType.Custom or not CustomStatSystem:GMStatsEnabled() then
+					SheetManager.Save.SetEntryValue(characterId, stat, value)
+				else
+					if StringHelpers.IsNullOrWhitespace(stat.UUID) then
+						stat.UUID = Ext.CreateCustomStat(stat.DisplayName, stat.Description)
+					end
+					if StringHelpers.IsNullOrWhitespace(stat.UUID) then
+						character:SetCustomStat(stat.UUID, value)
+					end
+				end
 			end
 		end
+
+		if stat.StatType == SheetManager.StatType.Custom then
+			stat:UpdateLastValue(character)
+		end
+
 		if not skipListenerInvoke then
+			value = stat:GetValue(character)
+
+			if stat.StatType == SheetManager.StatType.Custom then
+				CustomStatSystem:InvokeStatValueChangedListeners(stat, character, last, value)
+			end
+
 			for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
 				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
 				if not b then
@@ -73,7 +102,8 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 				end
 			end
 		end
-		if not skipSync and not isClient then
+		print(skipSync, isClient, stat.StatType)
+		if skipSync ~= true and not isClient then
 			Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
 				ID = stat.ID,
 				Mod = stat.Mod,
