@@ -22,6 +22,10 @@ if not TalentManager then
 	TalentManager = SheetManager.Talents
 end
 
+if not Mods.LeaderLib.TalentManager then
+	Mods.LeaderLib.TalentManager = SheetManager.Talents
+end
+
 SheetManager.Talents.Data.TalentState = {
 	Selected = 0,
 	Selectable = 2,

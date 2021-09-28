@@ -88,6 +88,10 @@ if not AbilityManager then
 	AbilityManager = SheetManager.Abilities
 end
 
+if not Mods.LeaderLib.AbilityManager then
+	Mods.LeaderLib.AbilityManager = SheetManager.Abilities
+end
+
 function SheetManager.Abilities.EnableAbility(abilityName, modID)
 	if StringHelpers.Equals(abilityName, "all", true) then
 		for ability,v in pairs(missingAbilities) do

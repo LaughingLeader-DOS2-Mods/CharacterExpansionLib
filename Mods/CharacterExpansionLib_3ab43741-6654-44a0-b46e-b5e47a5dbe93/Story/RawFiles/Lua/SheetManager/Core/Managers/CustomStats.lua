@@ -3,6 +3,10 @@ if CustomStatSystem == nil then
 	CustomStatSystem = {}
 end
 
+if not Mods.LeaderLib.CustomStatSystem then
+	Mods.LeaderLib.CustomStatSystem = CustomStatSystem
+end
+
 CustomStatSystem.__index = CustomStatSystem
 CustomStatSystem.Loaded = false
 CustomStatSystem.MISC_CATEGORY = 99999
