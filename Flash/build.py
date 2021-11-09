@@ -5,6 +5,7 @@ from typing import Dict,List
 import re
 import subprocess
 from alive_progress import alive_bar
+import winsound
 
 script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(script_dir)
@@ -28,7 +29,7 @@ DOS2DE_PUBLIC = DOS2.joinpath("DefEd/Data/Public/")
 OUTPUT = DOS2DE_PUBLIC.joinpath("CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/Overrides/")
 
 targets = [
-    #"characterCreation",
+    "characterCreation",
     "characterSheet",
     # "statsPanel_c",
     # "characterCreation_c",
@@ -110,7 +111,10 @@ with alive_bar(len(script_data)) as bar:
         exitCode = process.returncode
         if exitCode != 0:
             print("Error compiling {}({}):\n{}.".format(data.ID, exitCode, process.communicate()))
+            winsound.Beep(220, 800)
         else:
             print("Successfully recompiled {}.".format(data.ID))
+            winsound.Beep(440, 500)
         bar()
+
 print("All done.")
