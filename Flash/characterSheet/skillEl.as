@@ -16,7 +16,8 @@ package
 		public var dragTreshHold:uint;
 		public var mousePosDown:Point;
 		public var _canBeRemoved:Boolean;
-		
+		public var type:String = "Skill";
+
 		public function skillEl()
 		{
 			super();

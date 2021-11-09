@@ -12,6 +12,7 @@ package
 		public var value_txt:TextField;
 		public var root_mc:MovieClip;
 		public var abilities:listDisplay;
+		public var type:String = "AbilityGroup";
 		
 		public function abilityGroup()
 		{

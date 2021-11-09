@@ -24,7 +24,7 @@ package
 		public var base:MovieClip;
 		public var tooltip:String;
 		public var statID:Number; // Double handle
-		public var statType:String = "CustomStat";
+		public var type:String = "CustomStat";
 
 		//CharacterExpansionLib
 		public var am:Number; // The stat's value

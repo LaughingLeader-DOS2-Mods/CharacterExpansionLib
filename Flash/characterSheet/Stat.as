@@ -24,7 +24,7 @@ package
 		public var callbackStr:String = "showStatTooltip";
 		public var isCustom:Boolean = false;
 		public var hasCustomIcon:Boolean = false;
-		public var statType:String = "PrimaryStat";
+		public var type:String = "PrimaryStat";
 
 		public function MakeCustom(statID:Number, b:Boolean=true) : *
 		{

@@ -21,7 +21,7 @@ package
 		public var statID:Number;
 		public var callbackStr:String = "showTalentTooltip";
 		public var isCustom:Boolean = false;
-		public var statType:String = "Talent";
+		public var type:String = "Talent";
 
 		public function MakeCustom(statID:Number, b:Boolean=true) : *
 		{
@@ -76,8 +76,6 @@ package
 			this.hl_mc.alpha = 0;
 			this.hl_mc.height = 24;
 			this.label_txt.mouseEnabled = false;
-			// this.minus_mc.callbackStr = "minusTalent";
-			// this.plus_mc.callbackStr = "plusTalent";
 		}
 	}
 }

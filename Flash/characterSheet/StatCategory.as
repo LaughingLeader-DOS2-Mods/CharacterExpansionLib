@@ -15,6 +15,7 @@ package
 		public var hidePoints:Boolean;
 		public var texty:Number;
 		public var groupName:String = "";
+		public var type:String = "StatCategory";
 		
 		public function StatCategory()
 		{

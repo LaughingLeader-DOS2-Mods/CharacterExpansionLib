@@ -25,6 +25,7 @@ package
 		public var tooltip:Number; // The tooltip ID
 		public var callbackStr:String = "showStatTooltip";
 		public var isCustom:Boolean = false;
+		public var type:String = "PrimaryStat";
 
 		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
@@ -79,7 +80,6 @@ package
 		public function attributeEntry()
 		{
 			super();
-			addFrameScript(0,this.frame1);
 		}
 		
 		public function onInit(param1:MovieClip, param2:Function, param3:Function) : *
@@ -90,6 +90,8 @@ package
 			this.title_txt.autoSize = TextFieldAutoSize.LEFT;
 			this.plus_mc.init(param2,this);
 			this.min_mc.init(param3,this);
+			this.hit_mc.addEventListener(MouseEvent.ROLL_OVER,this.onHover);
+			this.hit_mc.addEventListener(MouseEvent.ROLL_OUT,this.onOut);
 		}
 		
 		public function onHover(e:MouseEvent) : *
@@ -122,12 +124,6 @@ package
 			this.hit_mc.x = -30;
 			this.hit_mc.width = this.icon_mc.width + this.value_txt.x + this.value_txt.width;
 			this.hit_mc.height = 27;
-		}
-		
-		public function frame1() : *
-		{
-			this.hit_mc.addEventListener(MouseEvent.ROLL_OVER,this.onHover);
-			this.hit_mc.addEventListener(MouseEvent.ROLL_OUT,this.onOut);
 		}
 	}
 }

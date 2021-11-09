@@ -30,7 +30,7 @@ package
 		public var isCustom:Boolean = false;
 		public var hasCustomIcon:Boolean = false;
 		public var customIcon_mc:IggyIcon;
-		public var statType:String = "SecondaryStat";
+		public var type:String = "SecondaryStat";
 
 		public function MakeCustom(statID:Number, b:Boolean=true) : *
 		{
@@ -56,7 +56,7 @@ package
 			addFrameScript(0,this.frame1);
 		}
 		
-		public function setupButtons(param1:Boolean, minusVisible:Boolean, plusVisible:Boolean, maxChars:Number = 5) : void
+		public function setupButtons(showBoth:Boolean, minusVisible:Boolean, plusVisible:Boolean, maxChars:Number = 5) : void
 		{
 			if(minusVisible || plusVisible)
 			{
@@ -73,7 +73,7 @@ package
 			}
 			this.minus_mc.visible = minusVisible;
 			this.plus_mc.visible = plusVisible;
-			if(param1)
+			if(showBoth)
 			{
 				this.plus_mc.x = 242;
 				this.hl_mc.width = 264;

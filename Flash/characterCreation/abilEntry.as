@@ -15,7 +15,7 @@ package
 		public var min_mc:minusButton;
 		public var plus_mc:plusButton;
 		public var value_txt:TextField;
-		public const headerColor = 10588810;
+		public const headerColor:uint = 10588810;
 		public var root_mc:MovieClip;
 		public var isAltered:Boolean;
 		public var value:uint;
@@ -24,6 +24,7 @@ package
 		public var statID:Number;
 		public var callbackStr:String = "showAbilityTooltip";
 		public var isCustom:Boolean = false;
+		public var type:String = "Ability";
 
 		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
@@ -46,7 +47,6 @@ package
 		public function abilEntry()
 		{
 			super();
-			addFrameScript(0,this.frame1);
 		}
 		
 		public function onInit(mainTimeline:MovieClip, pointAddedFunc:Function, pointRemovedFunc:Function) : *
@@ -85,7 +85,5 @@ package
 		{
 			ExternalInterface.call("hideTooltip");
 		}
-		
-		public function frame1() : * {}
 	}
 }
