@@ -22,6 +22,29 @@ SheetAbilityData.__index = function(t,k)
 	return v
 end
 
+SheetAbilityData.PropertyMap = {
+	ISCIVIL = {Name="IsCivil", Type = "boolean"},
+	GROUPID = {Name="GroupID", Type = "enum", Parse = function(val,t)
+		if t == "string" then
+			local id = string.lower(val)
+			for k,v in pairs(SheetManager.Abilities.Data.GroupID) do
+				if string.lower(k) == id then
+					return v
+				end
+			end
+		elseif t == "number" then
+			local id = SheetManager.Abilities.Data.GroupID[val]
+			if id then
+				return val
+			end
+		end
+		--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Ability GroupID. Using default.", t, val)
+		return SheetManager.Abilities.Data.GroupID.Skills
+	end},
+}
+
+TableHelpers.AddOrUpdate(SheetAbilityData.PropertyMap, Classes.SheetBaseData.PropertyMap, true)
+
 local defaults = {
 	GroupID = 0,
 	IsCivil = false,

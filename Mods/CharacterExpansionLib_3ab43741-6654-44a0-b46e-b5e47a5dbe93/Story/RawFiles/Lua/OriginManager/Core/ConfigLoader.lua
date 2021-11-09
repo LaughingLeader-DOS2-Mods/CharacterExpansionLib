@@ -46,7 +46,7 @@ local statPropertyMap = {
 				end
 			end
 		else
-			fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property StatType.", t, val)
+			--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property StatType.", t, val)
 		end
 		return SheetManager.Stats.Data.StatType.Secondary
 	end},
@@ -64,7 +64,7 @@ local statPropertyMap = {
 				return id
 			end
 		end
-		fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Stat StatType. Using default.", t, val)
+		--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Stat StatType. Using default.", t, val)
 		return SheetManager.Stats.Data.SecondaryStatType.Info
 	end},
 	SHEETICON = {Name="SheetIcon", Type = "string"},
@@ -94,7 +94,7 @@ local abilityPropertyMap = {
 				return val
 			end
 		end
-		fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Ability GroupID. Using default.", t, val)
+		--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Ability GroupID. Using default.", t, val)
 		return SheetManager.Abilities.Data.GroupID.Skills
 	end},
 }
@@ -124,7 +124,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 									data[propData.Name] = value
 								end
 							else
-								fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 							end
 						end
 					end
@@ -141,7 +141,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 								data[propData.Name] = value
 							end
 						else
-							fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+							--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 						end
 					end
 				end

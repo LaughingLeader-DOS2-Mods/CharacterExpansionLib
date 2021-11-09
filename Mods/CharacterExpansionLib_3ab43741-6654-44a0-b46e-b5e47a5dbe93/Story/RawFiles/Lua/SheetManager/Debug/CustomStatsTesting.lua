@@ -17,10 +17,10 @@ if Vars.DebugMode then
 		"RNGesus"
 	}
 	CustomStatSystem:RegisterAvailablePointsChangedListener("All", function(id, stat, character, previousPoints, currentPoints, isClientSide)
-		fprint(LOGLEVEL.DEFAULT, "[OnAvailablePointsChanged:%s] Stat(%s) Character(%s) %s => %s [%s]", id, stat.UUID, character.DisplayName, previousPoints, currentPoints, isClientSide and "CLIENT" or "SERVER")
+		--fprint(LOGLEVEL.DEFAULT, "[OnAvailablePointsChanged:%s] Stat(%s) Character(%s) %s => %s [%s]", id, stat.UUID, character.DisplayName, previousPoints, currentPoints, isClientSide and "CLIENT" or "SERVER")
 	end)
 	CustomStatSystem:RegisterStatValueChangedListener("All", function(id, stat, character, previousPoints, currentPoints, isClientSide)
-		fprint(LOGLEVEL.DEFAULT, "[OnStatValueChanged:%s] Stat(%s) Character(%s) %s => %s [%s]", id, stat.UUID, character.DisplayName, previousPoints, currentPoints, isClientSide and "CLIENT" or "SERVER")
+		--fprint(LOGLEVEL.DEFAULT, "[OnStatValueChanged:%s] Stat(%s) Character(%s) %s => %s [%s]", id, stat.UUID, character.DisplayName, previousPoints, currentPoints, isClientSide and "CLIENT" or "SERVER")
 	end)
 	if isClient then
 		CustomStatSystem:RegisterCanAddPointsHandler(specialStats, function(id, stat, character, current, availablePoints, canAdd)

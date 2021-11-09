@@ -218,7 +218,6 @@ else
 		if data then
 			local characterId = GameHelpers.GetCharacterID(data.NetID)
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
-			print(cmd, stat, characterId, data.ID, data.Mod, data.StatType)
 			if characterId and stat then
 				--TODO CustomStat support
 				if data.IsGameMaster or not stat.UsePoints then
@@ -288,7 +287,7 @@ if not isClient then
 			if PersistentVars.CharacterSheetValues[character.MyGuid] ~= nil then
 				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
 			end
-			fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
+			--fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
 			Ext.PostMessageToClient(character.MyGuid, "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
 			return true
 		else
@@ -311,7 +310,7 @@ if not isClient then
 					Ext.PostMessageToClient(user, "CEL_SheetManager_LoadSyncData", data)
 					return true
 				else
-					fprint(LOGLEVEL.ERROR, "[SheetManager:SyncData] Invalid type (%s)[%s] for user parameter.", t, user)
+					--fprint(LOGLEVEL.ERROR, "[SheetManager:SyncData] Invalid type (%s)[%s] for user parameter.", t, user)
 				end
 			end
 			Ext.BroadcastMessage("CEL_SheetManager_LoadSyncData", data)
@@ -333,7 +332,7 @@ else
 					for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[entry.ID], self.Listeners.OnEntryChanged.All) do
 						local b,err = xpcall(listener, debug.traceback, entry.ID, entry, character, last, value, isClient)
 						if not b then
-							fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", entry.ID, err)
+							--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", entry.ID, err)
 						end
 					end
 				end
@@ -363,7 +362,7 @@ else
 			assert(data.Values ~= nil, "Payload has no Values table.")
 			local lastValues = TableHelpers.Clone(self.CurrentValues[data.NetID] or {})
 			self.CurrentValues[data.NetID] = data.Values
-			fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
+			--fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
 
 			local character = Ext.GetCharacter(data.NetID)
 			if character then

@@ -6,8 +6,8 @@ UIOverrides = {
 	Files = {
 		characterSheet = {Source = "Public/Game/GUI/characterSheet.swf", Replacement = overridePath .. "characterSheet.swf"},
 		characterCreation = {Source = "Public/Game/GUI/characterCreation.swf", Replacement = overridePath .. "characterCreation.swf"},
-		statsPanel_c = {Source = "Public/Game/GUI/statsPanel_c.swf", Replacement = overridePath .. "statsPanel_c.swf"},
-		characterCreation_c = {Source = "Public/Game/GUI/characterCreation_c.swf", Replacement = overridePath .. "characterCreation_c.swf"},
+		--statsPanel_c = {Source = "Public/Game/GUI/statsPanel_c.swf", Replacement = overridePath .. "statsPanel_c.swf"},
+		--characterCreation_c = {Source = "Public/Game/GUI/characterCreation_c.swf", Replacement = overridePath .. "characterCreation_c.swf"},
 	},
 	Enable = function()
 		for k,v in pairs(UIOverrides.Files) do
@@ -59,7 +59,7 @@ Ext.RegisterConsoleCommand("contextRollTest", function()
         end)
         
         UI.ContextMenu.Register.EntryClickedListener(function(...)
-            fprint(LOGLEVEL.DEFAULT, "[ContextMenu.EntryClickedListener] %s", Lib.inspect({...}))
+            --fprint(LOGLEVEL.DEFAULT, "[ContextMenu.EntryClickedListener] %s", Lib.inspect({...}))
         end)
 
         registeredContextListeners = true

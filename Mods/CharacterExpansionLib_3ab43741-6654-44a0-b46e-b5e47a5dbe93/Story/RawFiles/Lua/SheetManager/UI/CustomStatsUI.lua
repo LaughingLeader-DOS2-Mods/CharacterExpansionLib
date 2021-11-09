@@ -113,7 +113,7 @@ end
 ---@param this CharacterSheetMainTimeline
 function CustomStatSystem.Update(ui, method, this)
 	CustomStatSystem:SetupGroups(ui, method)
-	local client = CustomStatSystem:GetCharacter(ui, this)
+	local client = CharacterSheet.GetCharacter()
 	
 	if CustomStatSystem:GMStatsEnabled() then
 		if client then
@@ -438,7 +438,7 @@ function CustomStatSystem:OnStatAdded(ui, call, doubleHandle, index)
 		for listener in self:GetListenerIterator(self.Listeners.StatAdded[stat.ID], self.Listeners.StatAdded.All) do
 			local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, stat_mc)
 			if not b then
-				fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointRemoved] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+				--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointRemoved] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 			end
 		end
 	else

@@ -165,7 +165,7 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 	for listener in self:GetListenerIterator(self.Listeners.CanAdd[entry.ID], self.Listeners.CanAdd.All) do
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
-			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsPlusVisible] Error calling CanAdd listener for entry (%s):\n%s", entry.ID, result)
+			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsPlusVisible] Error calling CanAdd listener for entry (%s):\n%s", entry.ID, result)
 		elseif type(result) == "boolean" then
 			bResult = result
 		end
@@ -188,7 +188,7 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 	for listener in self:GetListenerIterator(self.Listeners.CanRemove[entry.ID], self.Listeners.CanRemove.All) do
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
-			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsMinusVisible] Error calling CanRemove listener for entry (%s):\n%s", entry.ID, result)
+			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsMinusVisible] Error calling CanRemove listener for entry (%s):\n%s", entry.ID, result)
 		elseif type(result) == "boolean" then
 			bResult = result
 		end
@@ -216,7 +216,7 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 	for listener in self:GetListenerIterator(self.Listeners.IsEntryVisible[entry.ID], self.Listeners.IsEntryVisible.All) do
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
 		if not b then
-			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsEntryVisible] Error calling IsEntryVisible listener for entry (%s):\n%s", entry.ID, result)
+			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsEntryVisible] Error calling IsEntryVisible listener for entry (%s):\n%s", entry.ID, result)
 		elseif type(result) == "boolean" then
 			bResult = result
 		end

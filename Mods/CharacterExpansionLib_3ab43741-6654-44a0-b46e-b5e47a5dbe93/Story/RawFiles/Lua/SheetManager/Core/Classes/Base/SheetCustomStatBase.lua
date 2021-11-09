@@ -20,9 +20,23 @@ local SheetCustomStatBase = {
 	Icon = "",
 	IconWidth = 128,
 	IconHeight = 128,
+	---A generated ID assigned by the SheetManager, used to associate a stat in the UI with this data. In GM mode, this is also the double handle.
+	GeneratedID = -1,
 	ValueType = "number",
 }
 SheetCustomStatBase.__index = SheetCustomStatBase
+
+SheetCustomStatBase.PropertyMap = {
+	DISPLAYNAME = {Name="DisplayName", Type = "string"},
+	DESCRIPTION = {Name="Description", Type = "string"},
+	ICON = {Name="Icon", Type = "string"},
+	ICONWIDTH = {Name="IconWidth", Type = "number"},
+	ICONHEIGHT = {Name="IconHeight", Type = "number"},
+	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
+	SORTNAME = {Name="SortName", Type = "string"},
+	SORTVALUE = {Name="SortValue", Type = "number"},
+	LOADSTRINGKEY = {Name="LoadStringKey", Type = "boolean"},
+}
 
 local defaults = {
 	TooltipType = SheetCustomStatBase.TooltipType,
@@ -30,6 +44,7 @@ local defaults = {
 	Mod = SheetCustomStatBase.Mod,
 	DisplayName = SheetCustomStatBase.DisplayName,
 	Description = SheetCustomStatBase.Description,
+	GeneratedID = SheetCustomStatBase.GeneratedID,
 	Visible = SheetCustomStatBase.Visible,
 	SortValue = SheetCustomStatBase.SortValue,
 	SortName = SheetCustomStatBase.SortName,

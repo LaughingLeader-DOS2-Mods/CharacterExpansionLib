@@ -10,7 +10,6 @@ local function CreateTooltip(tooltipType, requestedUI, call, idOrCharacter, idOr
 		id = idOrOther
 		targetSide = "right"
 	end
-	print("CreateTooltip", tooltipType, requestedUI, call, idOrCharacter, idOrOther, id)
 	local ui = Ext.GetUIByType(Data.UIType.tooltip)
 	if ui then
 		local this = ui:GetRoot()

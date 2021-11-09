@@ -8,7 +8,10 @@ if SheetManager.Sync == nil then SheetManager.Sync = {} end
 ---@field Ability integer
 ---@field Civil integer
 ---@field Talent integer
+---@field Custom table<CUSTOMSTATID,integer>
 
+---Get points via SheetManager:GetAvailablePoints
+---@private
 ---@type table<UUID|NETID, SheetManagerAvailablePointsData>
 SheetManager.AvailablePoints = {}
 
@@ -24,6 +27,7 @@ function SheetManager.Sync.AvailablePoints(characterId)
 				data.Ability = CharacterGetAbilityPoints(player.MyGuid) or 0
 				data.Civil = CharacterGetCivilAbilityPoints(player.MyGuid) or 0
 				data.Talent = CharacterGetTalentPoints(player.MyGuid) or 0
+				data.Custom = PersistentVars.CustomStatAvailablePoints[player.MyGuid] or {}
 				SheetManager.AvailablePoints[player.MyGuid] = data
 				allPoints[player.NetID] = data
 			end
@@ -35,6 +39,7 @@ function SheetManager.Sync.AvailablePoints(characterId)
 			data.Ability = CharacterGetAbilityPoints(character.MyGuid) or 0
 			data.Civil = CharacterGetCivilAbilityPoints(character.MyGuid) or 0
 			data.Talent = CharacterGetTalentPoints(character.MyGuid) or 0
+			data.Custom = PersistentVars.CustomStatAvailablePoints[character.MyGuid] or {}
 			SheetManager.AvailablePoints[character.MyGuid] = data
 	
 			Ext.PostMessageToClient(character.MyGuid, "CEL_SheetManager_LoadAvailablePointsForCharacter", Ext.JsonStringify({
@@ -64,11 +69,15 @@ else
 		if data and data.NetID and data.Points then
 			SheetManager.AvailablePoints[data.NetID] = data.Points
 		end
+		--SheetManager.UI.CharacterSheet.Update(SheetManager.UI.CharacterSheet.Instance, "updateArraySystem", {Abilities = true, PrimaryStats = true, Civil = true, Talents = true, CustomStats = true})
+		SheetManager.UI.CharacterSheet.UpdateAllEntries()
 	end)
 	RegisterNetListener("CEL_SheetManager_LoadAllAvailablePoints", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			SheetManager.AvailablePoints = data
+
+			SheetManager.UI.CharacterSheet.UpdateAllEntries()
 		end
 	end)
 end

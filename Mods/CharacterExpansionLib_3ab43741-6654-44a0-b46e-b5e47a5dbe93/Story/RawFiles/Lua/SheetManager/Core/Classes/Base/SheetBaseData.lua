@@ -32,6 +32,20 @@ local SheetBaseData = {
 	BaseValue = 0,
 }
 
+SheetBaseData.PropertyMap = {
+	DISPLAYNAME = {Name="DisplayName", Type = "string"},
+	DESCRIPTION = {Name="Description", Type = "string"},
+	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
+	BASEVALUE = {Name="BaseValue", Type = "number"},
+	VISIBLE = {Name="Visible", Type = "boolean"},
+	SORTNAME = {Name="SortName", Type = "string"},
+	SORTVALUE = {Name="SortValue", Type = "number"},
+	LOADSTRINGKEY = {Name="LoadStringKey", Type = "boolean"},
+	BOOSTATTRIBUTE = {Name="BoostAttribute", Type = "string"},
+	SUFFIX = {Name="Suffix", Type = "string"},
+	USEPOINTS = {Name="UsePoints", Type = "boolean"},
+}
+
 local defaults = {
 	ID = SheetBaseData.ID,
 	Mod = SheetBaseData.Mod,
@@ -103,7 +117,7 @@ function SheetBaseData:GetBoostValue(character, fallback)
 	if character then
 		local value = character.Stats.DynamicStats[2][self.BoostAttribute]
 		if value == nil then
-			fprint(LOGLEVEL.ERROR, "[LeaderLib:SheetTalentData:GetValue] BoostAttribute(%s) for entry (%s) does not exist within StatCharacter!", self.BoostAttribute, self.ID)
+			--fprint(LOGLEVEL.ERROR, "[LeaderLib:SheetTalentData:GetValue] BoostAttribute(%s) for entry (%s) does not exist within StatCharacter!", self.BoostAttribute, self.ID)
 			return fallback
 		end
 		return value

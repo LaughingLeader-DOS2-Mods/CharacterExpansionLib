@@ -52,9 +52,9 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 					character.Stats.DynamicStats[2][stat.BoostAttribute] = value
 				end
 				local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
-				fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
+				--fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
 			else
-				fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
+				--fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
 			end
 		else
 			if isClient then
@@ -87,7 +87,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
 				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
 				if not b then
-					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:SetEntryValue] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+					--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:SetEntryValue] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 				end
 			end
 			if not isClient then
@@ -102,7 +102,6 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 				end
 			end
 		end
-		print(skipSync, isClient, stat.StatType)
 		if skipSync ~= true and not isClient then
 			Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
 				ID = stat.ID,

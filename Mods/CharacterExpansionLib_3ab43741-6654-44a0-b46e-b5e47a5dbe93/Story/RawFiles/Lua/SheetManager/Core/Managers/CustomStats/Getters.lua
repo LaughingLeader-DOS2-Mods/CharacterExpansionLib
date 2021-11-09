@@ -43,7 +43,7 @@ function CustomStatSystem:GetStatByID(id, mod)
 	if stat then
 		return stat
 	end
-	fprint(LOGLEVEL.WARNING, "[CustomStatSystem:GetStatByID] Failed to find stat for id(%s) and mod(%s)", id, mod or "")
+	--fprint(LOGLEVEL.WARNING, "[CustomStatSystem:GetStatByID] Failed to find stat for id(%s) and mod(%s)", id, mod or "")
 	return nil
 end
 
@@ -368,29 +368,6 @@ function CustomStatSystem:GetListenerIterator(...)
 	end
 end
 
-local function TryGetSheetCharacter(this)
-	if this.characterHandle ~= nil and not GameHelpers.Math.IsNaN(this.characterHandle) then
-		return Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle))
-	end
-end
-
----@return EclCharacter
-function CustomStatSystem:GetCharacter(ui, this)
-	if isClient then
-		ui = ui or Ext.GetUIByType(Data.UIType.characterSheet)
-		if ui then
-			this = this or ui:GetRoot()
-			if this then
-				local b,client = xpcall(TryGetSheetCharacter, debug.traceback, this)
-				if b and client ~= nil then
-					return client
-				end
-			end
-		end
-		return Client:GetCharacter()
-	end
-end
-
 if isClient then
 	---@private
 	function CustomStatSystem:GetStatVisibility(ui, doubleHandle, stat, character)
@@ -411,7 +388,7 @@ if isClient then
 						isVisible = result
 					end
 				else
-					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetStatVisibility] Error calling GetStatVisibility listener for stat (%s):\n%s", stat.ID, result)
+					--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetStatVisibility] Error calling GetStatVisibility listener for stat (%s):\n%s", stat.ID, result)
 				end
 			end
 			return isVisible

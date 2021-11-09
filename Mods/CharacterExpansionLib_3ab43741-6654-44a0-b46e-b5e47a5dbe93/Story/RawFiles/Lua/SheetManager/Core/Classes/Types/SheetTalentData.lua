@@ -21,6 +21,12 @@ SheetTalentData.__index = function(t,k)
 	return v
 end
 
+SheetTalentData.PropertyMap = {
+	ISRACIAL = {Name="IsRacial", Type = "boolean"},
+}
+
+TableHelpers.AddOrUpdate(SheetTalentData.PropertyMap, Classes.SheetBaseData.PropertyMap)
+
 local defaults = {
 	Icon = "",
 	IconWidth = SheetTalentData.IconWidth,

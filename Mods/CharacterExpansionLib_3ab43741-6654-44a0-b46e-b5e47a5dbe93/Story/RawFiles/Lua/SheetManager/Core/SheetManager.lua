@@ -43,6 +43,10 @@ SheetManager.Data = {
 	Talents = {},
 	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetStatData>>
 	Stats = {},
+	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetCustomStatData>>
+	CustomStats = {},
+	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetCustomStatCategoryData>>
+	CustomStatCategories = {},
 	ID_MAP = {
 		Abilities = {
 			NEXT_ID = 7999,
@@ -54,9 +58,19 @@ SheetManager.Data = {
 			NEXT_ID = 4999,
 			Entries = {}
 		},
-		---@type table<integer, SheetTalentData>
+		---@type table<integer, SheetStatData>
 		Stats = {
 			NEXT_ID = 1999,
+			Entries = {}
+		},
+		---@type table<integer, SheetCustomStatData>
+		CustomStats = {
+			NEXT_ID = -1,
+			Entries = {}
+		},
+		---@type table<integer, SheetCustomStatCategoryData>
+		CustomStatCategories = {
+			NEXT_ID = -1,
 			Entries = {}
 		},
 	}
@@ -68,34 +82,47 @@ local loader = Ext.Require("SheetManager/Core/ConfigLoader.lua")
 local function LoadData()
 	local b,data = xpcall(loader, debug.traceback)
 	if b and data then
-		for uuid,entryData in pairs(data) do
+		for modId,entryData in pairs(data) do
 
-			if not SheetManager.Data.Abilities[uuid] then
-				SheetManager.Data.Abilities[uuid] = entryData.Abilities or {}
+			if not SheetManager.Data.Abilities[modId] then
+				SheetManager.Data.Abilities[modId] = entryData.Abilities or {}
 			elseif entryData.Abilities then
-				TableHelpers.AddOrUpdate(SheetManager.Data.Abilities[uuid], entryData.Abilities)
+				TableHelpers.AddOrUpdate(SheetManager.Data.Abilities[modId], entryData.Abilities)
 			end
 
-			if not SheetManager.Data.Talents[uuid] then
-				SheetManager.Data.Talents[uuid] = entryData.Talents or {}
+			if not SheetManager.Data.Talents[modId] then
+				SheetManager.Data.Talents[modId] = entryData.Talents or {}
 			elseif entryData.Talents then
-				TableHelpers.AddOrUpdate(SheetManager.Data.Talents[uuid], entryData.Talents)
+				TableHelpers.AddOrUpdate(SheetManager.Data.Talents[modId], entryData.Talents)
 			end
 
-			if not SheetManager.Data.Stats[uuid] then
-				SheetManager.Data.Stats[uuid] = entryData.Stats or {}
+			if not SheetManager.Data.Stats[modId] then
+				SheetManager.Data.Stats[modId] = entryData.Stats or {}
 			elseif entryData.Stats then
-				TableHelpers.AddOrUpdate(SheetManager.Data.Stats[uuid], entryData.Stats)
+				TableHelpers.AddOrUpdate(SheetManager.Data.Stats[modId], entryData.Stats)
+			end
+
+			if not SheetManager.Data.CustomStats[modId] then
+				SheetManager.Data.CustomStats[modId] = entryData.CustomStats or {}
+			elseif entryData.Stats then
+				TableHelpers.AddOrUpdate(SheetManager.Data.CustomStats[modId], entryData.CustomStats)
+			end
+
+			if not SheetManager.Data.CustomStatCategories[modId] then
+				SheetManager.Data.CustomStatCategories[modId] = entryData.CustomStatCategories or {}
+			elseif entryData.Stats then
+				TableHelpers.AddOrUpdate(SheetManager.Data.CustomStatCategories[modId], entryData.CustomStatCategories)
 			end
 		end
-		
 	else
 		Ext.PrintError(data)
 	end
 
 	SheetManager.Talents.LoadRequirements()
 
-	--SheetManager.Talents.HideTalent("LoneWolf", ModuleUUID)
+	if not isClient then
+		--SheetManager.CustomStats.LoadUnregistered()
+	end
 
 	SheetManager.Loaded = true
 	InvokeListenerCallbacks(SheetManager.Listeners.Loaded, SheetManager)

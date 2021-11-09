@@ -27,6 +27,46 @@ SheetStatData.__index = function(t,k)
 	return v
 end
 
+SheetStatData.PropertyMap = {
+	STATTYPE = {Name="StatType", Type = "enum", Parse = function(val,t)
+		if t == "string" then
+			local id = string.lower(val)
+			for k,v in pairs(SheetManager.Stats.Data.StatType) do
+				if string.lower(k) == id then
+					return k
+				end
+			end
+		else
+			--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property StatType.", t, val)
+		end
+		return SheetManager.Stats.Data.StatType.Secondary
+	end},
+	SECONDARYSTATTYPE = {Name="SecondaryStatType", Type = "enum", Parse = function(val,t) 
+		if t == "string" then
+			local id = string.lower(val)
+			for k,v in pairs(SheetManager.Stats.Data.SecondaryStatType) do
+				if string.lower(k) == id then
+					return k
+				end
+			end
+		elseif t == "number" then
+			local id = SheetManager.Stats.Data.SecondaryStatTypeInteger[val]
+			if id then
+				return id
+			end
+		end
+		--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Stat StatType. Using default.", t, val)
+		return SheetManager.Stats.Data.SecondaryStatType.Info
+	end},
+	SHEETICON = {Name="SheetIcon", Type = "string"},
+	SHEETICONWIDTH = {Name="SheetIconWidth", Type = "number"},
+	SHEETICONHEIGHT = {Name="SheetIconHeight", Type = "number"},
+	SPACINGHEIGHT = {Name="SpacingHeight", Type = "number"},
+	FRAME = {Name="Frame", Type = "number"},
+}
+
+TableHelpers.AddOrUpdate(SheetStatData.PropertyMap, Classes.SheetBaseData.PropertyMap, true)
+
 local defaults = {
 	StatType = "Secondary",
 	SecondaryStatType = "Info",

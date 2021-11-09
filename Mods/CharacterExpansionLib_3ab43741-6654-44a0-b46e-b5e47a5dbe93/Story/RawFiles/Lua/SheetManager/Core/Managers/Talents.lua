@@ -535,7 +535,7 @@ function SheetManager.Talents.HasRequirements(player, id)
 					return false
 				end
 			else
-				fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager.Talents.HasRequirements] Error invoking requirement handler for talent [%s] modid[%s]", id, modid)
+				--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager.Talents.HasRequirements] Error invoking requirement handler for talent [%s] modid[%s]", id, modid)
 				Ext.PrintError(result)
 			end
 		end
@@ -794,7 +794,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 			local isRacial = SheetManager.Talents.Data.RacialTalents[talentId] ~= nil
 			local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
 			if hasTalent then 
-				fprint(LOGLEVEL.WARNING, "[%s] Name(%s) State(%s) hasTalent(%s) isChoosable(%s) isRacial(%s)", talentId, name, talentState, hasTalent, isChoosable, isRacial)
+				--fprint(LOGLEVEL.WARNING, "[%s] Name(%s) State(%s) hasTalent(%s) isChoosable(%s) isRacial(%s)", talentId, name, talentState, hasTalent, isChoosable, isRacial)
 			end
 
 			local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == SheetManager.Talents.Data.TalentState.Selectable))

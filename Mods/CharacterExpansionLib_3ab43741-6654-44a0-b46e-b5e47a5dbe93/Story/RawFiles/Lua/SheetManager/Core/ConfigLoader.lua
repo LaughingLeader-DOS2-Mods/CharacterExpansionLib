@@ -25,86 +25,6 @@ Format:
 }
 ]]
 
-local basePropertyMap = {
-	DISPLAYNAME = {Name="DisplayName", Type = "string"},
-	DESCRIPTION = {Name="Description", Type = "string"},
-	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
-	BASEVALUE = {Name="BaseValue", Type = "number"},
-	VISIBLE = {Name="Visible", Type = "boolean"},
-	SORTNAME = {Name="SortName", Type = "string"},
-	SORTVALUE = {Name="SortValue", Type = "number"},
-	LOADSTRINGKEY = {Name="LoadStringKey", Type = "boolean"},
-	BOOSTATTRIBUTE = {Name="BoostAttribute", Type = "string"},
-	SUFFIX = {Name="Suffix", Type = "string"},
-	ICON = {Name="Icon", Type = "string"},
-	ICONWIDTH = {Name="IconWidth", Type = "number"},
-	ICONHEIGHT = {Name="IconHeight", Type = "number"},
-	USEPOINTS = {Name="UsePoints", Type = "boolean"},
-}
-
-local statPropertyMap = {
-	STATTYPE = {Name="StatType", Type = "enum", Parse = function(val,t)
-		if t == "string" then
-			local id = string.lower(val)
-			for k,v in pairs(SheetManager.Stats.Data.StatType) do
-				if string.lower(k) == id then
-					return k
-				end
-			end
-		else
-			fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property StatType.", t, val)
-		end
-		return SheetManager.Stats.Data.StatType.Secondary
-	end},
-	SECONDARYSTATTYPE = {Name="SecondaryStatType", Type = "enum", Parse = function(val,t) 
-		if t == "string" then
-			local id = string.lower(val)
-			for k,v in pairs(SheetManager.Stats.Data.SecondaryStatType) do
-				if string.lower(k) == id then
-					return k
-				end
-			end
-		elseif t == "number" then
-			local id = SheetManager.Stats.Data.SecondaryStatTypeInteger[val]
-			if id then
-				return id
-			end
-		end
-		fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Stat StatType. Using default.", t, val)
-		return SheetManager.Stats.Data.SecondaryStatType.Info
-	end},
-	SHEETICON = {Name="SheetIcon", Type = "string"},
-	SHEETICONWIDTH = {Name="SheetIconWidth", Type = "number"},
-	SHEETICONHEIGHT = {Name="SheetIconHeight", Type = "number"},
-	SPACINGHEIGHT = {Name="SpacingHeight", Type = "number"},
-	FRAME = {Name="Frame", Type = "number"},
-}
-
-local talentPropertyMap = {
-	ISRACIAL = {Name="IsRacial", Type = "boolean"},
-}
-
-local abilityPropertyMap = {
-	ISCIVIL = {Name="IsCivil", Type = "boolean"},
-	GROUPID = {Name="GroupID", Type = "enum", Parse = function(val,t)
-		if t == "string" then
-			local id = string.lower(val)
-			for k,v in pairs(SheetManager.Abilities.Data.GroupID) do
-				if string.lower(k) == id then
-					return v
-				end
-			end
-		elseif t == "number" then
-			local id = SheetManager.Abilities.Data.GroupID[val]
-			if id then
-				return val
-			end
-		end
-		fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Ability GroupID. Using default.", t, val)
-		return SheetManager.Abilities.Data.GroupID.Skills
-	end},
-}
-
 local isClient = Ext.IsClient()
 
 local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
@@ -121,7 +41,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 					for property,value in pairs(defaults) do
 						if type(property) == "string" then
 							local propKey = string.upper(property)
-							local propData = propertyMap[propKey] or basePropertyMap[propKey]
+							local propData = propertyMap[propKey]
 							local t = type(value)
 							if propData then
 								if propData.Type == "enum" then
@@ -130,7 +50,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 									data[propData.Name] = value
 								end
 							else
-								fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 							end
 						end
 					end
@@ -138,7 +58,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 				for property,value in pairs(v) do
 					if type(property) == "string" then
 						local propKey = string.upper(property)
-						local propData = propertyMap[propKey] or basePropertyMap[propKey]
+						local propData = propertyMap[propKey]
 						local t = type(value)
 						if propData then
 							if propData.Type == "enum" then
@@ -147,12 +67,16 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 								data[propData.Name] = value
 							end
 						else
-							fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+							--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 						end
 					end
 				end
-				id_map.NEXT_ID = id_map.NEXT_ID + 1
-				data.GeneratedID = id_map.NEXT_ID
+				if id_map then
+					id_map.NEXT_ID = id_map.NEXT_ID + 1
+					data.GeneratedID = id_map.NEXT_ID
+					id_map.Entries[data.GeneratedID] = data
+				end
+
 				if class then
 					if class.SetDefaults then
 						class.SetDefaults(data)
@@ -160,7 +84,6 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 					setmetatable(data, class)
 				end
 				tableData[k] = data
-				id_map.Entries[data.GeneratedID] = data
 			end
 		end
 	end
@@ -170,22 +93,36 @@ end
 local function LoadConfig(uuid, file)
 	local config = Common.JsonParse(file)
 	local loaded = {}
-	local statDefaults,talentDefaults,abilityDefaults = nil,nil,nil
+	local defaults = {
+		Stats = nil,
+		Abilities = nil,
+		Talents = nil,
+		CustomStats = nil,
+		CustomStatCategories = nil
+	}
 	if config ~= nil then
 		if config.Defaults then
 			if config.Defaults.Stats then
-				statDefaults = config.Defaults.Stats
+				defaults.Stats = config.Defaults.Stats
 			end
 			if config.Defaults.Abilities then
-				abilityDefaults = config.Defaults.Abilities
+				defaults.Abilities = config.Defaults.Abilities
 			end
 			if config.Defaults.Talents then
-				talentDefaults = config.Defaults.Talents
+				defaults.Talents = config.Defaults.Talents
+			end
+			if config.Defaults.CustomStats then
+				defaults.CustomStats = config.Defaults.CustomStats
+			end
+			if config.Defaults.CustomStatCategories then
+				defaults.CustomStatCategories = config.Defaults.CustomStatCategories
 			end
 		end
-		local stats = parseTable(config.Stats, statPropertyMap, uuid, statDefaults, Classes.SheetStatData, SheetManager.Data.ID_MAP.Stats)
-		local talents = parseTable(config.Talents, talentPropertyMap, uuid, talentDefaults, Classes.SheetTalentData, SheetManager.Data.ID_MAP.Talents)
-		local abilities = parseTable(config.Abilities, abilityPropertyMap, uuid, abilityDefaults, Classes.SheetAbilityData, SheetManager.Data.ID_MAP.Abilities)
+		local stats = parseTable(config.Stats, Classes.SheetStatData.PropertyMap, uuid, defaults.Stats, Classes.SheetStatData, SheetManager.Data.ID_MAP.Stats)
+		local abilities = parseTable(config.Abilities, Classes.SheetAbilityData.PropertyMap, uuid, defaults.Abilities, Classes.SheetAbilityData, SheetManager.Data.ID_MAP.Abilities)
+		local talents = parseTable(config.Talents, Classes.SheetTalentData.PropertyMap, uuid, defaults.Talents, Classes.SheetTalentData, SheetManager.Data.ID_MAP.Talents)
+		local customStats = parseTable(config.CustomStats, Classes.SheetCustomStatData.PropertyMap, uuid, defaults.CustomStats, Classes.SheetCustomStatData, SheetManager.Data.ID_MAP.CustomStats)
+		local categories = parseTable(config.CustomStatCategories, Classes.SheetCustomStatCategoryData.PropertyMap, uuid, defaults.CustomStatCategories, Classes.SheetCustomStatCategoryData, SheetManager.Data.ID_MAP.CustomStatCategories)
 
 		if stats then
 			loaded.Stats = stats
@@ -197,6 +134,14 @@ local function LoadConfig(uuid, file)
 		end
 		if abilities then
 			loaded.Abilities = abilities
+			loaded.Success = true
+		end
+		if customStats then
+			loaded.CustomStats = customStats
+			loaded.Success = true
+		end
+		if categories then
+			loaded.CustomStatCategories = categories
 			loaded.Success = true
 		end
 	end

@@ -40,13 +40,14 @@ end
 ---@return SheetAbilityData|SheetStatData|SheetTalentData
 function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	if statType then
-		if statType == "Stat" or statType == "PrimaryStat" or statType == "SecondaryStat" then
+		if statType == "Stat" or statType == "PrimaryStat" or statType == "SecondaryStat" or statType == "InfoStat" then
 			return self.Data.ID_MAP.Stats.Entries[generatedId]
 		elseif statType == "Ability" then
 			return self.Data.ID_MAP.Abilities.Entries[generatedId]
 		elseif statType == "Talent" then
 			return self.Data.ID_MAP.Talents.Entries[generatedId]
 		end
+		return nil
 	end
 	for t,tbl in pairs(self.Data.ID_MAP) do
 		for checkId,data in pairs(tbl.Entries) do
@@ -145,8 +146,24 @@ end
 
 ---@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
 ---@param pointType AvailablePointsType
-function SheetManager:GetAvailablePoints(characterId, pointType)
+---@param customStatPointsID CUSTOMSTATID|nil If pointType is "Custom", this is the point ID.
+function SheetManager:GetAvailablePoints(characterId, pointType, customStatPointsID)
 	characterId = GameHelpers.GetCharacterID(characterId)
+
+	if pointType == "Custom" then
+		if isClient then
+			assert(not StringHelpers.IsNullOrWhitespace(customStatPointsID), "Param customStatPointsID needs to be a valid string (not empty/whitespace).")
+			if SheetManager.AvailablePoints[characterId] and SheetManager.AvailablePoints[characterId].Custom then
+				return SheetManager.AvailablePoints[characterId].Custom[customStatPointsID] or 0
+			end
+		else
+			local data = PersistentVars.CustomStatAvailablePoints[characterId]
+			if data then
+				return data[customStatPointsID] or 0
+			end
+		end
+		return 0
+	end
 
 	local sessionData = SheetManager.SessionManager:GetSession(characterId)
 	if sessionData then

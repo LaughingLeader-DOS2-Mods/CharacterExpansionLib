@@ -35,7 +35,7 @@ local ContentTypeLength = {
 local function GetContentLength(arr, contentTypeEnum, contentStartIndex)
 	local length = 3
 	local contentType = ContentType[contentTypeEnum]
-	fprint("[GetContentLength] type(%s) name(%s)", contentTypeEnum, contentType)
+	--fprint("[GetContentLength] type(%s) name(%s)", contentTypeEnum, contentType)
 	if contentType then
 		if contentType ~= "List" then
 			return length + ContentTypeLength[Vars.ControllerEnabled][contentType],contentType
@@ -208,14 +208,12 @@ local function SetSkills(self, ui, event)
 		local i = 0
 		for _,v in pairs(skills) do
 			local icon = Ext.StatGetAttribute(v, "Icon")
-			print(i, v, icon)
 			if not StringHelpers.IsNullOrWhitespace(icon) then
 				ui:SetCustomIcon(string.format("cel_racial%i", i), icon, this.iconSize, this.iconSize)
 			end
 			this.racialSkills[i] = v
 			i = i + 1
 		end
-		print(Lib.serpent.block(skills))
 	end
 end
 

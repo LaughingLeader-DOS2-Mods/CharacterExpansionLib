@@ -62,7 +62,7 @@ local function setAvailablePointsHandler(data)
 		if characterData then
 			return math.max(characterData[pointId] or 0, characterData[data.ID] or 0)
 		end
-		--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatsData:AvailablePoints] Failed to fetch available points for id (%s) and character(%s). Context(%s).", pointId, uuid, isClient and "CLIENT" or "SERVER")
+		----fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatsData:AvailablePoints] Failed to fetch available points for id (%s) and character(%s). Context(%s).", pointId, uuid, isClient and "CLIENT" or "SERVER")
 		return 0
 	end
 	AvailablePointsHandler.__newindex = function(table, characterId, value)
@@ -94,7 +94,7 @@ local function parseTable(tbl, propertyMap, modId, defaults)
 							if propData and (propData.Type == "any" or t == propData.Type) then
 								data[propData.Name] = value
 							else
-								fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:CustomStatsConfig] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:CustomStatsConfig] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 							end
 						end
 					end
@@ -107,7 +107,7 @@ local function parseTable(tbl, propertyMap, modId, defaults)
 						if propData and (propData.Type == "any" or t == propData.Type) then
 							data[propData.Name] = value
 						else
-							fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:CustomStatsConfig] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+							--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:CustomStatsConfig] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 						end
 					end
 				end

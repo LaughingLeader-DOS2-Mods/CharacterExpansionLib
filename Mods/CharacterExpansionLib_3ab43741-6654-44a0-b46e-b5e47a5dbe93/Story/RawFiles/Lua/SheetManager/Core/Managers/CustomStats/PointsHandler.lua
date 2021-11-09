@@ -29,7 +29,7 @@ end
 ---@param callback CustomStatCanAddPointsCallback
 function CustomStatSystem:RegisterCanAddPointsHandler(id, callback)
 	if not isClient then
-		fprint(LOGLEVEL.ERROR, "[CustomStatSystem:RegisterCanAddPointsHandler] This listener is only for the client-side. Stat(%s)", Common.Dump(id))
+		--fprint(LOGLEVEL.ERROR, "[CustomStatSystem:RegisterCanAddPointsHandler] This listener is only for the client-side. Stat(%s)", Common.Dump(id))
 		return
 	end
 	if type(id) == "table" then
@@ -45,7 +45,7 @@ end
 ---@param callback CustomStatCanRemovePointsCallback
 function CustomStatSystem:RegisterCanRemovePointsHandler(id, callback)
 	if not isClient then
-		fprint(LOGLEVEL.ERROR, "[CustomStatSystem:RegisterCanRemovePointsHandler] This listener is only for the client-side. Stat(%s)", Common.Dump(id))
+		--fprint(LOGLEVEL.ERROR, "[CustomStatSystem:RegisterCanRemovePointsHandler] This listener is only for the client-side. Stat(%s)", Common.Dump(id))
 		return
 	end
 	if type(id) == "table" then
@@ -86,7 +86,7 @@ function CustomStatSystem:InvokeStatValueChangedListeners(stat, character, last,
 	for listener in self:GetListenerIterator(self.Listeners.OnStatValueChanged[stat.ID], self.Listeners.OnStatValueChanged.All) do
 		local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, current, isClient)
 		if not b then
-			fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnStatValueChanged listener for stat (%s):\n%s", stat.ID, err)
+			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnStatValueChanged listener for stat (%s):\n%s", stat.ID, err)
 		end
 	end
 end
@@ -116,7 +116,7 @@ function CustomStatSystem:SetAvailablePoints(character, statId, amount, skipSync
 			end
 			self.PointsPool[characterId][statId] = amount
 			if Vars.DebugMode and amount ~= self.PointsPool[characterId][statId] then
-				fprint(LOGLEVEL.DEFAULT, "Set available points for custom stat or pool (%s) to (%s) for character(%s). Total(%s)", statId, amount, characterId, self.PointsPool[characterId][statId])
+				--fprint(LOGLEVEL.DEFAULT, "Set available points for custom stat or pool (%s) to (%s) for character(%s). Total(%s)", statId, amount, characterId, self.PointsPool[characterId][statId])
 			end
 			if not skipSync and not isClient then
 				-- If a save is loaded or the game is stopped, it'll get synced in the next SharedData cycle anyway
@@ -130,40 +130,6 @@ function CustomStatSystem:SetAvailablePoints(character, statId, amount, skipSync
 	end
 end
 
----@param character EsvCharacter|UUID|EclCharacter|NETID
----@param stat SheetCustomStatData
----@param amount integer The amount to modify the stat by.
-function CustomStatSystem:ModifyStat(character, stat, amount, ...)
-	if type(stat) == "string" then
-		local mod = table.unpack({...}) or ""
-		stat = self:GetStatByID(stat, mod)
-	end
-	local current = self:GetStatValueForCharacter(character, stat)
-	return self:SetStat(character, stat, current + amount)
-end
-
----@param character EsvCharacter|UUID|EclCharacter|NETID
----@param stat SheetCustomStatData
----@param value integer The value to set the stat to.
-function CustomStatSystem:SetStat(character, stat, value, ...)
-	if type(stat) == "string" then
-		local mod = table.unpack({...}) or ""
-		stat = self:GetStatByID(stat, mod)
-	end
-	SheetManager:SetEntryValue(stat, character, value)
-end
-
----@param character EsvCharacter|UUID|NETID
----@param statId string A stat id.
----@param value integer The value to set the stat to.
----@param mod string|nil A mod UUID to use when fetching the stat by ID.
-function CustomStatSystem:SetStatByID(character, statId, value, mod)
-	local stat = self:GetStatByID(statId, mod)
-	if stat then
-		self:SetStat(character, stat, value)
-	end
-end
-
 if not isClient then
 	RegisterNetListener("CEL_CustomStatSystem_AvailablePointsChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
@@ -174,7 +140,7 @@ if not isClient then
 				for listener in self:GetListenerIterator(self.Listeners.OnAvailablePointsChanged[stat.ID], self.Listeners.OnAvailablePointsChanged.All) do
 					local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, data.Last, data.Current, isClient)
 					if not b then
-						fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+						--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 					end
 				end
 			end
@@ -234,7 +200,7 @@ if not isClient then
 			self.PointsPool[characterId][pointId] = current + amount
 
 			if Vars.DebugMode then
-				fprint(LOGLEVEL.DEFAULT, "Added (%s) available points for custom stat (%s)[%s] to character(%s). Total(%s)", amount, statId, pointId, characterId, self.PointsPool[characterId][pointId])
+				--fprint(LOGLEVEL.DEFAULT, "Added (%s) available points for custom stat (%s)[%s] to character(%s). Total(%s)", amount, statId, pointId, characterId, self.PointsPool[characterId][pointId])
 			end
 
 			-- If a save is loaded or the game is stopped, it'll get synced in the next SharedData cycle anyway
@@ -304,7 +270,7 @@ function CustomStatSystem:GetCanAddPoints(ui, doubleHandle, character, stat)
 					canAdd = result
 				end
 			else
-				fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetAvailablePoints] Error calling CanAddPoints listener for stat (%s):\n%s", stat.ID, result)
+				--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetAvailablePoints] Error calling CanAddPoints listener for stat (%s):\n%s", stat.ID, result)
 			end
 		end
 		return canAdd
@@ -330,7 +296,7 @@ function CustomStatSystem:GetCanRemovePoints(ui, doubleHandle, character)
 						canRemove = result
 					end
 				else
-					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetAvailablePoints] Error calling CanRemovePoints listener for stat (%s):\n%s", stat.ID, result)
+					--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:GetAvailablePoints] Error calling CanRemovePoints listener for stat (%s):\n%s", stat.ID, result)
 				end
 			end
 			return canRemove
@@ -365,7 +331,7 @@ function CustomStatSystem:OnStatPointAdded(ui, call, doubleHandle)
 				for listener in self:GetListenerIterator(self.Listeners.OnAvailablePointsChanged[stat.ID], self.Listeners.OnAvailablePointsChanged.All) do
 					local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, lastPoints, points)
 					if not b then
-						fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+						--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 					end
 				end
 				Ext.PostMessageToServer("CEL_CustomStatSystem_AvailablePointsChanged", Ext.JsonStringify({
@@ -397,7 +363,7 @@ function CustomStatSystem:OnStatPointRemoved(ui, call, doubleHandle)
 			for listener in self:GetListenerIterator(self.Listeners.OnAvailablePointsChanged[stat.ID], self.Listeners.OnAvailablePointsChanged.All) do
 				local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, lastPoints, stat.AvailablePoints[character.NetID])
 				if not b then
-					fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointRemoved] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
+					--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointRemoved] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
 				end
 			end
 			Ext.PostMessageToServer("CEL_CustomStatSystem_AvailablePointsChanged", Ext.JsonStringify({

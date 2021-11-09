@@ -120,7 +120,7 @@ function SessionManager:ClearSession(character, skipSync)
 	character = GameHelpers.GetCharacter(character)
 	local characterId = GameHelpers.GetCharacterID(character)
 	SessionManager.Sessions[characterId] = nil
-	fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
+	--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
 	if skipSync ~= true and not isClient then
 		Ext.PostMessageToClient(character.MyGuid, "CEL_SessionManager_ClearCharacterData", character.NetID)
 	end
@@ -136,7 +136,7 @@ function SessionManager:ApplySession(character)
 		local characterId = character.MyGuid
 		local sessionData = self.Sessions[characterId]
 		if sessionData then
-			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData))
+			--fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData))
 			local currentPoints = {
 				Attribute = CharacterGetAttributePoints(characterId),
 				Ability = CharacterGetAbilityPoints(characterId),
