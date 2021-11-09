@@ -1,7 +1,7 @@
 if SheetManager.UI == nil then SheetManager.UI = {} end
 
 ---@class CharacterSheetWrapper:LeaderLibUIWrapper
-local CharacterSheet = Classes.UIWrapper:CreateFromType(Data.UIType.characterSheet, {ControllerID = Data.UIType.statsPanel_c, IsControllerSupported = true})
+local CharacterSheet = Classes.UIWrapper:CreateFromType(Data.UIType.characterSheet, {ControllerID = Data.UIType.statsPanel_c, IsControllerSupported = true, IsOpen = false})
 local self = CharacterSheet
 
 SheetManager.UI.CharacterSheet = CharacterSheet
@@ -326,6 +326,8 @@ local function SortLists(this)
 end
 
 local function GetArrayValues(this,baseChanges,modChanges)
+	local defaultCanAdd = this.isGameMasterChar
+	local defaultCanRemove = this.isGameMasterChar
 	local time = Ext.MonotonicTime()
 	local arr = this.primStat_array
 	for i=0,#arr-1,4 do
@@ -340,8 +342,6 @@ local function GetArrayValues(this,baseChanges,modChanges)
 				Value = arr[i+2],
 				TooltipID = arr[i+3],
 				Type = "PrimaryStat",
-				CanAdd = this.isGameMasterChar,
-				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -362,8 +362,6 @@ local function GetArrayValues(this,baseChanges,modChanges)
 					Frame = arr[i+5],
 					BoostValue = arr[i+6],
 					Type = "SecondaryStat",
-					CanAdd = this.isGameMasterChar,
-					CanRemove = this.isGameMasterChar
 				}
 			end
 		end
@@ -379,8 +377,6 @@ local function GetArrayValues(this,baseChanges,modChanges)
 			targetTable.Talents[id] = {
 				DisplayName = arr[i],
 				State = arr[i+2],
-				CanAdd = this.isGameMasterChar,
-				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -400,8 +396,6 @@ local function GetArrayValues(this,baseChanges,modChanges)
 				GroupID = arr[i+1],
 				AddPointsTooltip = arr[i+5],
 				RemovePointsTooltip = arr[i+6],
-				CanAdd = this.isGameMasterChar,
-				CanRemove = this.isGameMasterChar
 			}
 		end
 	end
@@ -485,12 +479,12 @@ local function ParseArrayValues(this, skipSort)
 		if entry.Type == "PrimaryStat" then
 			targetsUpdated.PrimaryStats = true
 			if not Vars.ControllerEnabled then
-				this.stats_mc.addPrimaryStat(id, entry.DisplayName, entry.Value, entry.TooltipID, entry.CanAdd, entry.CanRemove)
+				this.stats_mc.addPrimaryStat(id, entry.DisplayName, entry.Value, entry.TooltipID, entry.CanAdd or false, entry.CanRemove or false)
 			end
 		else
 			targetsUpdated.SecondaryStats = true
 			if not Vars.ControllerEnabled then
-				this.stats_mc.addSecondaryStat(entry.StatType, entry.DisplayName, entry.Value, id, entry.Frame or 0, entry.BoostValue, entry.CanAdd, entry.CanRemove)
+				this.stats_mc.addSecondaryStat(entry.StatType, entry.DisplayName, entry.Value, id, entry.Frame or 0, entry.BoostValue, entry.CanAdd or false, entry.CanRemove or false)
 			end
 		end
 	end
@@ -498,9 +492,15 @@ local function ParseArrayValues(this, skipSort)
 	for id,entry in pairs(modChanges.Talents) do
 		targetsUpdated.Talents = true
 		if not Vars.ControllerEnabled then
-			this.stats_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd, entry.CanRemove)
+			if entry.State == SheetManager.Talents.Data.TalentState.Selected then
+				entry.CanRemove = this.isGameMasterChar
+				entry.CanAdd = false
+			else
+				entry.CanRemove = false
+			end
+			this.stats_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd or false, entry.CanRemove or false)
 		else
-			this.mainpanel_mc.stats_mc.talents_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd, entry.CanRemove)
+			this.mainpanel_mc.stats_mc.talents_mc.addTalent(entry.DisplayName, id, entry.State, entry.CanAdd or false, entry.CanRemove or false)
 		end
 	end
 
@@ -511,7 +511,7 @@ local function ParseArrayValues(this, skipSort)
 			targetsUpdated.Abilities = true
 		end
 		if not Vars.ControllerEnabled then
-			this.stats_mc.addAbility(entry.IsCivil, entry.GroupID, id, entry.DisplayName, entry.Value, entry.AddPointsTooltip, entry.RemovePointsTooltip, entry.CanAdd, entry.CanRemove)
+			this.stats_mc.addAbility(entry.IsCivil, entry.GroupID, id, entry.DisplayName, entry.Value, entry.AddPointsTooltip, entry.RemovePointsTooltip, entry.CanAdd or false, entry.CanRemove or false)
 		end
 	end
 
@@ -668,7 +668,7 @@ function CharacterSheet.UpdateComplete(ui, method)
 		return
 	end
 
-	ParseArrayValues(this, false)
+	--ParseArrayValues(this, false)
 
 	this.justUpdated = false
 	targetsUpdated = {}
@@ -696,22 +696,46 @@ Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, "characterSheetUpdateDone", Cha
 
 --local mc = sheet.stats_mc.resistanceStatList.content_array[8]; print(mc.statID, mc.texts_mc.label_txt.htmlText)
 --for i=5,9 do local mc = sheet.stats_mc.resistanceStatList.content_array[i]; print(mc.statID, mc.texts_mc.label_txt.htmlText) end
-
---[[ Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", function(ui, call, isCustom, statID, listProperty, groupID)
-	--print(call, isCustom, statID, listProperty)
-	if isCustom then
-		local stat = SheetManager:GetEntryByGeneratedID(statID)
-		if stat then
-			stat.ListHolder = listProperty
-			-- local this = CharacterSheet.Root.stats_mc
-			-- local mc,arr,index = TryGetEntryMovieClip(stat, this)
-			-- if mc then
-			-- 	mc.customID = stat.ID
-			-- 	mc.customMod = stat.Mod
-			-- end
+local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
+	local this = ui:GetRoot().stats_mc
+	local list = this[listProperty]
+	if list then
+		if list.list then
+			list = list.list
+		end
+		local arr = nil
+		local mc = nil
+		if groupID ~= nil then
+			for i=0,#list.content_array-1 do
+				if list.content_array[i] and list.content_array[i].groupID == groupID then
+					arr = list.content_array[i].content_array
+					break
+				end
+			end
+		else
+			arr = list.content_array
+		end
+		if arr then
+			for i=0,#arr-1 do
+				if arr[i] and arr[i].statID == statID then
+					mc = arr[i]
+					break
+				end
+			end
+		end
+		if mc then
+			print(statID, Lib.serpent.block({
+				Type = mc.type or "nil",
+				name = mc.name,
+				["plus_mc.visible"] = mc.plus_mc == nil and "nil" or mc.plus_mc.visible,
+				["minus_mc.visible"] = mc.minus_mc == nil and "nil" or mc.minus_mc.visible,
+			}))
+		else
+			print(statID, "Failed to find movieclip")
 		end
 	end
-end) ]]
+end
+--Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 
 ---@param ui UIObject
 local function UpdateCharacterSheetPoints(ui, method, amount)
@@ -786,7 +810,7 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 		value = value or entry:GetValue(character)
 		local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 		local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
-		local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
+		local defaultCanAdd = ((entry.UsePoints and points > 0) or isGM)
 		local defaultCanRemove = entry.UsePoints and isGM
 
 		this = this.stats_mc
@@ -870,7 +894,7 @@ function CharacterSheet.UpdateAllEntries()
 	if this and this.isExtended then
 		local character = CharacterSheet.GetCharacter()
 		for mc in CharacterSheet.GetAllEntries(true) do
-			local entry = SheetManager:GetEntryByGeneratedID(mc.statID, mc.statType)
+			local entry = SheetManager:GetEntryByGeneratedID(mc.statID, mc.type)
 			if entry then
 				local value = entry:GetValue(character)
 				local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
@@ -895,7 +919,7 @@ function CharacterSheet.UpdateAllEntries()
 					-- mc.statPoints = 0
 				elseif entry.StatType == "SecondaryStat" then
 					mc.boostValue = value
-					mc.text_txt.htmlText = string.format("%i", value)
+					mc.texts_mc.text_txt.htmlText = string.format("%i", value)
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
 				elseif entry.StatType == "Ability" then
@@ -963,3 +987,42 @@ if Vars.DebugMode then
 		end
 	end)
 end
+
+Ext.RegisterUITypeInvokeListener(Data.UIType.hotBar, "setButtonActive", function(ui, method, id, isActive)
+	if id == 1 then
+		CharacterSheet.IsOpen = isActive
+	end
+end)
+
+-- CTRL + G to toggle GameMasterMode
+Input.RegisterListener("ToggleCraft", function(event, pressed, id, keys, controllerEnabled)
+	if Input.IsPressed("ToggleInfo") and CharacterSheet.IsOpen then
+		---@type FlashMainTimeline
+		local this = nil
+		if not Vars.ControllerEnabled then
+			this = Ext.GetUIByType(Data.UIType.characterSheet):GetRoot()
+		else
+			this = Ext.GetUIByType(Data.UIType.statsPanel_c):GetRoot()
+		end
+		if not this then
+			return
+		end
+		Ext.Print("Toggling GM mode in character sheet: ", not this.isGameMasterChar)
+		if this.isGameMasterChar then
+			this.setGameMasterMode(false, false, false)
+			CharacterSheet.UpdateAllEntries()
+			Ext.PostMessageToServer("LeaderLib_RefreshCharacterSheet", Client.Character.UUID)
+
+			this.setAvailableStatPoints(Client.Character.Points.Attribute)
+			this.setAvailableCombatAbilityPoints(Client.Character.Points.Ability)
+			this.setAvailableCivilAbilityPoints(Client.Character.Points.Civil)
+			this.setAvailableTalentPoints(Client.Character.Points.Talent)
+			if Mods.CharacterExpansionLib then
+				this.setAvailableCustomStatPoints(Mods.CharacterExpansionLib.CustomStatSystem:GetTotalAvailablePoints())
+			end
+		else
+			this.setGameMasterMode(true, true, false)
+			CharacterSheet.UpdateAllEntries()
+		end
+	end
+end)

@@ -824,10 +824,10 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 				local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))
 				local isRacial = data.IsRacial
 				local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
-				local canAdd = not hasTalent and isChoosable and talentPoints > 0
-				local canRemove = hasTalent and isCharacterCreation
+				local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or isGM
+				local canRemove = hasTalent and (isCharacterCreation or isGM)
 				---@type SheetManager.TalentsUITalentEntry
-				local data = {
+				local sheetData = {
 					ID = data.GeneratedID,
 					HasTalent = hasTalent,
 					DisplayName = name .. data.Suffix,
@@ -838,7 +838,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 					State = talentState,
 					IsCustom = true,
 				}
-				entries[#entries+1] = data
+				entries[#entries+1] = sheetData
 			end
 		end
 	end

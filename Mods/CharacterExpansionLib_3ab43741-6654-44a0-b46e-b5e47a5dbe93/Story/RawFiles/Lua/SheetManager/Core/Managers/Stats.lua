@@ -454,6 +454,8 @@ if isClient then
 			targetStats = sessionData.Stats
 		end
 
+		local defaultCanRemove = isGM or isCharacterCreation
+
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
 			local data = SheetManager.Stats.Data.Default.Entries[id]
@@ -471,8 +473,12 @@ if isClient then
 					else
 						value = targetStats[data.Attribute]
 					end
-					local canAdd = (points > 0 or isGM) and data.Type == "PrimaryStat"
-					local canRemove = data.Type == "PrimaryStat" and (isCharacterCreation or isGM) and value > Ext.ExtraData.AttributeBaseValue
+					--TODO Make sure add/remove works for info stats
+					local canAdd = (points > 0 or isGM)
+					local canRemove = defaultCanRemove
+					if data.Type == "PrimaryStat" and not canRemove then
+						canRemove = isCharacterCreation and value > Ext.ExtraData.AttributeBaseValue
+					end
 					
 					local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
 					if isCharacterCreation and data.CCFrame then
@@ -507,13 +513,12 @@ if isClient then
 			end
 		end
 
-		local defaultCanRemove = isGM or isCharacterCreation
 		for mod,dataTable in pairs(SheetManager.Data.Stats) do
 			for id,data in pairs(dataTable) do
 				if not isCharacterCreation or data.StatType == "PrimaryStat" then
 					local value = data:GetValue(player) or 0
 					if SheetManager:IsEntryVisible(data, player, value) then
-						local defaultCanAdd =  data.StatType == "PrimaryStat" and ((data.UsePoints == true and points > 0) or isGM)
+						local defaultCanAdd = (data.StatType == "PrimaryStat" and (data.UsePoints == true and points > 0)) or isGM
 						local entry = {
 							ID = data.GeneratedID,
 							DisplayName = data:GetDisplayName(player),

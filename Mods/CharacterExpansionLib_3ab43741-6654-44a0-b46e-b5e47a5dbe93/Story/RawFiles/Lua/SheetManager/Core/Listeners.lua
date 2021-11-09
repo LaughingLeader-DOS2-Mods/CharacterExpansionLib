@@ -161,6 +161,9 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 	if entryValue == nil then
 		entryValue = entry:GetValue(character)
 	end
+	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == true then
+		return false
+	end
 	local bResult = defaultValue
 	for listener in self:GetListenerIterator(self.Listeners.CanAdd[entry.ID], self.Listeners.CanAdd.All) do
 		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
@@ -183,6 +186,9 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 	end
 	if entryValue == nil then
 		entryValue = entry:GetValue(character)
+	end
+	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == false then
+		return false
 	end
 	local bResult = defaultValue
 	for listener in self:GetListenerIterator(self.Listeners.CanRemove[entry.ID], self.Listeners.CanRemove.All) do

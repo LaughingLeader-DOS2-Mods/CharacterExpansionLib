@@ -113,7 +113,7 @@ end
 ---@param this CharacterSheetMainTimeline
 function CustomStatSystem.Update(ui, method, this)
 	CustomStatSystem:SetupGroups(ui, method)
-	local client = CharacterSheet.GetCharacter()
+	local client = SheetManager.UI.CharacterSheet.GetCharacter()
 	
 	if CustomStatSystem:GMStatsEnabled() then
 		if client then
