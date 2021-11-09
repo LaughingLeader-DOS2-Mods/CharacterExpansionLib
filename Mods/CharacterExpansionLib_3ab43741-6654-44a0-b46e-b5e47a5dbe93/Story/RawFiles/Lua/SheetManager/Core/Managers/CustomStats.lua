@@ -72,6 +72,7 @@ CustomStatSystem.UnregisteredStats = {}
 
 ---@type fun():table<string, table<string, SheetCustomStatData>>
 local loader = Ext.Require("SheetManager/Core/Managers/CustomStats/ConfigLoader.lua")
+Ext.Require("SheetManager/Core/Managers/CustomStats/Aliases.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/Getters.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/DataSync.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/PointsHandler.lua")
@@ -101,7 +102,7 @@ local function LoadCustomStatsData()
 						if not existingData then
 							if stat.Create then
 								Ext.CreateCustomStat(stat.DisplayName, stat.Description)
-								fprint(LOGLEVEL.DEFAULT, "[CharacterExpansionLib:LoadCustomStatsData] Created a new custom stat for mod [%s]. ID(%s) DisplayName(%s) Description(%s)", modName, id, stat.DisplayName, stat.Description)
+								--fprint(LOGLEVEL.DEFAULT, "[CharacterExpansionLib:LoadCustomStatsData] Created a new custom stat for mod [%s]. ID(%s) DisplayName(%s) Description(%s)", modName, id, stat.DisplayName, stat.Description)
 								existingData = Ext.GetCustomStatByName(stat.DisplayName)
 							end
 						end
