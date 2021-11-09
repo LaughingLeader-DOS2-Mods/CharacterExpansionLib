@@ -93,10 +93,17 @@ package characterCreation_fla
 		public function set characterHandle(v:Number):void {
 			charHandle = v;
 		}
+
+		private static var _instance:MainTimeline;
+
+		public static function get instance():MainTimeline {
+			return _instance;
+		}
 		
 		public function MainTimeline()
 		{
 			super();
+			_instance = this;
 			addFrameScript(0,this.frame1);
 		}
 		
