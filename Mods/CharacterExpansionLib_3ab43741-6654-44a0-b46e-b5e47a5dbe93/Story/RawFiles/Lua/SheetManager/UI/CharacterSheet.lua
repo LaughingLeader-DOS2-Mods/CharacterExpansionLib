@@ -101,12 +101,24 @@ CharacterSheet.TryGetMovieClip = function(this, listHolder, id, groupID, arrayNa
 	end
 	local result = {xpcall(func, debug.traceback, this, listHolder, id, groupID, arrayName)}
 	if not result[1] then
-		fprint(LOGLEVEL.ERROR, "[CharacterSheet.TryGetMovieClip] Error:\n%s", result[2])
+		--fprint(LOGLEVEL.ERROR, "[CharacterSheet.TryGetMovieClip] Error:\n%s", result[2])
 		return nil
 	end
 	table.remove(result, 1)
 	return table.unpack(result)
 end
+
+local entryListHolders = {
+	primaryStatList = "content_array",
+	infoStatList = "content_array",
+	secondaryStatList = "content_array",
+	resistanceStatList = "content_array",
+	expStatList = "content_array",
+	civicAbilityHolder_mc = "content_array",
+	combatAbilityHolder_mc = "content_array",
+	talentHolder_mc = "content_array",
+	customStats_mc = "stats_array",
+}
 
 ---@param entry SheetAbilityData|SheetStatData
 ---@return FlashMovieClip,FlashArray,integer
@@ -161,6 +173,37 @@ CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 		arrayName = "stats_array"
 	end
 	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.GroupID, arrayName)
+end
+
+---@param customOnly boolean
+---@return fun():FlashMovieClip
+function CharacterSheet.GetAllEntries(customOnly, this)
+	this = this or CharacterSheet.Root
+	local stats_mc = this.stats_mc
+	local movieclips = {}
+	for listName,arrayName in pairs(entryListHolders) do
+		if stats_mc[listName] and stats_mc[listName][arrayName] then
+			local arr = stats_mc[listName][arrayName]
+			local length = #arr
+			if length > 0 then
+				for i=0,length-1 do
+					if arr[i] then
+						if not customOnly or customOnly == arr[i].isCustom then
+							movieclips[#movieclips+1] = arr[i]
+						end
+					end
+				end
+			end
+		end
+	end
+	local i = 0
+	local count = #movieclips
+	return function ()
+		i = i + 1
+		if i <= count then
+			return movieclips[i]
+		end
+	end
 end
 
 local function debugExportStatArrays(this)
@@ -420,7 +463,7 @@ local function GetArrayValues(this,baseChanges,modChanges)
 			end
 		end
 	end
-	fprint(LOGLEVEL.DEFAULT, "Took (%s)ms to parse character sheet arrays.", Ext.MonotonicTime() - time)
+	--fprint(LOGLEVEL.DEFAULT, "Took (%s)ms to parse character sheet arrays.", Ext.MonotonicTime() - time)
 end
 
 local function ParseArrayValues(this, skipSort)
@@ -477,9 +520,29 @@ local function ParseArrayValues(this, skipSort)
 	end
 end
 
+local function TryGetSheetCharacter(this)
+	if this.characterHandle ~= nil and not GameHelpers.Math.IsNaN(this.characterHandle) then
+		return Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle))
+	end
+end
+
+---@return EclCharacter
+function CharacterSheet.GetCharacter()
+	local this = CharacterSheet.Root
+	if this then
+		local b,client = xpcall(TryGetSheetCharacter, debug.traceback, this)
+		if b and client ~= nil then
+			return client
+		end
+	end
+	return Client:GetCharacter()
+end
+
 ---@private
 ---@param ui UIObject
-function CharacterSheet.Update(ui, method, updateTalents, updateAbilities, updateCivil)
+---@param method string
+---@param params SheetUpdateTargets
+function CharacterSheet.Update(ui, method, params)
 	updating = true
 	---@type CharacterSheetMainTimeline
 	local this = self.Root
@@ -496,17 +559,19 @@ function CharacterSheet.Update(ui, method, updateTalents, updateAbilities, updat
 		-- end
 	end
 
-	local player = CustomStatSystem:GetCharacter(ui, this)
+	local player = CharacterSheet.GetCharacter()
+
+	local extraParams = type(params) == "table" and params or {}
 
 	this.justUpdated = true
 
-	updateTargets.Abilities = #this.ability_array > 0
-	updateTargets.Civil = updateTargets.Abilities and this.ability_array[0] == true
-	updateTargets.Talents = #this.talent_array > 0
-	updateTargets.PrimaryStats = #this.primStat_array > 0
-	updateTargets.SecondaryStats = #this.secStat_array > 0
-	updateTargets.Tags = #this.tags_array > 0
-	updateTargets.CustomStats = #this.customStats_array > 0
+	updateTargets.Abilities = extraParams.Abilities or #this.ability_array > 0
+	updateTargets.Civil = extraParams.Civil or (updateTargets.Abilities and this.ability_array[0] == true)
+	updateTargets.Talents = extraParams.Talents or #this.talent_array > 0
+	updateTargets.PrimaryStats = extraParams.PrimaryStats or #this.primStat_array > 0
+	updateTargets.SecondaryStats = extraParams.SecondaryStats or #this.secStat_array > 0
+	updateTargets.Tags = extraParams.Tags or #this.tags_array > 0
+	updateTargets.CustomStats = extraParams.CustomStats or #this.customStats_array > 0
 
 	---@type SheetUpdateTargets
 	targetsUpdated = TableHelpers.Clone(updateTargetsDefaults)
@@ -518,7 +583,7 @@ function CharacterSheet.Update(ui, method, updateTalents, updateAbilities, updat
 			-- local arrayData = modChanges.Stats[stat.ID]
 			-- if arrayData then
 			-- 	if arrayData.Value ~= stat.Value then
-			-- 		fprint(LOGLEVEL.WARNING, "Stat value differs from the array value Lua(%s) <=> Array(%s)", stat.Value, arrayData.Value)
+			-- 		--fprint(LOGLEVEL.WARNING, "Stat value differs from the array value Lua(%s) <=> Array(%s)", stat.Value, arrayData.Value)
 			-- 	end
 			-- end
 			if not Vars.ControllerEnabled then
@@ -587,8 +652,6 @@ function CharacterSheet.PostUpdate(ui, method)
 	if not this or this.isExtended ~= true then
 		return
 	end
-
-	local player = CustomStatSystem:GetCharacter(ui, this)
 
 	SortLists(this)
 
@@ -713,11 +776,14 @@ local function getTalentStateFrame(talentState)
 	end
 end
 
-SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
-	fprint(LOGLEVEL.TRACE, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetCharacterID(character), lastValue, value, isClientSide)
+---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
+---@param character EclCharacter
+function CharacterSheet.UpdateEntry(entry, character, value, this)
 	---@type CharacterSheetMainTimeline
-	local this = CharacterSheet.Root
+	local this = this or CharacterSheet.Root
 	if this and this.isExtended then
+		character = character or CharacterSheet.GetCharacter()
+		value = value or entry:GetValue(character)
 		local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 		local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
 		local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
@@ -725,7 +791,7 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 
 		this = this.stats_mc
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
-		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
+		----fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
 		if arr and mc then
 			local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
 			local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
@@ -792,7 +858,93 @@ SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, 
 			end
 		end
 	end
+end
+
+SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
+	----fprint(LOGLEVEL.DEFAULT, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetCharacterID(character), lastValue, value, isClientSide)
+	CharacterSheet.UpdateEntry(entry, character, value)
 end)
+
+function CharacterSheet.UpdateAllEntries()
+	local this = CharacterSheet.Root
+	if this and this.isExtended then
+		local character = CharacterSheet.GetCharacter()
+		for mc in CharacterSheet.GetAllEntries(true) do
+			local entry = SheetManager:GetEntryByGeneratedID(mc.statID, mc.statType)
+			if entry then
+				local value = entry:GetValue(character)
+				local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
+				local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
+				local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
+				local defaultCanRemove = entry.UsePoints and isGM
+
+				local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
+				local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
+
+				if entry.StatType == "Ability" then
+					mc.texts_mc.plus_mc.visible = plusVisible
+					mc.texts_mc.minus_mc.visible = minusVisible
+				else
+					mc.plus_mc.visible = plusVisible
+					mc.minus_mc.visible = minusVisible
+				end
+
+				if entry.StatType == "PrimaryStat" then
+					mc.text_txt.htmlText = string.format("%i", value)
+					mc.statBasePoints = value
+					-- mc.statPoints = 0
+				elseif entry.StatType == "SecondaryStat" then
+					mc.boostValue = value
+					mc.text_txt.htmlText = string.format("%i", value)
+					mc.statBasePoints = value
+					-- mc.statPoints = 0
+				elseif entry.StatType == "Ability" then
+					mc.am = value
+					mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+					mc.statBasePoints = value
+					-- mc.statPoints = 0
+				elseif entry.StatType == "Talent" then
+					local talentState = entry:GetState(character)
+					local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), entry:GetDisplayName())
+					if mc.label_txt then
+						mc.label_txt.htmlText = name
+					end
+					mc.label = name
+					mc.talentState = talentState
+					mc.bullet_mc.gotoAndStop(this.getTalentStateFrame(talentState))
+
+					if not Vars.ControllerEnabled then
+						this.talentHolder_mc.list.positionElements()
+					else
+						this.mainpanel_mc.stats_mc.talents_mc.updateDone()
+					end
+				elseif entry.StatType == SheetManager.StatType.Custom then
+					--TODO Refactor into general SheetManager functions
+					local ui = CharacterSheet.Instance
+					local visible = CustomStatSystem:GetStatVisibility(ui, entry.Double, entry, character)
+					if visible then
+						local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
+						local plusVisible = CustomStatSystem:GetCanAddPoints(ui, entry.Double, character, entry)
+						local minusVisible = CustomStatSystem:GetCanRemovePoints(ui, entry.Double, character, entry)
+
+						mc.setValue(value)
+
+						if entry.DisplayMode == "Percentage" then
+							mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
+						elseif value > CustomStatSystem.MaxVisibleValue then
+							mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
+						end
+
+						mc.plus_mc.visible = plusVisible
+						mc.minus_mc.visible = minusVisible
+						mc.edit_mc.visible = not mc.isCustom and isGM
+						mc.delete_mc.visible = not mc.isCustom and isGM
+					end
+				end
+			end
+		end
+	end
+end
 
 if Vars.DebugMode then
 	RegisterListener("BeforeLuaReset", function()
