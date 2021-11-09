@@ -118,6 +118,45 @@ local function LoadData()
 		Ext.PrintError(data)
 	end
 
+	if not isClient then
+		for uuid,data in pairs(PersistentVars.CharacterSheetValues) do
+			local characterCount = 0
+			for statType,modTable in pairs(data) do
+				local statTypeCount = 0
+				for modId,entries in pairs(modTable) do
+					local entryCount = 0
+					for entryID,value in pairs(entries) do
+						entryCount = entryCount + 1
+						local entry = SheetManager:GetEntryByID(entryID, modId, statType)
+						if entry then
+							--This entry uses boost values, so it doesn't need to be saved in PersistentVars
+							if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+								fprint(LOGLEVEL.ERROR, "[SheetManager] Deleted a value (%s) in PersistentVars for an entry (%s) that uses a BoostAttribute (%s).", value, entryID, entry.BoostAttribute)
+								PersistentVars.CharacterSheetValues[uuid][statType][modId][entryID] = nil
+								entryCount = entryCount - 1
+							end
+						else
+							fprint(LOGLEVEL.ERROR, "[SheetManager] Failed to find entry for %s (%s) - %s", entryID, statType, modId)
+						end
+					end
+					if entryCount <= 0 then
+						PersistentVars.CharacterSheetValues[uuid][statType][modId] = nil
+					else
+						statTypeCount = statTypeCount + entryCount
+					end
+				end
+				if statTypeCount <= 0 then
+					PersistentVars.CharacterSheetValues[uuid][statType] = nil
+				else
+					characterCount = characterCount + characterCount
+				end
+			end
+			if characterCount <= 0 then
+				PersistentVars.CharacterSheetValues[uuid] = nil
+			end
+		end
+	end
+
 	SheetManager.Talents.LoadRequirements()
 
 	if not isClient then
