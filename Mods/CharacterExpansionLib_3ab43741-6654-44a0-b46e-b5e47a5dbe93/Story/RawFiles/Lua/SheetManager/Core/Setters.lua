@@ -35,30 +35,34 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			self:RequestValueChange(stat, characterId, value, true)
 		end
 	else
-		if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
-			if character and character.Stats then
-				if not isClient then
-					if stat.StatType == "Talent" then
-						NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
-						CharacterAddAttribute(characterId, "Dummy", 0)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					else
-						NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
-						-- Sync boost changes
-						CharacterAddAttribute(character.MyGuid, "Dummy", 0)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					end
-				else
-					character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-				end
-				local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
-				--fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
-			else
-				--fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
-			end
+		if isClient then
+			self:RequestValueChange(stat, characterId, value, false)
 		else
-			if isClient then
-				self:RequestValueChange(stat, characterId, value, false)
+			if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+				if character and character.Stats then
+					if not isClient then
+						if stat.StatType == "Talent" then
+							if not string.find(stat.BoostAttribute, "TALENT_") then
+								NRD_CharacterSetPermanentBoostTalent(characterId, stat.BoostAttribute, value)
+							else
+								NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
+							end
+							CharacterAddAttribute(characterId, "Dummy", 0)
+							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+						else
+							NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
+							-- Sync boost changes
+							CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+							--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+						end
+					else
+						character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+					end
+					local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
+					fprint(LOGLEVEL.DEFAULT, "[%s][SetEntryValue:%s] BoostAttribute(%s) Changed(%s) Current(%s) => Desired(%s)", isClient and "CLIENT" or "SERVER", stat.ID, stat.BoostAttribute, success, character.Stats.DynamicStats[2][stat.BoostAttribute], value)
+				else
+					fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
+				end
 			else
 				if stat.StatType ~= SheetManager.StatType.Custom or not CustomStatSystem:GMStatsEnabled() then
 					SheetManager.Save.SetEntryValue(characterId, stat, value)
