@@ -825,7 +825,7 @@ package characterSheet_fla
 				this.addVisualOption(this.visualValues_array[i++],this.visualValues_array[i++],this.visualValues_array[i++]);
 			}
 
-			i = 0;
+			/* i = 0;
 			while(i < this.lvlBtnStat_array.length)
 			{
 				canAddPoints = Boolean(this.lvlBtnStat_array[i]);
@@ -838,7 +838,7 @@ package characterSheet_fla
 					this.setStatMinusVisible(this.lvlBtnStat_array[i + 1],this.lvlBtnStat_array[i + 2]);
 				}
 				i = i + 3;
-			}
+			} */
 
 			i = 0;
 			if(this.lvlBtnSecStat_array.length > 0)
@@ -924,16 +924,20 @@ package characterSheet_fla
 			this.stats_mc.addTitle(param1);
 		}
 		
-		public function hideLevelUpStatButtons() : *
+		public function hideLevelUpStatButtons(force:Boolean=false) : *
 		{
-			this.stats_mc.setVisibilityStatButtons(this.isGameMasterChar);
+			if (!this.justUpdated || force) {
+				this.stats_mc.setVisibilityStatButtons(force);
+			}
 			this.setAvailableStatPoints(0);
 		}
 		
-		public function hideLevelUpAbilityButtons() : *
+		public function hideLevelUpAbilityButtons(force:Boolean=false) : *
 		{
-			this.stats_mc.setVisibilityAbilityButtons(false,this.isGameMasterChar);
-			this.stats_mc.setVisibilityAbilityButtons(true,this.isGameMasterChar);
+			if (!this.justUpdated || force) {
+				this.stats_mc.setVisibilityAbilityButtons(false,force);
+				this.stats_mc.setVisibilityAbilityButtons(true,force);
+			}
 			this.setAvailableCombatAbilityPoints(0);
 			this.setAvailableCivilAbilityPoints(0);
 			this.setAvailableCustomStatPoints(0);
@@ -943,9 +947,9 @@ package characterSheet_fla
 		{
 			// What's calling this after the array is parsed?
 			if (!this.justUpdated || force) {
-				this.stats_mc.setVisibilityTalentButtons(this.isGameMasterChar);
-				this.setAvailableTalentPoints(0);
+				this.stats_mc.setVisibilityTalentButtons(force);
 			}
+			this.setAvailableTalentPoints(0);
 		}
 		
 		public function clearStats(force:Boolean=false) : *
