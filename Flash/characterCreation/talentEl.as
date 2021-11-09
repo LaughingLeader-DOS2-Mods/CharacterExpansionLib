@@ -6,6 +6,7 @@ package
 	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
+	import characterCreation_fla.MainTimeline;
 	
 	public dynamic class talentEl extends MovieClip
 	{
@@ -23,6 +24,7 @@ package
 		public var statID:Number;
 		public var callbackStr:String = "showTalentTooltip";
 		public var isCustom:Boolean = false;
+		public var type:String = "Talent";
 
 		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
@@ -45,7 +47,30 @@ package
 		public function talentEl()
 		{
 			super();
-			addFrameScript(0,this.frame1);
+		}
+
+		private function onPlus() : void
+		{
+			if(!this.isCustom)
+			{
+				ExternalInterface.call("toggleTalent",this.statID);
+			}
+			else
+			{
+				ExternalInterface.call(this.plus_mc.callbackStr,this.statID);
+			}
+		}
+
+		private function onMinus() : void
+		{
+			if(!this.isCustom)
+			{
+				ExternalInterface.call("toggleTalent",this.statID);
+			}
+			else
+			{
+				ExternalInterface.call(this.min_mc.callbackStr,this.statID);
+			}
 		}
 		
 		public function onInit(param1:MovieClip, param2:Boolean) : *
@@ -57,8 +82,8 @@ package
 			this.text_txt.wordWrap = this.text_txt.multiline = false;
 			this.text_txt.autoSize = TextFieldAutoSize.LEFT;
 			this.gotoAndStop(1);
-			this.plus_mc.init(this.root_mc.CCPanel_mc.talents_mc.toggleTalent,this);
-			this.min_mc.init(this.root_mc.CCPanel_mc.talents_mc.toggleTalent,this);
+			this.plus_mc.init(this.onPlus,this);
+			this.min_mc.init(this.onMinus,this);
 			this.hit_mc.addEventListener(MouseEvent.ROLL_OVER,this.onOver);
 			this.hit_mc.addEventListener(MouseEvent.ROLL_OUT,this.onOut);
 		}
@@ -89,17 +114,13 @@ package
 		public function onOver(e:MouseEvent) : *
 		{
 			var globalPos:Point = this.localToGlobal(new Point(0,0));
-			ExternalInterface.call(this.callbackStr,this.base.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
+			ExternalInterface.call(this.callbackStr,this.root_mc.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
 			//ExternalInterface.call("showTalentTooltip",this.root_mc.characterHandle,this.statID,globalPos.x - this.root_mc.x,globalPos.y,this.hit_mc.width,this.hit_mc.height,"left");
 		}
 		
 		public function onOut(e:MouseEvent) : *
 		{
 			ExternalInterface.call("hideTooltip");
-		}
-		
-		public function frame1() : * {
-			this.base = root as MovieClip;
 		}
 	}
 }

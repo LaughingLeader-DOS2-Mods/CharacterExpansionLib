@@ -51,13 +51,13 @@ package characterCreation_fla
 				}
 				else
 				{
-					if(talent_mc.isActive)
+					if(talent_mc.plus_mc.visible)
 					{
-						ExternalInterface.call(mc.plus_mc.callbackStr,mc.statID);
+						ExternalInterface.call(talent_mc.plus_mc.callbackStr,talent_mc.statID);
 					}
 					else
 					{
-						ExternalInterface.call(mc.min_mc.callbackStr,mc.statID);
+						ExternalInterface.call(talent_mc.min_mc.callbackStr,talent_mc.statID);
 					}
 				}
 			}
