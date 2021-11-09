@@ -251,7 +251,7 @@ else
 	RegisterNetListener("CEL_SheetManager_RequestBaseValueChange", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			assert(type(data.ModifyBy) == "number", "Payload needs a ModifyBy amount.")
+			assert(data.ModifyBy ~= "nil", "Payload needs a ModifyBy value (integer or boolean).")
 			assert(type(data.NetID) == "number", "Payload needs a NetID.")
 			assert(type(data.ID) == "string", "Payload needs an ID for the attribute/ability/talent.")
 			assert(type(data.StatType) == "string", "Payload needs an StatType string value (Ability,Attribute,Talent).")
