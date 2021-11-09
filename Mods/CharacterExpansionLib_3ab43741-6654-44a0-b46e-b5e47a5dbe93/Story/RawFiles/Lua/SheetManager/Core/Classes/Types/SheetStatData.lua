@@ -62,7 +62,7 @@ SheetStatData.PropertyMap = {
 	SHEETICONWIDTH = {Name="SheetIconWidth", Type = "number"},
 	SHEETICONHEIGHT = {Name="SheetIconHeight", Type = "number"},
 	SPACINGHEIGHT = {Name="SpacingHeight", Type = "number"},
-	FRAME = {Name="Frame", Type = "number"},
+	FRAME = {Name="Frame", Type = "integer"},
 }
 
 TableHelpers.AddOrUpdate(SheetStatData.PropertyMap, Classes.SheetBaseData.PropertyMap, true)

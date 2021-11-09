@@ -45,8 +45,8 @@ SheetBaseData.PropertyMap = {
 	SUFFIX = {Name="Suffix", Type = "string"},
 	USEPOINTS = {Name="UsePoints", Type = "boolean"},
 	ICON = {Name="Icon", Type = "string"},
-	ICONWIDTH = {Name="IconWidth", Type = "integer"},
-	ICONHEIGHT = {Name="IconHeight", Type = "integer"},
+	ICONWIDTH = {Name="IconWidth", Type = "number"},
+	ICONHEIGHT = {Name="IconHeight", Type = "number"},
 }
 
 local defaults = {
