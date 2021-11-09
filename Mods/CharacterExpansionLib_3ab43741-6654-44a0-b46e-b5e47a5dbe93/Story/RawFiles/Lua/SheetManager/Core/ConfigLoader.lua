@@ -48,6 +48,8 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 									data[propData.Name] = propData.Parse(value,t)
 								elseif (propData.Type == "any" or t == propData.Type) then
 									data[propData.Name] = value
+								elseif t == "number" and propData.Type == "integer" then
+									data[propData.Name] = Ext.Round(value)
 								end
 							else
 								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
