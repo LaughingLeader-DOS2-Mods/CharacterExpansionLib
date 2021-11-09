@@ -7,7 +7,7 @@ function CustomStatSystem:SyncAvailablePoints(character)
 	if not isClient then
 		self:SyncData()
 	else
-		character = character or self:GetCharacter()
+		character = character or SheetManager.UI.CharacterSheet.GetCharacter()
 		local data = {
 			NetID = character.NetID,
 			Stats = {}

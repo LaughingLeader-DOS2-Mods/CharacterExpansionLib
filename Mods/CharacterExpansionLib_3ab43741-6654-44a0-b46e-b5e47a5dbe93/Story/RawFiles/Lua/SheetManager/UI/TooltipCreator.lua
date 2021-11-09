@@ -17,7 +17,7 @@ local function CreateTooltip(tooltipType, requestedUI, call, idOrCharacter, idOr
 		if this and this.tooltip_array and data then
 			local request = {
 				Type = data.TooltipType,
-				Character = Client:GetCharacter()
+				Character = SheetManager.UI.CharacterSheet.GetCharacter()
 			}
 
 			local resolved = false

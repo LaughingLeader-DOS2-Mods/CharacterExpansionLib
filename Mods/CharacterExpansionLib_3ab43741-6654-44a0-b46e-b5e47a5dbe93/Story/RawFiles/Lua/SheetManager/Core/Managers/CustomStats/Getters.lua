@@ -314,7 +314,7 @@ function CustomStatSystem:GetStatValueForCategory(character, id, mod)
 		if Ext.IsServer() then
 			character = Ext.GetCharacter(CharacterGetHostCharacter())
 		else
-			character = self:GetCharacter()
+			character = SheetManager.UI.CharacterSheet.GetCharacter()
 		end
 	end
 	local statValue = 0
@@ -374,7 +374,7 @@ if isClient then
 		if GameHelpers.Client.IsGameMaster(ui) == true then
 			return true
 		end
-		character = character or self:GetCharacter()
+		character = character or SheetManager.UI.CharacterSheet.GetCharacter()
 		stat = stat or (doubleHandle and self:GetStatByDouble(doubleHandle))
 		if stat then
 			local isVisible = true

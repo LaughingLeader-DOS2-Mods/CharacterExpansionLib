@@ -266,7 +266,7 @@ end
 
 ---@private
 function CustomStatSystem:UpdateStatMovieClips()
-	local character = self:GetCharacter()
+	local character = SheetManager.UI.CharacterSheet.GetCharacter()
 	---@type CharacterSheetMainTimeline
 	local this = SheetManager.UI.CharacterSheet.Root
 	if not this or this.isExtended ~= true then
