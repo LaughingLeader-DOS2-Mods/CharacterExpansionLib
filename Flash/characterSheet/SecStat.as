@@ -30,6 +30,7 @@ package
 		public var isCustom:Boolean = false;
 		public var hasCustomIcon:Boolean = false;
 		public var customIcon_mc:IggyIcon;
+		public var statType:String = "SecondaryStat";
 
 		public function MakeCustom(statID:Number, b:Boolean=true) : *
 		{

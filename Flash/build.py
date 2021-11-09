@@ -28,8 +28,8 @@ DOS2DE_PUBLIC = DOS2.joinpath("DefEd/Data/Public/")
 OUTPUT = DOS2DE_PUBLIC.joinpath("CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/Overrides/")
 
 targets = [
-    "characterCreation",
-    #"characterSheet",
+    #"characterCreation",
+    "characterSheet",
     # "statsPanel_c",
     # "characterCreation_c",
 ]

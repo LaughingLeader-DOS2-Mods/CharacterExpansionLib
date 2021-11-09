@@ -19,6 +19,7 @@ package
 		public var statID:Number;
 		public var callbackStr:String = "showAbilityTooltip";
 		public var isCustom:Boolean = false;
+		public var statType:String = "Ability";
 
 		public function MakeCustom(id:Number, b:Boolean=true) : *
 		{
