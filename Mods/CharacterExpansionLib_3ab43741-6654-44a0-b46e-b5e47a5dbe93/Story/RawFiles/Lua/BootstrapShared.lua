@@ -22,13 +22,17 @@ if isClient then
 	}
 end
 
+local printMessages = {
+	CEL_SheetManager_RequestValueChange = true
+}
+
 ---@param id string
 ---@param callback fun(id:string, payload:string, user:integer|nil):void
 function RegisterNetListener(id, callback)
 	Ext.RegisterNetListener(id, function(id, payload, user)
-		-- if Vars.LeaderDebugMode then
-		-- 	--fprint(LOGLEVEL.DEFAULT, "[NetListener:%s] id(%s) user(%s) payload:\n%s", Ext.IsClient() and "CLIENT" or "SERVER", id, user, payload)
-		-- end
+		if Vars.LeaderDebugMode and printMessages[id] then
+			fprint(LOGLEVEL.DEFAULT, "[NetListener:%s] id(%s) user(%s) payload:\n%s", Ext.IsClient() and "CLIENT" or "SERVER", id, user, payload)
+		end
 		local b,err = xpcall(callback, debug.traceback, id, payload, user)
 		if not b then
 			Ext.PrintError(err)
