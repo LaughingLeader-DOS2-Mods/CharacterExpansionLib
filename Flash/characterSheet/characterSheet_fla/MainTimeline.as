@@ -840,7 +840,7 @@ package characterSheet_fla
 				i = i + 3;
 			} */
 
-			i = 0;
+			/* i = 0;
 			if(this.lvlBtnSecStat_array.length > 0)
 			{
 				hasButtons = this.lvlBtnSecStat_array[0];
@@ -867,7 +867,7 @@ package characterSheet_fla
 					}
 					i = i + 4;
 				}
-			}
+			} */
 
 			if(this.tags_array.length > 0)
 			{

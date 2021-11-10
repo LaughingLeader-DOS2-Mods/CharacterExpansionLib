@@ -586,6 +586,9 @@ function CharacterSheet.Update(ui, method, params)
 			-- 		--fprint(LOGLEVEL.WARNING, "Stat value differs from the array value Lua(%s) <=> Array(%s)", stat.Value, arrayData.Value)
 			-- 	end
 			-- end
+			-- if stat.IsCustom then
+			-- 	print(Lib.serpent.block(stat))
+			-- end
 			if not Vars.ControllerEnabled then
 				if stat.StatType == SheetManager.Stats.Data.StatType.PrimaryStat then
 					targetsUpdated.PrimaryStats = true
@@ -694,10 +697,21 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setTitle", functio
 end)
 Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, "characterSheetUpdateDone", CharacterSheet.Update)
 
+local secondaryStatListProperties = {
+	infoStatList = true,
+	secondaryStatList = true,
+	resistanceStatList = true,
+	expStatList = true,
+}
+
 --local mc = sheet.stats_mc.resistanceStatList.content_array[8]; print(mc.statID, mc.texts_mc.label_txt.htmlText)
 --for i=5,9 do local mc = sheet.stats_mc.resistanceStatList.content_array[i]; print(mc.statID, mc.texts_mc.label_txt.htmlText) end
 local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
-	local this = ui:GetRoot().stats_mc
+	if not secondaryStatListProperties[listProperty] then
+		return
+	end
+	local main = ui:GetRoot()
+	local this = main.stats_mc
 	local list = this[listProperty]
 	if list then
 		if list.list then
@@ -724,18 +738,23 @@ local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
 			end
 		end
 		if mc then
-			print(statID, Lib.serpent.block({
-				Type = mc.type or "nil",
-				name = mc.name,
-				["plus_mc.visible"] = mc.plus_mc == nil and "nil" or mc.plus_mc.visible,
-				["minus_mc.visible"] = mc.minus_mc == nil and "nil" or mc.minus_mc.visible,
-			}))
-		else
-			print(statID, "Failed to find movieclip")
+			-- print(statID, Lib.serpent.block({
+			-- 	Type = mc.type or "nil",
+			-- 	name = mc.name,
+			-- 	["plus_mc.visible"] = mc.plus_mc == nil and "nil" or mc.plus_mc.visible,
+			-- 	["minus_mc.visible"] = mc.minus_mc == nil and "nil" or mc.minus_mc.visible,
+			-- }))
+			if mc.type == "SecondaryStat" or mc.type == "InfoStat" then
+				if main.isGameMasterChar then
+					this.setupSecondaryStatsButtons(mc.statID,true,true,true,mc.statID == 44 and 9 or 5)
+				else
+					this.setupSecondaryStatsButtons(mc.statID,false,false,false)
+				end
+			end
 		end
 	end
 end
---Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
+Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 
 ---@param ui UIObject
 local function UpdateCharacterSheetPoints(ui, method, amount)
@@ -815,7 +834,7 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 
 		this = this.stats_mc
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
-		----fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
+		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
 		if arr and mc then
 			local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
 			local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
@@ -900,7 +919,7 @@ function CharacterSheet.UpdateAllEntries()
 				local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 				local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
 				local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
-				local defaultCanRemove = entry.UsePoints and isGM
+				local defaultCanRemove = isGM
 
 				local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
 				local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)
@@ -913,13 +932,27 @@ function CharacterSheet.UpdateAllEntries()
 					mc.minus_mc.visible = minusVisible
 				end
 
-				if entry.StatType == "PrimaryStat" then
+				if mc.type ~= entry.StatType then
+					Ext.PrintError(entry.ID, entry.StatType, mc.type, mc.statID, mc.callbackStr)
+				end
+				if mc.type == "PrimaryStat" then
 					mc.text_txt.htmlText = string.format("%i", value)
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
-				elseif entry.StatType == "SecondaryStat" then
+				elseif mc.type == "SecondaryStat" or mc.type == "InfoStat" then
 					mc.boostValue = value
-					mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+					if mc.texts_mc then
+						mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+						if isGM then
+							this.setupSecondaryStatsButtons(mc.statID,true,minusVisible,plusVisible,mc.statID == 44 and 9 or 5)
+						else
+							this.setupSecondaryStatsButtons(mc.statID,false,false,false)
+						end
+					else
+						if mc.text_txt then
+							mc.text_txt.htmlText = string.format("%i", value)
+						end
+					end
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
 				elseif entry.StatType == "Ability" then
