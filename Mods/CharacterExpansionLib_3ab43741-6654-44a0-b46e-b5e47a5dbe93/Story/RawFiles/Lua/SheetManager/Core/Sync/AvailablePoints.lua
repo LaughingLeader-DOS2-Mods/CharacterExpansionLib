@@ -70,14 +70,17 @@ else
 			SheetManager.AvailablePoints[data.NetID] = data.Points
 		end
 		--SheetManager.UI.CharacterSheet.Update(SheetManager.UI.CharacterSheet.Instance, "updateArraySystem", {Abilities = true, PrimaryStats = true, Civil = true, Talents = true, CustomStats = true})
-		SheetManager.UI.CharacterSheet.UpdateAllEntries()
+		if SheetManager.UI.CharacterSheet.IsOpen then
+			SheetManager.UI.CharacterSheet.UpdateAllEntries()
+		end
 	end)
 	RegisterNetListener("CEL_SheetManager_LoadAllAvailablePoints", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			SheetManager.AvailablePoints = data
-
-			SheetManager.UI.CharacterSheet.UpdateAllEntries()
+			if SheetManager.UI.CharacterSheet.IsOpen then
+				SheetManager.UI.CharacterSheet.UpdateAllEntries()
+			end
 		end
 	end)
 end
