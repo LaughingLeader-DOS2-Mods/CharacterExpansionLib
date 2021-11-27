@@ -778,11 +778,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 
 	local talentPoints = SheetManager:GetAvailablePoints(player, "Talent")
 
-	local targetStats = player.Stats
-	local sessionData = SheetManager.SessionManager:GetSession(player)
-	if sessionData then
-		targetStats = sessionData.Stats
-	end
+	local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
 
 	local entries = {}
 	--Default entries

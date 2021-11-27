@@ -132,9 +132,7 @@ SheetManager.Stats = {
 						local originalFunc = Game.Math.GetWeaponScalingRequirement
 						Game.Math.GetWeaponScalingRequirement = getReqFunc
 
-						local mainDamageRange = Game.Math.CalculateWeaponScaledDamageRanges(character, mainWeapon)
-
-						Game.Math.GetWeaponScalingRequirement = originalFunc
+						local mainDamageRange = {}
 
 						local minDamage = 0
 						local maxDamage = 0
@@ -144,7 +142,10 @@ SheetManager.Stats = {
 
 						if mainWeapon ~= nil then
 							mainDamageType = mainWeapon["Damage Type"]
+							mainDamageRange = Game.Math.CalculateWeaponScaledDamageRanges(character, mainWeapon)
 						end
+
+						Game.Math.GetWeaponScalingRequirement = originalFunc
 
 						if offHandWeapon ~= nil and Game.Math.IsRangedWeapon(mainWeapon) == Game.Math.IsRangedWeapon(offHandWeapon) then
 							offDamageType = offHandWeapon["Damage Type"]
@@ -448,11 +449,7 @@ if isClient then
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 		local points = SheetManager:GetAvailablePoints(player, "Attribute")
 		
-		local targetStats = player.Stats
-		local sessionData = SheetManager.SessionManager:GetSession(player)
-		if sessionData then
-			targetStats = sessionData.Stats
-		end
+		local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
 
 		local defaultCanRemove = isGM or isCharacterCreation
 
@@ -469,46 +466,53 @@ if isClient then
 				else
 					local value = nil
 					if type(data.Attribute) == "function" then
-						value = data.Attribute(targetStats)
+						local b,result = xpcall(data.Attribute, debug.traceback, targetStats)
+						if b then
+							value = result
+						else
+							fprint(LOGLEVEL.ERROR, "[SheetManager.Stats.GetVisible] Error getting value for %s:\n%s", id, result)
+						end
 					else
 						value = targetStats[data.Attribute]
 					end
-					--TODO Make sure add/remove works for info stats
-					local canAdd = (points > 0 or isGM)
-					local canRemove = defaultCanRemove
-					if data.Type == "PrimaryStat" and not canRemove then
-						canRemove = isCharacterCreation and value > Ext.ExtraData.AttributeBaseValue
-					end
-					
-					local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
-					if isCharacterCreation and data.CCFrame then
-						frame = data.CCFrame
-					end
+					if value ~= nil then
+						--TODO Make sure add/remove works for info stats
+						local canAdd = (data.Type == "PrimaryStat" and points > 0) or isGM
+						local canRemove = defaultCanRemove
+						if data.Type == "PrimaryStat" and not canRemove then
+							canRemove = isCharacterCreation and value > Ext.ExtraData.AttributeBaseValue
+						end
+						
+						local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
+						if isCharacterCreation and data.CCFrame then
+							frame = data.CCFrame
+						end
 
-					local delta = 0
-					if data.Type == "PrimaryStat" then
-						delta = value - Ext.ExtraData.AttributeBaseValue
-					end
+						local delta = 0
+						if data.Type == "PrimaryStat" then
+							delta = value - Ext.ExtraData.AttributeBaseValue
+						end
 
-					local entry = {
-						ID = data.StatID,
-						DisplayName = data.DisplayName.Value,
-						Description = "",
-						Value = string.format("%s", value) .. (data.Suffix or ""),
-						Delta = delta,
-						CanAdd = canAdd,
-						CanRemove = canRemove,
-						IsCustom = false,
-						StatType = data.Type,
-						Frame = frame,
-						SecondaryStatTypeInteger = data.StatType or 0,
-						Icon = "",
-						IconWidth = 0,
-						IconHeight = 0,
-						IconClipName = "",
-						IconDrawCallName = ""
-					}
-					entries[#entries+1] = entry
+						local entry = {
+							ID = data.StatID,
+							DisplayName = data.DisplayName.Value,
+							Description = "",
+							Value = string.format("%s", value) .. (data.Suffix or ""),
+							Delta = delta,
+							CanAdd = canAdd,
+							CanRemove = canRemove,
+							IsCustom = false,
+							StatType = data.Type,
+							Frame = frame,
+							SecondaryStatTypeInteger = data.StatType or 0,
+							Icon = "",
+							IconWidth = 0,
+							IconHeight = 0,
+							IconClipName = "",
+							IconDrawCallName = ""
+						}
+						entries[#entries+1] = entry
+					end
 				end
 			end
 		end

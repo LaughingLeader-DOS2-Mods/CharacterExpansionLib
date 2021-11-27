@@ -89,6 +89,15 @@ if not isClient then
 		end
 	end)
 
+	--Fallback in case none of the UI listeners notify the server that CC is done
+	Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
+		if not StringHelpers.IsNullOrEmpty(character) then
+			Timer.StartOneshot("", 900, function()
+				SheetManager.Save.CharacterCreationDone(character, true)
+			end)
+		end
+	end)
+
 	--[[ Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
 		if character ~= StringHelpers.NULL_UUID then
 
@@ -133,27 +142,37 @@ function SessionManager:ApplySession(character)
 	if isClient then
 		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
 	else
-		local characterId = character.MyGuid
+		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self.Sessions[characterId]
 		if sessionData then
-			--fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData))
-			local currentPoints = {
-				Attribute = CharacterGetAttributePoints(characterId),
-				Ability = CharacterGetAbilityPoints(characterId),
-				Civil = CharacterGetCivilAbilityPoints(characterId),
-				Talent = CharacterGetTalentPoints(characterId),
-			}
-			if sessionData.ModifyPoints.Attribute ~= 0 and sessionData.ModifyPoints.Attribute + currentPoints.Attribute >= 0 then
-				CharacterAddAttributePoint(characterId, sessionData.ModifyPoints.Attribute)
-			end
-			if sessionData.ModifyPoints.Ability ~= 0 and sessionData.ModifyPoints.Ability + currentPoints.Ability >= 0 then
-				CharacterAddAbilityPoint(characterId, sessionData.ModifyPoints.Ability)
-			end
-			if sessionData.ModifyPoints.Civil ~= 0 and sessionData.ModifyPoints.Civil + currentPoints.Civil >= 0 then
-				CharacterAddCivilAbilityPoint(characterId, sessionData.ModifyPoints.Civil)
-			end
-			if sessionData.ModifyPoints.Talent ~= 0 and sessionData.ModifyPoints.Talent + currentPoints.Talent >= 0 then
-				CharacterAddTalentPoint(characterId, sessionData.ModifyPoints.Talent)
+			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s\n%s", Lib.serpent.block(sessionData.ModifyPoints), Lib.serpent.block(sessionData.PendingChanges))
+
+			if sessionData.ModifyPoints then
+				local modifyPoints = TableHelpers.Clone(sessionData.ModifyPoints)
+				--Delay slightly because the engine will revert point changes otherwise
+				Timer.StartOneshot(string.format("CEL_ApplyCCSessionData_%s", characterId), 500, function()
+					local currentPoints = {
+						Attribute = CharacterGetAttributePoints(characterId),
+						Ability = CharacterGetAbilityPoints(characterId),
+						Civil = CharacterGetCivilAbilityPoints(characterId),
+						Talent = CharacterGetTalentPoints(characterId),
+					}
+					fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Apply point changes.\n%s\n%s", Lib.serpent.block(modifyPoints), Lib.serpent.block(currentPoints))
+					if modifyPoints.Attribute ~= 0 and modifyPoints.Attribute + currentPoints.Attribute >= 0 then
+						CharacterAddAttributePoint(characterId, modifyPoints.Attribute)
+					end
+					if modifyPoints.Ability ~= 0 and modifyPoints.Ability + currentPoints.Ability >= 0 then
+						CharacterAddAbilityPoint(characterId, modifyPoints.Ability)
+					end
+					if modifyPoints.Civil ~= 0 and modifyPoints.Civil + currentPoints.Civil >= 0 then
+						CharacterAddCivilAbilityPoint(characterId, modifyPoints.Civil)
+					end
+					if modifyPoints.Talent ~= 0 and modifyPoints.Talent + currentPoints.Talent >= 0 then
+						CharacterAddTalentPoint(characterId, modifyPoints.Talent)
+					end
+
+					SheetManager.Sync.AvailablePoints(characterId)
+				end)
 			end
 	
 			if sessionData.PendingChanges then
@@ -167,18 +186,12 @@ function SessionManager:ApplySession(character)
 							data[statType][modId] = entries
 						else
 							for id,value in pairs(entries) do
-								if type(data[statType][modId][id]) == "number" then
-									data[statType][modId][id] = data[statType][modId][id] + value
-								else
-									data[statType][modId][id] = value
-								end
+								data[statType][modId][id] = value
 							end
 						end
 					end
 				end
 			end
-
-			SheetManager:SyncData(character)
 		end
 	end
 	SessionManager:ClearSession(character)
@@ -189,6 +202,33 @@ end
 function SessionManager:GetSession(character)
 	local characterId = GameHelpers.GetCharacterID(character)
 	return self.Sessions[characterId]
+end
+
+---Creates a table that can be used to get a current value of a session, that falls back to the character's Stats otherwise.
+---This is mainly used when the UI builds the list of entries, for the character sheet or character creation UIs.
+---@param character EsvCharacter|EclCharacter|UUID|NETID
+---@return StatCharacter
+function SessionManager:CreateCharacterSessionMetaTable(character)
+	local character = GameHelpers.GetCharacter(character)
+	local sessionData = SheetManager.SessionManager:GetSession(character)
+	if sessionData then
+		local targetStats = {}
+		setmetatable(targetStats, {
+			__index = function(_, k)
+				if sessionData.Stats[k] then
+					return sessionData.Stats[k]
+				else
+					return character.Stats[k]
+				end
+			end,
+			__newindex = function(_, k, v)
+				character.Stats[k] = v
+			end
+		})
+		return targetStats
+	else
+		return character.Stats
+	end
 end
 
 SheetManager.SessionManager = SessionManager

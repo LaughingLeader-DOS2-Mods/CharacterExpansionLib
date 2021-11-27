@@ -6,7 +6,6 @@ package
 	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
-	import characterCreation_fla.MainTimeline;
 	
 	public dynamic class talentEl extends MovieClip
 	{

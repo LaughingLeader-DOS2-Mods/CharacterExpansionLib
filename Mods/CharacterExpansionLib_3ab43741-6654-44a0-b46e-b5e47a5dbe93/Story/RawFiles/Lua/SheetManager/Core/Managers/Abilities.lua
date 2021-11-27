@@ -161,8 +161,8 @@ if Ext.IsClient() then
 		local abilityPoints = SheetManager:GetAvailablePoints(character, "Ability")
 		local civilPoints = SheetManager:GetAvailablePoints(character, "Civil")
 
-		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
-		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
+		local maxAbility = GameHelpers.GetExtraData("CombatAbilityCap", 10)
+		local maxCivil = GameHelpers.GetExtraData("CivilAbilityCap", 5)
 
 		for abilityName,data in pairs(missingAbilities) do
 			if SheetManager.Abilities.RegisteredCount[abilityName] > 0 then
@@ -220,14 +220,10 @@ if Ext.IsClient() then
 		local abilityPoints = SheetManager:GetAvailablePoints(player, "Ability")
 		local civilPoints = SheetManager:GetAvailablePoints(player, "Civil")
 	
-		local maxAbility = Ext.ExtraData.CombatAbilityCap or 10
-		local maxCivil = Ext.ExtraData.CivilAbilityCap or 5
+		local maxAbility = GameHelpers.GetExtraData("CombatAbilityCap", 10)
+		local maxCivil = GameHelpers.GetExtraData("CivilAbilityCap", 5)
 
-		local targetStats = player.Stats
-		local sessionData = SheetManager.SessionManager:GetSession(player)
-		if sessionData then
-			targetStats = sessionData.Stats
-		end
+		local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
 
 		--Defaults
 		for numId,id in Data.Ability:Get() do

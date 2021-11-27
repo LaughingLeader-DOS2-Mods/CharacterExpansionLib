@@ -12,6 +12,9 @@ local self = CharacterCreation
 ---@param ui UIObject
 function CharacterCreation.UpdateTalents(ui, method)
 	local this = self.Root
+	if not this then
+		return
+	end
 	--this.clearArray("talentArray")
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
@@ -36,6 +39,9 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateTalents
 ---@param ui UIObject
 function CharacterCreation.UpdateAbilities(ui, method)
 	local this = self.Root
+	if not this then
+		return
+	end
 	--this.clearArray("abilityArray")
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
@@ -63,6 +69,9 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateAbiliti
 ---@param ui UIObject
 function CharacterCreation.UpdateAttributes(ui, method)
 	local this = self.Root
+	if not this then
+		return
+	end
 	--this.clearArray("abilityArray")
 
 	-- print("attributeArray")
@@ -97,6 +106,18 @@ end
 
 Ext.RegisterUITypeCall(Data.UIType.characterCreation, "characterCreationStarted", CharacterCreation.Started)
 Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, "characterCreationStarted", CharacterCreation.Started)
+
+function CharacterCreation.CreationDone(ui, method, startText, backText, visible)
+	if visible == false then
+		-- UI is closing with no message box confirmation, which can happen if points were only spent on custom entries
+		if not MessageBox.UI.Instance and CharacterCreation.IsOpen then
+			SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
+			CharacterCreation.IsOpen = false
+		end
+	end
+end
+Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation, "creationDone", CharacterCreation.CreationDone)
+Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "creationDone", CharacterCreation.CreationDone)
 
 MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
 	if isConfirmed and CharacterCreation.IsOpen then
