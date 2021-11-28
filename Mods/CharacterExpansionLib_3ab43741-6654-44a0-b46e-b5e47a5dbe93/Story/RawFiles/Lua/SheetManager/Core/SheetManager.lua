@@ -163,6 +163,8 @@ local function LoadData()
 		--SheetManager.CustomStats.LoadUnregistered()
 	end
 
+	SheetManager.CustomStats.Initialize()
+
 	SheetManager.Loaded = true
 	InvokeListenerCallbacks(SheetManager.Listeners.Loaded, SheetManager)
 

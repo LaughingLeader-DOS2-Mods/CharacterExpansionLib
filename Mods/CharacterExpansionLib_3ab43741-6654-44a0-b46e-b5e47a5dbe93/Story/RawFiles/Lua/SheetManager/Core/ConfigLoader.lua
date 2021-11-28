@@ -21,6 +21,18 @@ Format:
 			"DisplayName": "",
 			"Description": ""
 		}
+	},
+	"CustomStats": {
+		"ID": {
+			"DisplayName": "",
+			"Description": ""
+		}
+	},
+	"CustomStatsCategories": {
+		"ID": {
+			"DisplayName": "",
+			"Description": ""
+		}
 	}
 }
 ]]
@@ -92,8 +104,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 	return tableData
 end
 
-local function LoadConfig(uuid, file)
-	local config = Common.JsonParse(file)
+local function LoadConfig(uuid, config)
 	local loaded = {}
 	local defaults = {
 		Stats = nil,
@@ -156,6 +167,11 @@ local function TryFindConfig(info)
 	return file
 end
 
+local function TryFindOldCustomStatsConfig(info)
+	local filePath = string.format("Mods/%s/CustomStatsConfig.json", info.Directory)
+	local file = Ext.LoadFile(filePath, "data")
+	return file
+end
 
 ---@return table<string, table<string, SheetCustomStatBase>>
 local function LoadConfigFiles()
@@ -170,9 +186,47 @@ local function LoadConfigFiles()
 				if not b then
 					Ext.PrintError(result)
 				elseif result ~= nil and result ~= "" then
-					local data = LoadConfig(uuid, result)
-					if data and data.Success then
-						entries[uuid] = data
+					local config = Common.JsonParse(result)
+					if config then
+						local data = LoadConfig(uuid, config)
+						if data and data.Success then
+							entries[uuid] = data
+						end
+					end
+				end
+				local b,result = xpcall(TryFindOldCustomStatsConfig, debug.traceback, info)
+				if not b then
+					Ext.PrintError(result)
+				elseif result ~= nil and result ~= "" then
+					local config = Common.JsonParse(result)
+					if config then
+						--Translate table to new system
+						if config.Defaults then
+							if config.Defaults.Stats then
+								config.Defaults.CustomStats = TableHelpers.Clone(config.Defaults.Stats)
+								config.Defaults.Stats = nil
+							end
+							if config.Defaults.Categories then
+								config.Defaults.CustomStatCategories = TableHelpers.Clone(config.Defaults.Categories)
+								config.Defaults.Categories = nil
+							end
+						end
+						if config.Stats then
+							config.CustomStats = TableHelpers.Clone(config.Stats)
+							config.Stats = nil
+						end
+						if config.Categories then
+							config.CustomStatCategories = TableHelpers.Clone(config.Categories)
+							config.Categories = nil
+						end
+						local data = LoadConfig(uuid, config)
+						if data and data.Success then
+							if entries[uuid] == nil then
+								entries[uuid] = data
+							else
+								TableHelpers.AddOrUpdate(entries[uuid], data)
+							end
+						end
 					end
 				end
 			end

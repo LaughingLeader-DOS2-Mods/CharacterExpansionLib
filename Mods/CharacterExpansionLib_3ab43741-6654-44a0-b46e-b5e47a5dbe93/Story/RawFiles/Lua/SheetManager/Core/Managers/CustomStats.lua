@@ -1,5 +1,9 @@
+local isClient = Ext.IsClient()
+
 if CustomStatSystem == nil then
 	---@class CustomStatSystem
+	---@field Stats table<string, table<string, SheetCustomStatData>>
+	---@field Categories table<string, table<string, SheetCustomStatCategoryData>>
 	CustomStatSystem = {}
 end
 
@@ -7,7 +11,15 @@ if not Mods.LeaderLib.CustomStatSystem then
 	Mods.LeaderLib.CustomStatSystem = CustomStatSystem
 end
 
-CustomStatSystem.__index = CustomStatSystem
+setmetatable(CustomStatSystem, {
+	__index = function(_,k)
+		if k == "Categories" then
+			return SheetManager.Data.CustomStatCategories
+		elseif k == "Stats" then
+			return SheetManager.Data.CustomStats
+		end
+	end
+})
 CustomStatSystem.Loaded = false
 CustomStatSystem.MISC_CATEGORY = 99999
 
@@ -45,8 +57,6 @@ CustomStatSystem.TooltipType = {
 
 local self = CustomStatSystem
 
-local isClient = Ext.IsClient()
-
 ---@type table<UUID|NETID, table<CUSTOMSTATID, integer>>
 CustomStatSystem.PointsPool = {}
 if not isClient then
@@ -61,17 +71,8 @@ if not isClient then
 	setmetatable(CustomStatSystem.PointsPool, PointsPoolHandler)
 end
 
----@alias MOD_UUID string
----@alias CUSTOMSTATID string
-
----@type table<MOD_UUID, table<CUSTOMSTATID, SheetCustomStatCategoryData>>
-CustomStatSystem.Categories = {}
----@type table<MOD_UUID, table<CUSTOMSTATID, SheetCustomStatData>>
-CustomStatSystem.Stats = {}
 CustomStatSystem.UnregisteredStats = {}
 
----@type fun():table<string, table<string, SheetCustomStatData>>
-local loader = Ext.Require("SheetManager/Core/Managers/CustomStats/ConfigLoader.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/Aliases.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/Getters.lua")
 Ext.Require("SheetManager/Core/Managers/CustomStats/DataSync.lua")
@@ -83,15 +84,11 @@ function CustomStatSystem:GMStatsEnabled()
 	return SharedData.GameMode == GAMEMODE.GAMEMASTER
 end
 
-local function LoadCustomStatsData()
-	local categories,stats = loader()
-	TableHelpers.AddOrUpdate(CustomStatSystem.Categories, categories)
-	TableHelpers.AddOrUpdate(CustomStatSystem.Stats, stats)
-
-	Ext.SaveFile(string.format("ConsoleDebug/CustomStats_%s_%s.lua", "Categories", isClient and "CLIENT" or "SERVER"), Lib.serpent.block(CustomStatSystem.Categories))
-	Ext.SaveFile(string.format("ConsoleDebug/CustomStats_%s_%s.lua", "Stats", isClient and "CLIENT" or "SERVER"), Lib.serpent.block(CustomStatSystem.Stats))
-
+---@private
+function CustomStatSystem.Initialize()
 	if not isClient then
+		CustomStatSystem.UnregisteredStats = {}
+
 		local foundStats = {}
 		if CustomStatSystem:GMStatsEnabled() then
 			for uuid,stats in pairs(CustomStatSystem.Stats) do
@@ -116,8 +113,6 @@ local function LoadCustomStatsData()
 					end
 				end
 			end
-
-			CustomStatSystem.UnregisteredStats = {}
 	
 			for _,uuid in pairs(Ext.GetAllCustomStats()) do
 				if not foundStats[uuid] then
@@ -161,13 +156,6 @@ local function LoadCustomStatsData()
 
 	InvokeListenerCallbacks(CustomStatSystem.Listeners.Loaded, CustomStatSystem)
 end
-
-if not isClient then
-	RegisterListener("Initialized", LoadCustomStatsData)
-else
-	Ext.RegisterListener("SessionLoaded", LoadCustomStatsData)
-end
---RegisterListener("LuaReset", LoadCustomStatsData)
 
 ---@private
 ---@param character EsvCharacter|EclCharacter
