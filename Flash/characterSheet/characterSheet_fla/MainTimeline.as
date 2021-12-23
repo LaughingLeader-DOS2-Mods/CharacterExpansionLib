@@ -956,6 +956,10 @@ package characterSheet_fla
 		{
 			if (!this.justUpdated || force) {
 				this.stats_mc.clearStats();
+				this.stats_mc.setVisibilityStatButtons(false);
+				this.stats_mc.setVisibilityAbilityButtons(false,false);
+				this.stats_mc.setVisibilityAbilityButtons(true,false);
+				this.stats_mc.setVisibilityTalentButtons(false);
 			}
 		}
 
