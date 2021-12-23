@@ -80,7 +80,6 @@ package
 		
 		public function onOver(e:MouseEvent) : *
 		{
-			trace("cdContent", this.x, this.y, this.width, this.height);
 			var hit_mc:MovieClip = e.target as MovieClip;
 			var pos:Point = hit_mc.localToGlobal(new Point(0,0));
 			var skill:String = null;
