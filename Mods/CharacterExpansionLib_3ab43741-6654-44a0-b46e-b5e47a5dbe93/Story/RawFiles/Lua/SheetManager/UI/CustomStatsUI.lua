@@ -168,7 +168,7 @@ function CustomStatSystem.Update(ui, method, this)
 						hideStat = true
 					end
 				else
-					local text,handle = Ext.GetTranslatedStringFromKey(displayName)
+					local text = GameHelpers.GetStringKeyText(displayName)
 					if not StringHelpers.IsNullOrWhitespace(text) then
 						displayName = text
 					end
@@ -208,13 +208,13 @@ function CustomStatSystem.Update(ui, method, this)
 			this.clearArray("customStats_array")
 		end
 		for stat in CustomStatSystem:GetAllStats(false, true, true) do
-			local visible = CustomStatSystem:GetStatVisibility(ui, stat.Double, stat, client)
+			local visible = CustomStatSystem:GetStatVisibility(ui, stat.GeneratedID, stat, client)
 			if visible then
 				local value = stat:GetValue(client)
 				local groupId = CustomStatSystem:GetCategoryGroupId(stat.Category, stat.Mod)
-				local plusVisible = self:GetCanAddPoints(ui, stat.Double)
-				local minusVisible = self:GetCanRemovePoints(ui, stat.Double)
-				this.stats_mc.customStats_mc.addCustomStat(stat.Double, stat:GetDisplayName(), tostring(value), groupId, plusVisible, minusVisible, true)
+				local plusVisible = self:GetCanAddPoints(ui, stat.GeneratedID)
+				local minusVisible = self:GetCanRemovePoints(ui, stat.GeneratedID)
+				this.stats_mc.customStats_mc.addCustomStat(stat.GeneratedID, stat:GetDisplayName(), tostring(value), groupId, plusVisible, minusVisible, true)
 			end
 		end
 	end
@@ -442,7 +442,7 @@ function CustomStatSystem:OnStatAdded(ui, call, doubleHandle, index)
 			end
 		end
 	else
-		--[[ local text,handle = Ext.GetTranslatedStringFromKey(stat_mc.label_txt.htmlText)
+		--[[ local text = GameHelpers.GetStringKeyText(stat_mc.label_txt.htmlText)
 		if not StringHelpers.IsNullOrWhitespace(text) then
 			stat_mc.label_txt.htmlText = text
 			stat_mc.label_txt.height = math.min(22.05, stat_mc.label_txt.textHeight)
