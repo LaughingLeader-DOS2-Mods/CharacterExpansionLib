@@ -1,21 +1,23 @@
 local function OnPointsAdded(statType, ui, event, generatedId, ...)
+	local character = Client:GetCharacter()
 	local stat = SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	if stat then
 		if statType ~= "Talent" then
-			stat:ModifyValue(Client:GetCharacter(), 1)
+			stat:ModifyValue(character, 1)
 		else
-			stat:SetValue(Client:GetCharacter(), true)
+			stat:SetValue(character, true)
 		end
 	end
 end
 
 local function OnPointsRemove(statType, ui, event, generatedId, ...)
+	local character = Client:GetCharacter()
 	local stat = SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	if stat then
 		if statType ~= "Talent" then
-			stat:ModifyValue(Client:GetCharacter(), -1)
+			stat:ModifyValue(character, -1)
 		else
-			stat:SetValue(Client:GetCharacter(), false)
+			stat:SetValue(character, false)
 		end
 	end
 end
@@ -55,10 +57,10 @@ end
 --region Fix for base stats not being adjustable when the sheet is in GM mode in campaign mode
 
 local function RequestBaseValueChange(statType, id, modifyBy, skipPointsCheck)
+	local character = Client:GetCharacter()
 	if GameHelpers.Client.IsGameMaster() and SharedData.GameMode == GAMEMODE.CAMPAIGN then
 		local stat,entryType = GetBaseStatID(id, statType)
 		if stat then
-			local character = Client:GetCharacter()
 			if character then
 				local points = 0
 				if not skipPointsCheck then
@@ -88,6 +90,7 @@ local function RequestBaseValueChange(statType, id, modifyBy, skipPointsCheck)
 			end
 		end
 	end
+	SheetManager.Sync.AvailablePointsWithDelay(character)
 end
 
 local function OnBasePointsAdded(statType, ui, event, id)
