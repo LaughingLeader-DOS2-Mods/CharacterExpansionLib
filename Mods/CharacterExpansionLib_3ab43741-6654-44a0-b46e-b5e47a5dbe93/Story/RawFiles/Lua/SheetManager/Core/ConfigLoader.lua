@@ -163,13 +163,13 @@ end
 
 local function TryFindConfig(info)
 	local filePath = string.format("Mods/%s/CharacterSheetConfig.json", info.Directory)
-	local file = Ext.LoadFile(filePath, "data")
+	local file = Ext.IO.LoadFile(filePath, "data")
 	return file
 end
 
 local function TryFindOldCustomStatsConfig(info)
 	local filePath = string.format("Mods/%s/CustomStatsConfig.json", info.Directory)
-	local file = Ext.LoadFile(filePath, "data")
+	local file = Ext.IO.LoadFile(filePath, "data")
 	return file
 end
 
@@ -235,9 +235,12 @@ local function LoadConfigFiles()
 
 	if Vars.DebugMode and Vars.LeaderDebugMode then
 		--local data = LoadConfig(ModuleUUID, Ext.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
-		local data = LoadConfig(ModuleUUID, Ext.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data"))
-		if data and data.Success then
-			entries[ModuleUUID] = data
+		local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
+		if dataStr then
+			local data = LoadConfig(ModuleUUID, Common.JsonParse(dataStr))
+			if data and data.Success then
+				entries[ModuleUUID] = data
+			end
 		end
 	end
 	return entries

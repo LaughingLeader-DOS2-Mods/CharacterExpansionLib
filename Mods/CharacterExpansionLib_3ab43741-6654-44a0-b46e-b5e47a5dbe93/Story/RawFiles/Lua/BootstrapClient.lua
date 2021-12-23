@@ -11,9 +11,9 @@ UIOverrides = {
 	},
 	Enable = function()
 		for k,v in pairs(UIOverrides.Files) do
-			local currentPath = Ext.GetPathOverride(v.Source)
+			local currentPath = Ext.IO.GetPathOverride(v.Source)
 			if not currentPath or currentPath == v.Source then
-				Ext.AddPathOverride(v.Source, v.Replacement)
+				Ext.IO.AddPathOverride(v.Source, v.Replacement)
             --The currentPath may be the full path including the drive letter, so string.find helps with checking that.
 			elseif currentPath ~= v.Replacement and not string.find(currentPath, v.Replacement, 1, true) then
 				Ext.PrintError(string.format("[CharacterExpansionLib] UI file (%s) is already being overwritten! Mod conflict! The replacement path is (%s).", k, currentPath))

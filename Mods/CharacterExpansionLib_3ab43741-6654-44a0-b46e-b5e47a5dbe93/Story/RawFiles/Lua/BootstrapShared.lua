@@ -1,3 +1,16 @@
+if Ext.Version() < 56 and Ext.IO == nil then
+	local io = {
+		AddPathOverride = Ext.AddPathOverride,
+		GetPathOverride = Ext.GetPathOverride,
+		LoadFile = Ext.LoadFile,
+		SaveFile = Ext.SaveFile,
+	}
+	if Ext.GetPathOverride == nil then
+		io.GetPathOverride = function() return nil end
+	end
+	rawset(Ext, "IO", io)
+end
+
 ModuleFolder = Ext.GetModInfo(ModuleUUID).Directory
 
 ---@class CharacterExpansionLibListeners:table
@@ -5,6 +18,13 @@ local listeners = {}
 Mods.CharacterExpansionLib.Listeners = listeners
 
 Mods.LeaderLib.Import(Mods.CharacterExpansionLib)
+
+---Makes CharacterExpansionLib's and LeaderLib's globals accessible using metamethod magic. Pass it a mod table, such as Mods.MyModTable.
+---Usage: Mods.CharacterExpansionLib.Import(Mods.MyModTable)
+---@param targetModTable table
+function Import(targetModTable)
+	Mods.LeaderLib.Import(targetModTable, Mods.CharacterExpansionLib)
+end
 
 local isClient = Ext.IsClient()
 
@@ -31,7 +51,8 @@ local printMessages = {
 function RegisterNetListener(id, callback)
 	Ext.RegisterNetListener(id, function(id, payload, user)
 		if Vars.LeaderDebugMode and printMessages[id] then
-			fprint(LOGLEVEL.DEFAULT, "[NetListener:%s] id(%s) user(%s) payload:\n%s", Ext.IsClient() and "CLIENT" or "SERVER", id, user, payload)
+			--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
+			fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", id, user, payload)
 		end
 		local b,err = xpcall(callback, debug.traceback, id, payload, user)
 		if not b then
@@ -76,9 +97,3 @@ end
 Ext.RegisterListener("SessionLoading", function()
 	--CheckOsiToolsConfig()
 end)
-
----Makes CharacterExpansionLib's and LeaderLib's globals accessible using metamethod magic. Pass it a mod table, such as Mods.MyModTable.
----@param targetModTable table
-function Import(targetModTable)
-	Mods.LeaderLib.Import(targetModTable, Mods.CharacterExpansionLib)
-end

@@ -32,7 +32,11 @@ local SheetCustomStatData = {
 	AutoAddAvailablePointsOnRemove = true,
 }
 
+---@param tbl SheetCustomStatData
 SheetCustomStatData.__index = function(tbl,k)
+	if k == "Handle" or k == "Double" then
+		return tbl.GeneratedID
+	end
 	return SheetCustomStatData[k] or Classes.SheetCustomStatBase[k]
 end
 
