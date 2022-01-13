@@ -759,30 +759,40 @@ Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 ---@param ui UIObject
 local function UpdateCharacterSheetPoints(ui, method, amount)
 	local characterId = GameHelpers.GetCharacterID(Client:GetCharacter())
-
-	if method == "setAvailableCombatAbilityPoints" or method == "setAvailableCivilAbilityPoints" then
-		local availablePoints = 0
-		if method == "setAvailableCombatAbilityPoints" then
-			availablePoints = SheetManager:GetAvailablePoints(characterId, "Ability")
-			if availablePoints ~= amount then
-				SheetManager.AvailablePoints[characterId].Ability = amount
-			end
-		else
-			availablePoints = SheetManager:GetAvailablePoints(characterId, "Civil")
-			if availablePoints ~= amount then
-				SheetManager.AvailablePoints[characterId].Civil = amount
-			end
+	if characterId then
+		if SheetManager.AvailablePoints[characterId] == nil then
+			SheetManager.AvailablePoints[characterId] = {
+				Attribute = 0,
+				Ability = 0,
+				Civil = 0,
+				Talent = 0,
+				Custom = 0,
+			}
 		end
-		SheetManager.Abilities.UpdateCharacterSheetPoints(ui, method, ui:GetRoot(), amount)
-	elseif method == "setAvailableStatPoints" then
-		local availablePoints = SheetManager:GetAvailablePoints(characterId, "Attribute")
-		if availablePoints ~= amount then
-			SheetManager.AvailablePoints[characterId].Attribute = amount
-		end
-	elseif method == "setAvailableTalentPoints" then
-		local availablePoints = SheetManager:GetAvailablePoints(characterId, "Talent")
-		if availablePoints ~= amount then
-			SheetManager.AvailablePoints[characterId].Talent = amount
+		if method == "setAvailableCombatAbilityPoints" or method == "setAvailableCivilAbilityPoints" then
+			local availablePoints = 0
+			if method == "setAvailableCombatAbilityPoints" then
+				availablePoints = SheetManager:GetAvailablePoints(characterId, "Ability")
+				if availablePoints ~= amount then
+					SheetManager.AvailablePoints[characterId].Ability = amount
+				end
+			else
+				availablePoints = SheetManager:GetAvailablePoints(characterId, "Civil")
+				if availablePoints ~= amount then
+					SheetManager.AvailablePoints[characterId].Civil = amount
+				end
+			end
+			SheetManager.Abilities.UpdateCharacterSheetPoints(ui, method, ui:GetRoot(), amount)
+		elseif method == "setAvailableStatPoints" then
+			local availablePoints = SheetManager:GetAvailablePoints(characterId, "Attribute")
+			if availablePoints ~= amount then
+				SheetManager.AvailablePoints[characterId].Attribute = amount
+			end
+		elseif method == "setAvailableTalentPoints" then
+			local availablePoints = SheetManager:GetAvailablePoints(characterId, "Talent")
+			if availablePoints ~= amount then
+				SheetManager.AvailablePoints[characterId].Talent = amount
+			end
 		end
 	end
 end
@@ -873,17 +883,17 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 			end
 
 			if entry.StatType == "PrimaryStat" then
-				mc.text_txt.htmlText = string.format("%i", value)
+				mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 				mc.statBasePoints = value
 				-- mc.statPoints = 0
 			elseif entry.StatType == "SecondaryStat" then
 				mc.boostValue = value
-				mc.text_txt.htmlText = string.format("%i", value)
+				mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 				mc.statBasePoints = value
 				-- mc.statPoints = 0
 			elseif entry.StatType == "Ability" then
 				mc.am = value
-				mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+				mc.texts_mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 				mc.statBasePoints = value
 				-- mc.statPoints = 0
 			elseif entry.StatType == "Talent" then
@@ -913,9 +923,9 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 					mc.setValue(value)
 
 					if entry.DisplayMode == "Percentage" then
-						mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
+						mc.text_txt.htmlText = string.format("%s%%%s", math.floor(value), entry.Suffix or "")
 					elseif value > CustomStatSystem.MaxVisibleValue then
-						mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
+						mc.text_txt.htmlText = string.format("%s%s", StringHelpers.GetShortNumberString(value), entry.Suffix or "")
 					end
 
 					mc.plus_mc.visible = plusVisible
@@ -961,13 +971,13 @@ function CharacterSheet.UpdateAllEntries()
 					Ext.PrintError(entry.ID, entry.StatType, mc.type, mc.statID, mc.callbackStr)
 				end
 				if mc.type == "PrimaryStat" then
-					mc.text_txt.htmlText = string.format("%i", value)
+					mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
 				elseif mc.type == "SecondaryStat" or mc.type == "InfoStat" then
 					mc.boostValue = value
 					if mc.texts_mc then
-						mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+						mc.texts_mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 						if isGM then
 							this.setupSecondaryStatsButtons(mc.statID,true,minusVisible,plusVisible,mc.statID == 44 and 9 or 5)
 						else
@@ -975,14 +985,14 @@ function CharacterSheet.UpdateAllEntries()
 						end
 					else
 						if mc.text_txt then
-							mc.text_txt.htmlText = string.format("%i", value)
+							mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 						end
 					end
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
 				elseif entry.StatType == "Ability" then
 					mc.am = value
-					mc.texts_mc.text_txt.htmlText = string.format("%i", value)
+					mc.texts_mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 					mc.statBasePoints = value
 					-- mc.statPoints = 0
 				elseif entry.StatType == "Talent" then
