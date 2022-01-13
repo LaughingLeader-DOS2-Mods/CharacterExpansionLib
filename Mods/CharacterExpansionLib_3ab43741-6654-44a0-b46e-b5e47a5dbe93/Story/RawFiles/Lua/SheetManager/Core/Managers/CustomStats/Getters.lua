@@ -184,6 +184,34 @@ function CustomStatSystem:HasCategories()
 	return false
 end
 
+---@param a SheetCustomStatCategoryData
+---@param b SheetCustomStatCategoryData
+local function SortCategories(a,b)
+	local name1 = a:GetDisplayName()
+	local name2 = b:GetDisplayName()
+	local sortVal1 = a.Index
+	local sortVal2 = b.Index
+	local trySortByValue = false
+	if a.SortName then
+		name1 = a.SortName
+	end
+	if a.SortValue then
+		sortVal1 = a.SortValue
+		trySortByValue = true
+	end
+	if b.SortName then
+		name2 = b.SortName
+	end
+	if b.SortValue then
+		sortVal2 = b.SortValue
+		trySortByValue = true
+	end
+	if trySortByValue and sortVal1 ~= sortVal2 then
+		return sortVal1 < sortVal2
+	end
+	return name1 < name2
+end
+
 ---Get an iterator of sorted categories.
 ---@param skipSort boolean|nil
 ---@return fun():SheetCustomStatCategoryData
@@ -202,35 +230,11 @@ function CustomStatSystem:GetAllCategories(skipSort)
 
 	---@type SheetCustomStatCategoryData[]
 	local categories = {}
-	for k,v in pairs(allCategories) do
+	for id,v in pairs(allCategories) do
 		categories[#categories+1] = v
 	end
 	if skipSort ~= true then
-		table.sort(categories, function(a,b)
-			local name1 = a:GetDisplayName()
-			local name2 = b:GetDisplayName()
-			local sortVal1 = a.Index
-			local sortVal2 = b.Index
-			local trySortByValue = false
-			if a.SortName then
-				name1 = a.SortName
-			end
-			if a.SortValue then
-				sortVal1 = a.SortValue
-				trySortByValue = true
-			end
-			if b.SortName then
-				name2 = b.SortName
-			end
-			if b.SortValue then
-				sortVal2 = b.SortValue
-				trySortByValue = true
-			end
-			if trySortByValue and sortVal1 ~= sortVal2 then
-				return sortVal1 < sortVal2
-			end
-			return name1 < name2
-		end)
+		table.sort(categories, SortCategories)
 	end
 
 	local i = 0
