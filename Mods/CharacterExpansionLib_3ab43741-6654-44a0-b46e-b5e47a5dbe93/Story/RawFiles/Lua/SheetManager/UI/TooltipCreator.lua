@@ -2,12 +2,12 @@ local isVisible = false
 local lastTooltipX = nil
 local lastTooltipY = nil
 
-Game.Tooltip.RegisterBeforeNotifyListener("CustomStat", function(request, ui, method, tooltip, ...)
-	if request.RequestUpdate then
-		SheetManager.CustomStats:UpdateStatTooltipArray(ui, request.Stat, tooltip, request)
-		request.RequestUpdate = false
+Game.Tooltip.RegisterRequestListener("Stat", function(request, ui, uiType, event, id, statOrWidth, ...)
+	local stat = SheetManager:GetEntryByGeneratedID(id, "Stat")
+	if stat then
+		request.Stat = stat.ID
 	end
-end)
+end, "before")
 
 Game.Tooltip.RegisterRequestListener("Ability", function(request, ui, uiType, event, id, statOrWidth, ...)
 	local stat = SheetManager:GetEntryByGeneratedID(id, "Ability")
@@ -22,6 +22,13 @@ Game.Tooltip.RegisterRequestListener("Talent", function(request, ui, uiType, eve
 		request.Talent = stat.ID
 	end
 end, "before")
+
+Game.Tooltip.RegisterBeforeNotifyListener("CustomStat", function(request, ui, method, tooltip, ...)
+	if request.RequestUpdate then
+		SheetManager.CustomStats:UpdateStatTooltipArray(ui, request.Stat, tooltip, request)
+		request.RequestUpdate = false
+	end
+end)
 
 Game.Tooltip.RegisterRequestListener("CustomStat", function(request, ui, uiType, event, id, statOrWidth, ...)
 	SheetManager.CustomStats:OnRequestTooltip(ui, event, request.Stat, request.Character, ...)
