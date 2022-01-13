@@ -15,6 +15,20 @@ function CharacterCreation.UpdateTalents(ui, method)
 	if not this then
 		return
 	end
+
+	local engineValues = {}
+
+	--talentArray[0] is available points
+	for i=1,#this.talentArray-1,4 do
+		local statID = this.talentArray[i]
+		--local talentLabel = this.talentArray[i+1]
+		local isUnlocked = this.talentArray[i+2]
+		--local choosable = this.talentArray[i+3]
+		if statID and isUnlocked ~= nil then
+			engineValues[statID] = isUnlocked
+		end
+	end
+
 	--this.clearArray("talentArray")
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
@@ -22,6 +36,9 @@ function CharacterCreation.UpdateTalents(ui, method)
 	local talentsMC = this.CCPanel_mc.talents_mc
 
 	for talent in SheetManager.Talents.GetVisible(player, true) do
+		if engineValues[talent.ID] ~= nil then
+			talent.HasTalent = engineValues[talent.ID]
+		end
 		talentsMC.addTalentElement(talent.ID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
 	end
 
@@ -44,6 +61,22 @@ function CharacterCreation.UpdateAbilities(ui, method)
 	end
 	--this.clearArray("abilityArray")
 
+	local engineValues = {}
+
+	for i=0,#this.abilityArray-1,7 do
+		--local groupID = this.abilityArray[i]
+		--local groupTitle = this.abilityArray[i+1]
+		local statID = this.abilityArray[i+2]
+		--local abilityLabel = this.abilityArray[i+3]
+		local abilityValue = this.abilityArray[i+4]
+		local abilityDelta = this.abilityArray[i+5]
+		--local isCivil = this.abilityArray[i+6]
+		engineValues[statID] = {
+			Value = abilityValue,
+			Delta = abilityDelta
+		}
+	end
+
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
 	local abilities_mc = this.CCPanel_mc.abilities_mc
@@ -52,6 +85,11 @@ function CharacterCreation.UpdateAbilities(ui, method)
 	local classEdit = class_mc.classEditList[1]
 	classEdit.contentList.clearElements()
 	for ability in SheetManager.Abilities.GetVisible(player, nil, true) do
+		local updateData = engineValues[ability.ID]
+		if updateData then
+			ability.Value = updateData.Value
+			ability.Delta = updateData.Delta
+		end
 		classEdit.addContentString(1,ability.ID,ability.DisplayName)
 		abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.ID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 	end
@@ -74,10 +112,18 @@ function CharacterCreation.UpdateAttributes(ui, method)
 	end
 	--this.clearArray("abilityArray")
 
-	-- print("attributeArray")
-	-- for i=0,#this.attributeArray-1 do
-	-- 	print(i, this.attributeArray[i])
-	-- end
+	local engineValues = {}
+	for i=0,#this.attributeArray-1,5 do
+		local statID = this.attributeArray[i]
+		-- local label = this.abilityArray[i+1]
+		-- local attributeInfo = this.abilityArray[i+2]
+		local value = this.attributeArray[i+3]
+		local delta = this.attributeArray[i+4]
+		engineValues[statID] = {
+			Value = value,
+			Delta = delta
+		}
+	end
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 	local attributes_mc = this.CCPanel_mc.attributes_mc
@@ -85,6 +131,11 @@ function CharacterCreation.UpdateAttributes(ui, method)
 	this.availableAttributePoints = SheetManager:GetAvailablePoints(player, "Attribute")
 	
 	for stat in SheetManager.Stats.GetVisible(player, true) do
+		local updateData = engineValues[stat.ID]
+		if updateData then
+			stat.Value = updateData.Value
+			stat.Delta = updateData.Delta
+		end
 		attributes_mc.addAttribute(stat.ID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3)
 		if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 			self.Instance:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
