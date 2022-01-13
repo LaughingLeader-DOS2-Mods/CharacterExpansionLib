@@ -8,16 +8,15 @@ SheetManager.Sync = {}
 
 ---Sync all current values and available points for a specific character, or all characters if nil.
 ---@param character UUID|EsvCharacter
----@param user integer|nil
 function SheetManager:SyncData(character)
 	if not isClient then
 		SheetManager.Sync.EntryValues(character)
 		SheetManager.Sync.AvailablePoints(character)
 		if character ~= nil then
 			SheetManager.SessionManager:SyncSession(character)
-			Ext.PostMessageToClient(GameHelpers.GetCharacterID(character), "CEL_SheetManager_NotifyDataSynced", "")
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character), "CEL_SheetManager_NotifyDataSynced", "")
 		else
-			Ext.BroadcastMessage("CEL_SheetManager_NotifyDataSynced", "")
+			GameHelpers.Net.Broadcast("CEL_SheetManager_NotifyDataSynced", "")
 		end
 	else
 		if character then

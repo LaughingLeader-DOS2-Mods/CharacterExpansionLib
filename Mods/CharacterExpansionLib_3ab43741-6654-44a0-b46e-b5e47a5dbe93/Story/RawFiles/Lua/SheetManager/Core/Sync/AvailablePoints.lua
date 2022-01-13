@@ -31,7 +31,7 @@ function SheetManager.Sync.AvailablePoints(characterId)
 				SheetManager.AvailablePoints[player.MyGuid] = data
 				allPoints[player.NetID] = data
 			end
-			Ext.BroadcastMessage("CEL_SheetManager_LoadAllAvailablePoints", Ext.JsonStringify(allPoints))
+			GameHelpers.Net.Broadcast("CEL_SheetManager_LoadAllAvailablePoints", Ext.JsonStringify(allPoints))
 		else
 			local character = GameHelpers.GetCharacter(characterId)
 			local data = {}
@@ -42,7 +42,7 @@ function SheetManager.Sync.AvailablePoints(characterId)
 			data.Custom = PersistentVars.CustomStatAvailablePoints[character.MyGuid] or {}
 			SheetManager.AvailablePoints[character.MyGuid] = data
 	
-			Ext.PostMessageToClient(character.MyGuid, "CEL_SheetManager_LoadAvailablePointsForCharacter", Ext.JsonStringify({
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SheetManager_LoadAvailablePointsForCharacter", Ext.JsonStringify({
 				NetID = character.NetID,
 				Points = data
 			}))
@@ -97,7 +97,6 @@ else
 	end
 
 	RegisterNetListener("CEL_SheetManager_LoadAvailablePointsForCharacter", function(cmd, payload)
-		Ext.PrintWarning(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data and data.NetID and data.Points then
 			SheetManager.AvailablePoints[data.NetID] = data.Points

@@ -66,7 +66,7 @@ if not isClient then
 	function SessionManager:SyncSession(character)
 		local characterId = GameHelpers.GetCharacterID(character)
 		if self.Sessions[characterId] then
-			Ext.PostMessageToClient(characterId, "CEL_SessionManager_SyncCharacterData", Ext.JsonStringify(self.Sessions[characterId]))
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_SyncCharacterData", Ext.JsonStringify(self.Sessions[characterId]))
 		end
 	end
 
@@ -131,7 +131,7 @@ function SessionManager:ClearSession(character, skipSync)
 	SessionManager.Sessions[characterId] = nil
 	--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
 	if skipSync ~= true and not isClient then
-		Ext.PostMessageToClient(character.MyGuid, "CEL_SessionManager_ClearCharacterData", character.NetID)
+		GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
 	end
 end
 

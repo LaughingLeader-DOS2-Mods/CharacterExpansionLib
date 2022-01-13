@@ -107,7 +107,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			end
 		end
 		if skipSync ~= true and not isClient then
-			Ext.BroadcastMessage("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
+			GameHelpers.Net.Broadcast("CEL_SheetManager_EntryValueChanged", Ext.JsonStringify({
 				ID = stat.ID,
 				Mod = stat.Mod,
 				NetID = GameHelpers.GetNetID(characterId),

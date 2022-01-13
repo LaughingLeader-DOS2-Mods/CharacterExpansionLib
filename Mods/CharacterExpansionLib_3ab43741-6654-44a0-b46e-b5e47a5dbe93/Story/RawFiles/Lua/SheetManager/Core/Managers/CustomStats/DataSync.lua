@@ -78,9 +78,9 @@ if not isClient then
 				AvailablePoints = availablePoints
 			})
 			if user then
-				Ext.PostMessageToUser(user, "CEL_SharedData_StoreCustomStatData", payload)
+				GameHelpers.Net.PostToUser(user, "CEL_SharedData_StoreCustomStatData", payload)
 			else
-				Ext.BroadcastMessage("CEL_SharedData_StoreCustomStatData", payload)
+				GameHelpers.Net.Broadcast("CEL_SharedData_StoreCustomStatData", payload)
 			end
 		else
 			local payload = Ext.JsonStringify({
@@ -88,9 +88,9 @@ if not isClient then
 				AvailablePoints = availablePoints
 			})
 			if user then
-				Ext.PostMessageToUser(user, "CEL_SharedData_StoreCustomStatData", payload)
+				GameHelpers.Net.PostToUser(user, "CEL_SharedData_StoreCustomStatData", payload)
 			else
-				Ext.BroadcastMessage("CEL_SharedData_StoreCustomStatData", payload)
+				GameHelpers.Net.Broadcast("CEL_SharedData_StoreCustomStatData", payload)
 			end
 		end
 	end
@@ -208,7 +208,7 @@ RegisterNetListener("CEL_CustomStatSystem_RemoveStatByUUID", function(cmd, paylo
 		end
 		CustomStatSystem.UnregisteredStats[data.UUID] = nil
 		if not isClient then
-			Ext.BroadcastMessage("CEL_CustomStatSystem_RemoveStatByUUID", data.UUID, data.Client)
+			GameHelpers.Net.Broadcast("CEL_CustomStatSystem_RemoveStatByUUID", data.UUID, data.Client)
 		end
 	end
 end)

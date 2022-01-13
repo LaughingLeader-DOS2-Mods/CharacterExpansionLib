@@ -288,7 +288,7 @@ if not isClient then
 				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
 			end
 			--fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
-			Ext.PostMessageToClient(character.MyGuid, "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character.MyGuid), "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
 			return true
 		else
 			--Sync all characters
@@ -304,16 +304,16 @@ if not isClient then
 			if user then
 				local t = type(user)
 				if t == "number" then
-					Ext.PostMessageToUser(user, "CEL_SheetManager_LoadSyncData", data)
+					GameHelpers.Net.PostToUser(user, "CEL_SheetManager_LoadSyncData", data)
 					return true
 				elseif t == "string" then
-					Ext.PostMessageToClient(user, "CEL_SheetManager_LoadSyncData", data)
+					GameHelpers.Net.PostToUser(GameHelpers.GetUserID(user), "CEL_SheetManager_LoadSyncData", data)
 					return true
 				else
 					--fprint(LOGLEVEL.ERROR, "[SheetManager:SyncData] Invalid type (%s)[%s] for user parameter.", t, user)
 				end
 			end
-			Ext.BroadcastMessage("CEL_SheetManager_LoadSyncData", data)
+			GameHelpers.Net.Broadcast("CEL_SheetManager_LoadSyncData", data)
 			return true
 		end
 		return false

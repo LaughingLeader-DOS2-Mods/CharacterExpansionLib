@@ -227,7 +227,7 @@ if not isClient then
 						data.Description = ""
 					end
 				end
-				Ext.PostMessageToUser(character.ReservedUserID, "CEL_CreateCustomStatTooltip", Ext.JsonStringify(data))
+				GameHelpers.Net.PostToUser(character.ReservedUserID, "CEL_CreateCustomStatTooltip", Ext.JsonStringify(data))
 			end
 		end
 	end)
