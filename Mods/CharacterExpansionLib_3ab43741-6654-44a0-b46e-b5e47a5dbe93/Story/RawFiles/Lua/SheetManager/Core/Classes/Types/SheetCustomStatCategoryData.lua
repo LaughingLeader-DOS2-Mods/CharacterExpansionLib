@@ -5,6 +5,7 @@ local SheetCustomStatCategoryData = {
 	HideTotalPoints = false,
 	TooltipType = "Stat",
 	GroupId = nil,
+	Index = -1,
 }
 
 SheetCustomStatCategoryData.PropertyMap = {
