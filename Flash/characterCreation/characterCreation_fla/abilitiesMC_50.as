@@ -74,36 +74,36 @@ package characterCreation_fla
 		
 		public function updateAbilities(param1:Array) : *
 		{
-			var val2:Array = null;
-			var val3:uint = 0;
-			var val4:uint = 0;
-			var val5:String = null;
-			var val6:uint = 0;
-			var val7:String = null;
-			var val8:Number = NaN;
-			var val9:Number = NaN;
-			var val10:Boolean = false;
+			var contentArr:Array = null;
+			var i:uint = 0;
+			var groupID:uint = 0;
+			var groupTitle:String = null;
+			var statID:uint = 0;
+			var abilityLabel:String = null;
+			var abilityValue:Number = NaN;
+			var abilityDelta:Number = NaN;
+			var isCivil:Boolean = false;
 			if(param1.length > 0)
 			{
-				val2 = new Array();
-				val3 = 0;
-				while(val3 < param1.length)
+				contentArr = new Array();
+				i = 0;
+				while(i < param1.length)
 				{
-					val4 = param1[val3++];
-					val5 = param1[val3++];
-					val6 = param1[val3++];
-					val7 = param1[val3++];
-					val8 = param1[val3++];
-					val9 = param1[val3++];
-					val10 = param1[val3++];
-					this.addAbility(val4,val5,val6,val7,val8,val9,val10);
-					if(val9 > 0)
+					groupID = param1[i++];
+					groupTitle = param1[i++];
+					statID = param1[i++];
+					abilityLabel = param1[i++];
+					abilityValue = param1[i++];
+					abilityDelta = param1[i++];
+					isCivil = param1[i++];
+					this.addAbility(groupID,groupTitle,statID,abilityLabel,abilityValue,abilityDelta,isCivil);
+					if(abilityDelta > 0)
 					{
-						val2.push(val6);
-						val2.push(val7);
-						val2.push(val9);
+						contentArr.push(statID);
+						contentArr.push(abilityLabel);
+						contentArr.push(abilityDelta);
 					}
-					this.root_mc.CCPanel_mc.class_mc.addTabTextContent(1,val2);
+					this.root_mc.CCPanel_mc.class_mc.addTabTextContent(1,contentArr);
 				}
 				this.freePoints_txt.htmlText = this.root_mc.textArray[13] + " " + this.root_mc.availableAbilityPoints;
 				this.freePoints2_txt.htmlText = this.root_mc.textArray[13] + " " + this.root_mc.availableCivilPoints;

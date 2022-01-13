@@ -39,7 +39,7 @@ package
 			else
 			{
 				this.callbackStr = "showAbilityTooltip";
-				this.min_mc.callbackStr = "minusAbility";
+				this.min_mc.callbackStr = "minAbility";
 				this.plus_mc.callbackStr = "plusAbility";
 			}
 		}

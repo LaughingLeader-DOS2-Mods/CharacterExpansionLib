@@ -45,33 +45,33 @@ package characterCreation_fla
 		
 		public function updateAttributes(param1:Array) : *
 		{
-			var val2:Array = null;
-			var val3:uint = 0;
-			var val4:uint = 0;
-			var val5:String = null;
-			var val6:String = null;
-			var val7:Number = NaN;
-			var val8:Number = NaN;
+			var content:Array = null;
+			var i:uint = 0;
+			var statID:uint = 0;
+			var label:String = null;
+			var attributeInfo:String = null;
+			var value:Number = NaN;
+			var delta:Number = NaN;
 			if(param1.length > 0)
 			{
-				val2 = new Array();
-				val3 = 0;
-				while(val3 < param1.length)
+				content = new Array();
+				i = 0;
+				while(i < param1.length)
 				{
-					val4 = param1[val3++];
-					val5 = param1[val3++];
-					val6 = param1[val3++];
-					val7 = param1[val3++];
-					val8 = param1[val3++];
-					this.addAttribute(val4,val5,val6,val7,val8);
-					if(val8 != 0)
+					statID = param1[i++];
+					label = param1[i++];
+					attributeInfo = param1[i++];
+					value = param1[i++];
+					delta = param1[i++];
+					this.addAttribute(statID,label,attributeInfo,value,delta);
+					if(delta != 0)
 					{
-						val2.push(val4);
-						val2.push(val5);
-						val2.push(val8);
+						content.push(statID);
+						content.push(label);
+						content.push(delta);
 					}
 				}
-				this.root_mc.CCPanel_mc.class_mc.addTabTextContent(0,val2);
+				this.root_mc.CCPanel_mc.class_mc.addTabTextContent(0,content);
 			}
 			this.attributes.cleanUpElements();
 			this.freePoints_txt.htmlText = this.root_mc.textArray[12] + " " + this.root_mc.availableAttributePoints;

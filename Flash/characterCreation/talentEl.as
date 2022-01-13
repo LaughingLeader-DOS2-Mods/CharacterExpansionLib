@@ -38,8 +38,8 @@ package
 			else
 			{
 				this.callbackStr = "showTalentTooltip";
-				this.min_mc.callbackStr = "minusTalent";
-				this.plus_mc.callbackStr = "plusTalent";
+				this.min_mc.callbackStr = "toggleTalent";
+				this.plus_mc.callbackStr = "toggleTalent";
 			}
 		}
 		
