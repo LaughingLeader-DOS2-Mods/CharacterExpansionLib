@@ -183,6 +183,16 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 	end
 
 	if isClient then
+		local character = GameHelpers.GetCharacter(characterId)
+		if pointType == "Attribute" then
+			return character.PlayerUpgrade.AttributePoints
+		elseif pointType == "Ability" then
+			return character.PlayerUpgrade.CombatAbilityPoints
+		elseif pointType == "Civil" then
+			return character.PlayerUpgrade.CivilAbilityPoints
+		elseif pointType == "Talent" then
+			return character.PlayerUpgrade.TalentPoints
+		end
 		if SheetManager.AvailablePoints[characterId] then
 			return SheetManager.AvailablePoints[characterId][pointType] or 0
 		end
@@ -206,7 +216,7 @@ end
 function SheetManager:GetAllEntries(boostOnly, includeCustom)
 	local entries = {}
 
-	for t,tbl in pairs(self.Data.Stats) do
+	for _,tbl in pairs(self.Data.Stats) do
 		for id,entry in pairs(tbl) do
 			if boostOnly then
 				if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
