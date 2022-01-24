@@ -8,6 +8,19 @@ local self = CharacterCreation
 ---@field addTalentElement fun(talentID:integer, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean):void
 ---@field addCustomTalentElement fun(customID:string, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean):void
 
+local updateSessionPoints = {}
+
+Ext.RegisterUITypeCall(Data.UIType.characterCreation, "toggleTalent", function (ui, call, statID)
+	local this = ui:GetRoot()
+	if this then
+		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+		if updateSessionPoints[player.NetID] == nil then
+			updateSessionPoints[player.NetID] = {}
+		end
+		updateSessionPoints[player.NetID].Talent = statID
+	end
+end, "Before")
+
 ---@private
 ---@param ui UIObject
 function CharacterCreation.UpdateTalents(ui, method)
@@ -15,6 +28,8 @@ function CharacterCreation.UpdateTalents(ui, method)
 	if not this then
 		return
 	end
+
+	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
 	local engineValues = {}
 
@@ -26,11 +41,16 @@ function CharacterCreation.UpdateTalents(ui, method)
 		--local choosable = this.talentArray[i+3]
 		if statID and isUnlocked ~= nil then
 			engineValues[statID] = isUnlocked
+			if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Talent == statID then
+				if isUnlocked then
+					SheetManager.SessionManager:RequestPointsUpdate(player, "Talent", -1)
+				else
+					SheetManager.SessionManager:RequestPointsUpdate(player, "Talent", 1)
+				end
+				updateSessionPoints[player.NetID].Talent = nil
+			end
 		end
 	end
-
-	--this.clearArray("talentArray")
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
 	---@type FlashCharacterCreationTalentsMC
 	local talentsMC = this.CCPanel_mc.talents_mc
@@ -61,6 +81,7 @@ function CharacterCreation.UpdateAbilities(ui, method)
 	end
 	--this.clearArray("abilityArray")
 
+	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 	local engineValues = {}
 
 	for i=0,#this.abilityArray-1,7 do
@@ -75,9 +96,11 @@ function CharacterCreation.UpdateAbilities(ui, method)
 			Value = abilityValue,
 			Delta = abilityDelta
 		}
+		if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Ability == statID then
+			SheetManager.SessionManager:RequestPointsUpdate(player, "Ability", abilityValue)
+			updateSessionPoints[player.NetID].Ability = nil
+		end
 	end
-
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 
 	local abilities_mc = this.CCPanel_mc.abilities_mc
 	
@@ -112,6 +135,8 @@ function CharacterCreation.UpdateAttributes(ui, method)
 	end
 	--this.clearArray("abilityArray")
 
+	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+
 	local engineValues = {}
 	for i=0,#this.attributeArray-1,5 do
 		local statID = this.attributeArray[i]
@@ -123,9 +148,13 @@ function CharacterCreation.UpdateAttributes(ui, method)
 			Value = value,
 			Delta = delta
 		}
+
+		if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Stat == statID then
+			SheetManager.SessionManager:RequestPointsUpdate(player, "Stat", value)
+			updateSessionPoints[player.NetID].Stat = nil
+		end
 	end
 
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 	local attributes_mc = this.CCPanel_mc.attributes_mc
 
 	this.availableAttributePoints = SheetManager:GetAvailablePoints(player, "Attribute")
