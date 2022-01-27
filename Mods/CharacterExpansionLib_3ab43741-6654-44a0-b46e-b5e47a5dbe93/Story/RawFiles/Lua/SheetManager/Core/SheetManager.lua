@@ -4,6 +4,7 @@ if SheetManager == nil then
 end
 
 ---@alias SHEET_ENTRY_ID string
+---@alias MOD_UUID string
 
 SheetManager.__index = SheetManager
 SheetManager.Loaded = false

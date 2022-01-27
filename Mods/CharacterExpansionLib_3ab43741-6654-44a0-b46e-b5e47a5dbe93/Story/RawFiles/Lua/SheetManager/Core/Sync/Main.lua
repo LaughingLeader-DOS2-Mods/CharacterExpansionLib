@@ -39,9 +39,9 @@ else
 	---@private
 	function SheetManager:OnDataSynced()
 		if SheetManager.UI.CharacterCreation.IsOpen then
-			SheetManager.UI.CharacterCreation.UpdateAttributes()
-			SheetManager.UI.CharacterCreation.UpdateAbilities()
-			SheetManager.UI.CharacterCreation.UpdateTalents()
+			SheetManager.UI.CharacterCreation.UpdateAttributes(SheetManager.UI.CharacterCreation)
+			SheetManager.UI.CharacterCreation.UpdateAbilities(SheetManager.UI.CharacterCreation)
+			SheetManager.UI.CharacterCreation.UpdateTalents(SheetManager.UI.CharacterCreation)
 		elseif SheetManager.UI.CharacterSheet.IsOpen then
 			-- SheetManager.UI.CharacterSheet.UpdateAttributes()
 			-- SheetManager.UI.CharacterSheet.UpdateAbilities()

@@ -4,7 +4,7 @@ local isClient = Ext.IsClient()
 local OriginSettings = {
 	Type="OriginSettings",
 	ID = "",
-	---@type MOD_UUID
+	---@type string
 	Mod = "",
 	SkillSets = {},
 	Force = {

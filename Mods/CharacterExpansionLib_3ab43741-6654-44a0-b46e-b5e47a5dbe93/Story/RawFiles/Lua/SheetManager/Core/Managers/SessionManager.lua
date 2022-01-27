@@ -8,7 +8,6 @@ local isClient = Ext.IsClient()
 
 ---@class CharacterCreationSessionData
 ---@field Stats table
----@field ModifyPoints CharacterCreationSessionPointsData
 ---@field PendingChanges table
 
 local SessionManager = {
@@ -17,6 +16,14 @@ local SessionManager = {
 }
 
 local self = SessionManager
+
+local function ErrorMessage(prefix, txt, ...)
+	if #{...} > 0 then
+		return prefix .. string.format(txt, ...)
+	else
+		return prefix .. txt
+	end
+end
 
 if not isClient then
 	---@param character EsvCharacter|EclCharacter|UUID|NETID
@@ -33,26 +40,19 @@ if not isClient then
 		local data = {
 			UUID = characterId,
 			NetID = character.NetID,
-			Stats = {},
-			ModifyPoints = {
-				Attribute = 0,
-				Ability = 0,
-				Civil = 0,
-				Talent = 0,
-			},
 			PendingChanges = {},
 			Respec = respec
 		}
 
-		for k,v in pairs(Data.AttributeEnum) do
-			data.Stats[k] = character.Stats[k]
-		end
-		for k,v in pairs(Data.AbilityEnum) do
-			data.Stats[k] = character.Stats[k]
-		end
-		for k,v in pairs(Data.TalentEnum) do
-			data.Stats["TALENT_" .. k] = character.Stats["TALENT_" .. k]
-		end
+		-- for k,v in pairs(Data.AttributeEnum) do
+		-- 	data.Stats[k] = character.Stats[k]
+		-- end
+		-- for k,v in pairs(Data.AbilityEnum) do
+		-- 	data.Stats[k] = character.Stats[k]
+		-- end
+		-- for k,v in pairs(Data.TalentEnum) do
+		-- 	data.Stats["TALENT_" .. k] = character.Stats["TALENT_" .. k]
+		-- end
 
 		self.Sessions[characterId] = data
 
@@ -66,7 +66,7 @@ if not isClient then
 	function SessionManager:SyncSession(character)
 		local characterId = GameHelpers.GetCharacterID(character)
 		if self.Sessions[characterId] then
-			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_SyncCharacterData", Ext.JsonStringify(self.Sessions[characterId]))
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_SyncCharacterData", self.Sessions[characterId])
 		end
 	end
 
@@ -76,7 +76,20 @@ if not isClient then
 	local function OnCharacterCreationStarted(character, respec, success)
 		SessionManager:CreateSession(StringHelpers.GetUUID(character), respec)
 	end
-
+--[[ 
+	---@param region string
+	---@param state REGIONSTATE
+	---@param levelType LEVELTYPE
+	RegisterListener("RegionChanged", function (region, state, levelType)
+		Ext.PrintError("RegionChanged", region, state, levelType)
+		if levelType == LEVELTYPE.CHARACTER_CREATION and state ~= REGIONSTATE.ENDED then
+			for player in GameHelpers.Character.GetPlayers(false) do
+				fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
+				SessionManager:CreateSession(player, false)
+			end
+		end
+	end)
+ ]]
 	Ext.RegisterOsirisListener("CharacterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
 			OnCharacterCreationStarted(character, respec == 2, true)
@@ -107,6 +120,7 @@ if not isClient then
 	end) ]]
 else
 	RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
+		Ext.PrintError(cmd,payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			self.Sessions[data.NetID] = data
@@ -138,43 +152,13 @@ end
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
-	
 	if isClient then
 		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
 	else
 		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self.Sessions[characterId]
 		if sessionData then
-			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s\n%s", Lib.serpent.block(sessionData.ModifyPoints), Lib.serpent.block(sessionData.PendingChanges))
-
-			if sessionData.ModifyPoints then
-				local modifyPoints = TableHelpers.Clone(sessionData.ModifyPoints)
-				--Delay slightly because the engine will revert point changes otherwise
-				Timer.StartOneshot(string.format("CEL_ApplyCCSessionData_%s", characterId), 500, function()
-					local currentPoints = {
-						Attribute = CharacterGetAttributePoints(characterId),
-						Ability = CharacterGetAbilityPoints(characterId),
-						Civil = CharacterGetCivilAbilityPoints(characterId),
-						Talent = CharacterGetTalentPoints(characterId),
-					}
-					fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Apply point changes.\n%s\n%s", Lib.serpent.block(modifyPoints), Lib.serpent.block(currentPoints))
-					if modifyPoints.Attribute ~= 0 and modifyPoints.Attribute + currentPoints.Attribute >= 0 then
-						CharacterAddAttributePoint(characterId, modifyPoints.Attribute)
-					end
-					if modifyPoints.Ability ~= 0 and modifyPoints.Ability + currentPoints.Ability >= 0 then
-						CharacterAddAbilityPoint(characterId, modifyPoints.Ability)
-					end
-					if modifyPoints.Civil ~= 0 and modifyPoints.Civil + currentPoints.Civil >= 0 then
-						CharacterAddCivilAbilityPoint(characterId, modifyPoints.Civil)
-					end
-					if modifyPoints.Talent ~= 0 and modifyPoints.Talent + currentPoints.Talent >= 0 then
-						CharacterAddTalentPoint(characterId, modifyPoints.Talent)
-					end
-
-					SheetManager.Sync.AvailablePoints(characterId)
-				end)
-			end
-	
+			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 			if sessionData.PendingChanges then
 				local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
 				for statType,mods in pairs(sessionData.PendingChanges) do
@@ -210,16 +194,19 @@ end
 ---@return StatCharacter
 function SessionManager:CreateCharacterSessionMetaTable(character)
 	local character = GameHelpers.GetCharacter(character)
+	local netid = character.NetID
 	local sessionData = SheetManager.SessionManager:GetSession(character)
 	if sessionData then
 		local targetStats = {}
 		setmetatable(targetStats, {
 			__index = function(_, k)
-				if sessionData.Stats[k] then
-					return sessionData.Stats[k]
-				else
-					return character.Stats[k]
+				if isClient then
+					local stats = CharacterCreationWizard.Stats[netid]
+					if stats then
+						return stats
+					end
 				end
+				return character.Stats[k]
 			end,
 			__newindex = function(_, k, v)
 				character.Stats[k] = v

@@ -67,10 +67,10 @@ if version >= 56 then
 		end
 		local listeners = _netListeners[id]
 		local wrapper = function (_id, payload, user)
-			if Vars.LeaderDebugMode and printMessages[id] then
-				--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
-				fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
-			end
+			-- if Vars.LeaderDebugMode and printMessages[id] then
+			-- 	--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
+			-- 	fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
+			-- end
 			local b,err = xpcall(callback, debug.traceback, _id, payload, user)
 			if not b then
 				Ext.PrintError(err)
@@ -97,7 +97,6 @@ else
 end
 
 Ext.Require("SheetManager/Init.lua")
-Ext.Require("OriginManager/Init.lua")
 
 local function TryFindOsiToolsConfig(info)
 	local filePath = string.format("Mods/%s/OsiToolsConfig.json", info.Directory)
@@ -128,6 +127,7 @@ local function CheckOsiToolsConfig()
 	end
 end
 
-Ext.RegisterListener("SessionLoading", function()
+RegisterListener("LuaReset", function()
+	Mods.LeaderLib.Vars.Print.UI = true
 	--CheckOsiToolsConfig()
 end)

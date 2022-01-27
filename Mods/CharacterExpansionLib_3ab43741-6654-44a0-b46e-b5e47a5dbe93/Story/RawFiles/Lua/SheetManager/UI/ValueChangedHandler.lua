@@ -58,7 +58,7 @@ end
 
 local function RequestBaseValueChange(statType, id, modifyBy, skipPointsCheck)
 	local character = Client:GetCharacter()
-	if GameHelpers.Client.IsGameMaster() and SharedData.GameMode == GAMEMODE.CAMPAIGN then
+	if not GameHelpers.Client.IsGameMaster() and SharedData.GameMode == GAMEMODE.CAMPAIGN then
 		local stat,entryType = GetBaseStatID(id, statType)
 		if stat then
 			if character then
@@ -115,5 +115,19 @@ for t,v in pairs(SheetManager.Config.BaseCalls.PointRemoved) do
 	Ext.RegisterUITypeCall(Data.UIType.characterSheet, v, func, "Before")
 	Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, v, func, "Before")
 end
+-- for t,v in pairs(SheetManager.Config.BaseCreationCalls.PointAdded) do
+-- 	local func = function(...)
+-- 		OnBasePointsAdded(t, ...)
+-- 	end
+-- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation, v, func, "Before")
+-- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
+-- end
+-- for t,v in pairs(SheetManager.Config.BaseCreationCalls.PointRemoved) do
+-- 	local func = function(...)
+-- 		OnBasePointsRemove(t, ...)
+-- 	end
+-- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation, v, func, "Before")
+-- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
+-- end
 
 --endregion

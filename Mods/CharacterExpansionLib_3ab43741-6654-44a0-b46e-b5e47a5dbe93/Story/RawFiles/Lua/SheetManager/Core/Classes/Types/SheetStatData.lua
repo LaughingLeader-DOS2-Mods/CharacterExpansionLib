@@ -1,12 +1,15 @@
 local isClient = Ext.IsClient()
 
+---@alias StatSheetStatType string | "PrimaryStat" | "SecondaryStat" | "Spacing"
+---@alias StatSheetSecondaryStatType string | "Info" | "Normal" | "Resistance"
+
 ---@class SheetStatData:SheetBaseData
 local SheetStatData = {
 	Type = "SheetStatData",
 	TooltipType = "Stat",
-	---@type SheetStatType
+	---@type StatSheetStatType
 	StatType = "SecondaryStat",
-	---@type SheetSecondaryStatType
+	---@type StatSheetSecondaryStatType
 	SecondaryStatType = "Info",
 	---For if the StatType is "Spacing".
 	SpacingHeight = 0,

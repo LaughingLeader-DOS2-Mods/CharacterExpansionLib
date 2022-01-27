@@ -22,6 +22,8 @@ package
 
 		//CharacterExpansionLib Changes
 		public var statID:Number;
+		public var callbackID:Number;
+		public var attrID:Number; // Just in case Larian checks this in engine
 		public var tooltip:Number; // The tooltip ID
 		public var callbackStr:String = "showStatTooltip";
 		public var isCustom:Boolean = false;
@@ -39,6 +41,7 @@ package
 			}
 			else
 			{
+				this.attrID = id;
 				this.callbackStr = "showStatTooltip";
 				this.min_mc.callbackStr = "minAttribute";
 				this.plus_mc.callbackStr = "plusAttribute";

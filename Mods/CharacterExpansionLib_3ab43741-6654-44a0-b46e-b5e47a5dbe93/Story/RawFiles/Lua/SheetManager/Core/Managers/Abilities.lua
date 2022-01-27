@@ -217,8 +217,8 @@ if Ext.IsClient() then
 		local entries = {}
 		local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 
-		local abilityPoints = SheetManager:GetAvailablePoints(player, "Ability")
-		local civilPoints = SheetManager:GetAvailablePoints(player, "Civil")
+		local abilityPoints = SheetManager:GetAvailablePoints(player, "Ability", nil, true)
+		local civilPoints = SheetManager:GetAvailablePoints(player, "Civil", nil, true)
 	
 		local maxAbility = GameHelpers.GetExtraData("CombatAbilityCap", 10)
 		local maxCivil = GameHelpers.GetExtraData("CivilAbilityCap", 5)

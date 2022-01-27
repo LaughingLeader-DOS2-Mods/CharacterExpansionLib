@@ -173,6 +173,8 @@ end
 	width 135
 ]]
 
+local activeCustomDraws = {}
+
 ---@param self CharacterCreationWrapper
 ---@param ui UIObject
 local function SetSkills(self, ui, event)
@@ -204,12 +206,20 @@ local function SetSkills(self, ui, event)
 			end
 		end
 
+		activeCustomDraws = {}
+
 		this.clearArray("racialSkills")
 		local i = 0
 		for _,v in pairs(skills) do
 			local icon = Ext.StatGetAttribute(v, "Icon")
 			if not StringHelpers.IsNullOrWhitespace(icon) then
-				ui:SetCustomIcon(string.format("cel_racial%i", i), icon, this.iconSize, this.iconSize)
+				local iconId = string.format("llcel_racial%i", i)
+				ui:SetCustomIcon(iconId, icon, this.iconSize, this.iconSize)
+				activeCustomDraws[#activeCustomDraws+1] = {
+					ID = iconId,
+					Icon = icon,
+					Size = this.iconSize
+				}
 			end
 			this.racialSkills[i] = v
 			i = i + 1
@@ -217,17 +227,32 @@ local function SetSkills(self, ui, event)
 	end
 end
 
-if Vars.DebugMode then
-	local testArray = Ext.Require("OriginManager/Debug/ContentParserTesting.lua")
+if Ext.IsDeveloperMode() then
+	RegisterListener("BeforeLuaReset", function ()
+		Ext.SaveFile("CEL_Debug_CCDrawIcons.json", Common.JsonStringify(activeCustomDraws))
+	end)
+	
+	RegisterListener("LuaReset", function ()
+		local f = Ext.LoadFile("CEL_Debug_CCDrawIcons.json")
+		if f then
+			local data = Common.JsonParse(f)
+			if data then
+				local ui = SheetManager.UI.CharacterCreation:GetInstance()
+				if ui then
+					for _,v in pairs(data) do
+						ui:SetCustomIcon(v.ID, v.Icon, v.Size, v.Size)
+					end
+					activeCustomDraws = data
+				end
+			end
+		end
+	end)
+
+	local testArray = Ext.Require("CharacterCreationExtended/Debug/ContentParserTesting.lua")
 	Ext.RegisterConsoleCommand("testcc", function()
 		ParseArray(testArray)
 	end)
 end
 
-return {
-	---@param cc CharacterCreationWrapper
-	Init = function(cc)
-		cc:RegisterInvokeListener("updateContent", OnUpdateContent, "Before", "All")
-		cc:RegisterInvokeListener("updateSkills", SetSkills, "After", "All")
-	end
-}
+SheetManager.UI.CharacterCreation:RegisterInvokeListener("updateContent", OnUpdateContent, "Before", "All")
+SheetManager.UI.CharacterCreation:RegisterInvokeListener("updateSkills", SetSkills, "After", "All")

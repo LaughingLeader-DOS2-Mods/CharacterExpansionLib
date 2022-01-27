@@ -8,12 +8,64 @@ if SheetManager.Sync == nil then SheetManager.Sync = {} end
 ---@field Ability integer
 ---@field Civil integer
 ---@field Talent integer
----@field Custom table<CUSTOMSTATID,integer>
+---@field Custom table<string,integer>
 
 ---Get points via SheetManager:GetAvailablePoints
 ---@private
 ---@type table<UUID|NETID, SheetManagerAvailablePointsData>
 SheetManager.AvailablePoints = {}
+local CustomAvailablePoints = {}
+
+if isClient then
+	local function GetAvailablePoints(netid)
+		local pointsLink = {}
+		setmetatable(pointsLink, {
+			__index = function(tbl, k)
+				local ccwiz = Ext.UI.GetCharacterCreationWizard()
+				if ccwiz then
+					local points = ccwiz.AttributePoints
+					if k == "Attribute" then
+						return points[1]
+					elseif k == "Ability" then
+						return points[2]
+					elseif k == "Civil" then
+						return points[3]
+					elseif k == "Talent" then
+						return points[5]
+					elseif k == "SkillSlots" then
+						return points[4]
+					elseif k == "Custom" then
+						return CustomAvailablePoints[netid]
+					end
+				end
+			end,
+			__newindex = function(tbl, k, v)
+				local ccwiz = Ext.UI.GetCharacterCreationWizard()
+				if ccwiz then
+					local points = ccwiz.AttributePoints
+					if k == "Attribute" then
+						points[1] = v
+					elseif k == "Ability" then
+						points[2] = v
+					elseif k == "Civil" then
+						points[3] = v
+					elseif k == "Talent" then
+						points[5] = v
+					elseif k == "SkillSlots" then
+						points[4] = v
+					end
+				end
+			end
+		})
+		return pointsLink
+	end
+
+	setmetatable(SheetManager.AvailablePoints, {
+		__index = function (tbl, netid)
+			return GetAvailablePoints(netid)
+		end
+	})
+end
 
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
 function SheetManager.Sync.AvailablePoints(characterId)
@@ -99,7 +151,7 @@ else
 	RegisterNetListener("CEL_SheetManager_LoadAvailablePointsForCharacter", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data and data.NetID and data.Points then
-			SheetManager.AvailablePoints[data.NetID] = data.Points
+			CustomAvailablePoints[data.NetID] = data.Points.Custom
 		end
 		--SheetManager.UI.CharacterSheet.Update(SheetManager.UI.CharacterSheet.Instance, "updateArraySystem", {Abilities = true, PrimaryStats = true, Civil = true, Talents = true, CustomStats = true})
 		if SheetManager.UI.CharacterSheet.IsOpen then
@@ -109,7 +161,9 @@ else
 	RegisterNetListener("CEL_SheetManager_LoadAllAvailablePoints", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			SheetManager.AvailablePoints = data
+			for id,v in pairs(data) do
+				CustomAvailablePoints[id] = v.Custom
+			end
 			if SheetManager.UI.CharacterSheet.IsOpen then
 				SheetManager.UI.CharacterSheet.UpdateAllEntries()
 			end

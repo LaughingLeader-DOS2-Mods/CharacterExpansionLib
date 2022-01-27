@@ -2,9 +2,6 @@ local ts = Classes.TranslatedString
 
 local isClient = Ext.IsClient()
 
----@alias SheetStatType string | "PrimaryStat" | "SecondaryStat" | "Spacing"
----@alias SheetSecondaryStatType string | "Info" | "Normal" | "Resistance"
-
 ---@class StatsManager
 SheetManager.Stats = {
 	Data = {
@@ -348,7 +345,7 @@ SheetManager.Stats = {
 			Resistance = 2,
 			Experience = 3,
 		},
-		---@type table<integer,SheetSecondaryStatType>
+		---@type table<integer,StatSheetSecondaryStatType>
 		SecondaryStatTypeInteger = {
 			[0] = "Info",
 			[1] = "Stat",
@@ -383,6 +380,7 @@ SheetManager.Stats = {
 				NextLevel = 37,
 			},
 			ID = {
+				[0]="Strength",
 				[1]="Finesse",
 				[2]="Intelligence",
 				[3]="Constitution",
@@ -399,7 +397,6 @@ SheetManager.Stats = {
 				[14]="SourcePoints",
 				[20]="Movement",
 				[21]="Initiative",
-				[0]="Strength",
 				[28]="Fire",
 				[29]="Water",
 				[30]="Earth",
@@ -434,10 +431,11 @@ if isClient then
 
 	---@private
 	---@param player EclCharacter
-	---@param isCharacterCreation boolean|nil
-	---@param isGM boolean|nil
+	---@param isCharacterCreation ?boolean
+	---@param isGM ?boolean
+	---@param isRespec ?boolean
 	---@return fun():SheetManager.StatsUIEntry
-	function SheetManager.Stats.GetVisible(player, isCharacterCreation, isGM)
+	function SheetManager.Stats.GetVisible(player, isCharacterCreation, isGM, isRespec)
 		if isCharacterCreation == nil then
 			isCharacterCreation = false
 		end
@@ -447,7 +445,7 @@ if isClient then
 
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
-		local points = SheetManager:GetAvailablePoints(player, "Attribute")
+		local points = SheetManager:GetAvailablePoints(player, "Attribute", nil, true)
 		
 		local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
 
@@ -511,6 +509,9 @@ if isClient then
 							IconClipName = "",
 							IconDrawCallName = ""
 						}
+						if not isRespec then
+							entry.ID = entry.ID + 1
+						end
 						entries[#entries+1] = entry
 					end
 				end

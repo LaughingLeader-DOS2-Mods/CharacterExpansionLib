@@ -5,6 +5,7 @@ package characterCreation_fla
 	import flash.events.MouseEvent;
 	import flash.external.ExternalInterface;
 	import flash.geom.Point;
+	import LS_Classes.tooltipHelper;
 	
 	public dynamic class MainTimeline extends MovieClip
 	{
@@ -25,7 +26,8 @@ package characterCreation_fla
 		public const fixedContentSize:Point = new Point(300,150);
 		public const iconSize:uint = 55;
 		public const iconSpacing:uint = 25;
-		public const maxNameChars:uint = 20;
+		//CharacterExpansionLib - Increased limit
+		public const maxNameChars:uint = 255;
 		public const numberOfClassEdits:uint = 3;
 		public const skillIconSize:uint = 50;
 		public const chosenListSpacing:uint = 24;
@@ -54,8 +56,9 @@ package characterCreation_fla
 		public var isDragging:Boolean;
 		public var isGM:Boolean;
 		public var isMaster:Boolean;
-		public var screenWidth:uint;
-		public var screenHeight:uint;
+		public var screenWidth:Number;
+		public var screenHeight:Number;
+		public var uiScaling:Number;
 		public var contentArray:Array;
 		public var stepArray:Array;
 		public var attributeArray:Array;
@@ -106,7 +109,7 @@ package characterCreation_fla
 			_instance = this;
 			addFrameScript(0,this.frame1);
 		}
-		
+
 		public function onOverScrollEat(e:MouseEvent) : *
 		{
 			ExternalInterface.call("blockMouseWheelInput",true);
@@ -163,6 +166,13 @@ package characterCreation_fla
 				panelX = this.maxPanelPosX;
 			}
 			this.CCPanel_mc.x = panelX;
+
+			if(this.screenWidth != w || this.screenHeight != h)
+			{
+				this.screenWidth = w;
+				this.screenHeight = h;
+				this.uiScaling = h / this.designResolution.y;
+			}
 		}
 		
 		public function setLetterBoxText(str:String) : *
@@ -416,21 +426,27 @@ package characterCreation_fla
 		public function updateAttributes() : *
 		{
 			//CharacterExpansionLib - Disabled since we're adding attributes through Lua.
-			//this.CCPanel_mc.attributes_mc.updateAttributes(this.attributeArray);
+			if (!this.isExtended) {
+				this.CCPanel_mc.attributes_mc.updateAttributes(this.attributeArray);
+			}
 			this.attributeArray = new Array();
 		}
 		
 		public function updateAbilities() : *
 		{
 			//CharacterExpansionLib - Disabled since we're adding abilities through Lua.
-			//this.CCPanel_mc.abilities_mc.updateAbilities(this.abilityArray);
+			if (!this.isExtended) {
+				this.CCPanel_mc.abilities_mc.updateAbilities(this.abilityArray);
+			}
 			this.abilityArray = new Array();
 		}
 		
 		public function updateTalents() : *
 		{
 			//CharacterExpansionLib - Disabled since we're adding talents through Lua.
-			/*this.CCPanel_mc.talents_mc.updateTalents(this.talentArray,this.racialTalentArray);*/
+			if (!this.isExtended) {
+				this.CCPanel_mc.talents_mc.updateTalents(this.talentArray,this.racialTalentArray);
+			}
 			this.talentArray = new Array();
 			this.racialTalentArray = new Array();
 		}
@@ -519,18 +535,23 @@ package characterCreation_fla
 			{
 				case 0:
 					this.availableAttributePoints = amount;
+					ExternalInterface.call("characterCreationPointsUpdated", "Attribute", amount);
 					break;
 				case 1:
 					this.availableAbilityPoints = amount;
+					ExternalInterface.call("characterCreationPointsUpdated", "Ability", amount);
 					break;
 				case 2:
 					this.availableCivilPoints = amount;
+					ExternalInterface.call("characterCreationPointsUpdated", "Civil", amount);
 					break;
 				case 3:
 					this.availableSkillPoints = amount;
+					ExternalInterface.call("characterCreationPointsUpdated", "Skill", amount);
 					break;
 				case 4:
 					this.availableTalentPoints = amount;
+					ExternalInterface.call("characterCreationPointsUpdated", "Talent", amount);
 			}
 		}
 		
@@ -573,6 +594,39 @@ package characterCreation_fla
 				parentObj = parentObj.parent;
 			}
 			return pos;
+		}
+
+		public function get PanelButtonX() : Number
+		{
+			var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc.armourBtnHolder_mc.helmetBtn_mc);
+			//var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc);
+			return pos.x;
+		}
+
+		public function get PanelPositionX() : Number
+		{
+			var pos:Point = tooltipHelper.getGlobalPositionOfMC(this.CCPanel_mc, this);
+			//var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc);
+			return pos.x;
+		}
+
+		public function get PanelPositionY() : Number
+		{
+			var pos:Point = tooltipHelper.getGlobalPositionOfMC(this.CCPanel_mc, this);
+			//var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc);
+			return pos.y;
+		}
+
+		public function get PanelPositionX2() : Number
+		{
+			var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc);
+			return pos.x;
+		}
+
+		public function get PanelPositionY2() : Number
+		{
+			var pos:Point = this.getGlobalPositionOfMC(this.CCPanel_mc);
+			return pos.y;
 		}
 
 		//CharacterExpansionLib

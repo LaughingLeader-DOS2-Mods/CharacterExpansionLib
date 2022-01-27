@@ -122,21 +122,36 @@ end
 ---Gets the builtin available points for a stat.
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param clientCharacterCreationPoints ?table If in CC, pass this from Ext.UI.GetCharacterCreationWizard
 ---@return integer
-function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
+function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character, clientCharacterCreationPoints)
 	local entryType = entry.StatType
 	local isCivil = entryType == "Ability" and entry.IsCivil
 
-	if entryType == "PrimaryStat" then
-		return self:GetAvailablePoints(character, "Attribute")
-	elseif entryType == "Ability" then
-		if isCivil == true then
-			return self:GetAvailablePoints(character, "Civil")
-		else
-			return self:GetAvailablePoints(character, "Ability")
+	if not clientCharacterCreationPoints then
+		if entryType == "PrimaryStat" then
+			return self:GetAvailablePoints(character, "Attribute")
+		elseif entryType == "Ability" then
+			if isCivil == true then
+				return self:GetAvailablePoints(character, "Civil")
+			else
+				return self:GetAvailablePoints(character, "Ability")
+			end
+		elseif entryType == "Talent" then
+			return self:GetAvailablePoints(character, "Talent")
 		end
-	elseif entryType == "Talent" then
-		return self:GetAvailablePoints(character, "Talent")
+	else
+		if entryType == "PrimaryStat" then
+			return clientCharacterCreationPoints.Attribute
+		elseif entryType == "Ability" then
+			if isCivil == true then
+				return clientCharacterCreationPoints.Civil
+			else
+				return clientCharacterCreationPoints.Ability
+			end
+		elseif entryType == "Talent" then
+			return clientCharacterCreationPoints.Talent
+		end
 	end
 
 	return 0
@@ -147,7 +162,8 @@ end
 ---@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
 ---@param pointType AvailablePointsType
 ---@param customStatPointsID CUSTOMSTATID|nil If pointType is "Custom", this is the point ID.
-function SheetManager:GetAvailablePoints(characterId, pointType, customStatPointsID)
+---@param isCharacterCreation ?boolean
+function SheetManager:GetAvailablePoints(characterId, pointType, customStatPointsID, isCharacterCreation)
 	characterId = GameHelpers.GetCharacterID(characterId)
 
 	if pointType == "Custom" then
@@ -163,6 +179,10 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 			end
 		end
 		return 0
+	else
+		if isCharacterCreation then
+			return CharacterCreationWizard.AvailablePoints[characterId]
+		end
 	end
 
 	local sessionData = SheetManager.SessionManager:GetSession(characterId)

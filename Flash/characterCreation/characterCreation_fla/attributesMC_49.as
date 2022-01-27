@@ -43,7 +43,7 @@ package characterCreation_fla
 			this.attrHolder_mc.addChild(this.attributes);
 		}
 		
-		public function updateAttributes(param1:Array) : *
+		public function updateAttributes(updateArray:Array) : *
 		{
 			var content:Array = null;
 			var i:uint = 0;
@@ -52,17 +52,17 @@ package characterCreation_fla
 			var attributeInfo:String = null;
 			var value:Number = NaN;
 			var delta:Number = NaN;
-			if(param1.length > 0)
+			if(updateArray.length > 0)
 			{
 				content = new Array();
 				i = 0;
-				while(i < param1.length)
+				while(i < updateArray.length)
 				{
-					statID = param1[i++];
-					label = param1[i++];
-					attributeInfo = param1[i++];
-					value = param1[i++];
-					delta = param1[i++];
+					statID = updateArray[i++];
+					label = updateArray[i++];
+					attributeInfo = updateArray[i++];
+					value = updateArray[i++];
+					delta = updateArray[i++];
 					this.addAttribute(statID,label,attributeInfo,value,delta);
 					if(delta != 0)
 					{
@@ -87,7 +87,7 @@ package characterCreation_fla
 			ExternalInterface.call(mc.min_mc.callbackStr, mc.callbackID);
 		}
 		
-		public function addAttribute(statID:Number, label:String, attributeInfo:String, value:Number, delta:Number, frame:uint=0, isCustom:Boolean=false, iggyIconName:String = "", iconOffsetX:Number = 0, iconOffsetY:Number = 0, iconScale:Number = 0.5) : *
+		public function addAttribute(statID:Number, label:String, attributeInfo:String, value:Number, delta:Number, frame:uint=0, isCustom:Boolean=false, iggyIconName:String = "", iconOffsetX:Number = 0, iconOffsetY:Number = 0, iconScale:Number = 0.5, callbackID:Number = -1) : *
 		{
 			var attribute_mc:MovieClip = this.attributes.getElementByNumber("statID", statID);
 			if(!attribute_mc)
@@ -103,12 +103,20 @@ package characterCreation_fla
 			if(iggyIconName != "") {
 				attribute_mc.SetCustomIcon(iggyIconName, iconOffsetX, iconOffsetY, iconScale);
 			}
-			if(!isCustom) {
-				// Why? Who knows. The attributes attrID were originally ID + 1, then they did ID - 1 when displaying tooltips.
-				attribute_mc.callbackID = statID + 1;
-			} else {
-				attribute_mc.callbackID = statID;
+
+			if(callbackID != -1) {
+				attribute_mc.callbackID = callbackID;
 			}
+			else {
+				attribute_mc.callbackID = statID;
+				// if(!isCustom) {
+				// 	// Why? Who knows. The attributes attrID were originally ID + 1, then they did ID - 1 when displaying tooltips.
+				// 	attribute_mc.callbackID = statID + 1;
+				// } else {
+				// 	attribute_mc.callbackID = statID;
+				// }
+			}
+
 			attribute_mc.setAttribute(label,attributeInfo);
 			attribute_mc.setValue(value,delta);
 			attribute_mc.isUpdated = true;

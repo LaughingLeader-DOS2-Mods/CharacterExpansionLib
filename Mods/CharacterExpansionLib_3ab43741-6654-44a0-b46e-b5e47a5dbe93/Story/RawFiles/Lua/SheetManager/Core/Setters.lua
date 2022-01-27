@@ -138,8 +138,9 @@ if not isClient then
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData
 ---@param character EsvCharacter|UUID|NETID
 ---@param amount integer
+---@param availablePoints ?SheetManagerAvailablePointsData
 ---@return boolean
-function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount)
+function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, availablePoints)
 	if amount == 0 then
 		return true
 	end
@@ -154,20 +155,19 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount)
 	local characterId = GameHelpers.GetCharacterID(character)
 	
 	if characterId then
-		local sessionData = SheetManager.SessionManager:GetSession(characterId)
-		if sessionData then
+		if availablePoints then
 			if entryType == "PrimaryStat" then
-				sessionData.ModifyPoints.Attribute = sessionData.ModifyPoints.Attribute + amount
+				availablePoints.Attribute = availablePoints.Attribute + amount
 			elseif entryType == "Ability" then
 				if isCivil == true then
-					sessionData.ModifyPoints.Civil = sessionData.ModifyPoints.Civil + amount
+					availablePoints.Civil = availablePoints.Civil + amount
 				else
-					sessionData.ModifyPoints.Ability = sessionData.ModifyPoints.Ability + amount
+					availablePoints.Ability = availablePoints.Ability + amount
 				end
 			elseif entryType == "Talent" then
-				sessionData.ModifyPoints.Talent = sessionData.ModifyPoints.Talent + amount
+				availablePoints.Talent = availablePoints.Talent + amount
 			end
-			return true
+			return true, availablePoints
 		else
 			local points = GetPoints(characterId, entryType, isCivil)
 			if entryType == "PrimaryStat" then

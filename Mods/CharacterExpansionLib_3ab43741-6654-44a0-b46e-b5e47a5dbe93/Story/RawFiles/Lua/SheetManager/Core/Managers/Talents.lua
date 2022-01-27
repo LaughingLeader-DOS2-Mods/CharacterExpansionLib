@@ -586,7 +586,7 @@ end
 ---@param player EclCharacter
 ---@param talentId string
 ---@param hasTalent boolean
----@return SheetManager.Talents.Data.TalentState
+---@return TalentState
 function SheetManager.Talents.GetTalentState(player, talentId, hasTalent)
 	if hasTalent == true then 
 		return SheetManager.Talents.Data.TalentState.Selected
@@ -776,8 +776,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 		isGM = false
 	end
 
-	local talentPoints = SheetManager:GetAvailablePoints(player, "Talent")
-
+	local talentPoints = SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
 	local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
 
 	local entries = {}

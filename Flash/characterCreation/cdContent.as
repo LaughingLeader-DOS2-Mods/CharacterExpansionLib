@@ -33,7 +33,7 @@ package
 				icon_mc = new iggy();
 				icon_mc.bg_mc.height = this.root_mc.iconSize;
 				icon_mc.bg_mc.width = this.root_mc.iconSize;
-				icon_mc.name = "iggy_cel_racial" + i;
+				icon_mc.name = "iggy_llcel_racial" + i;
 				this.iconHolder_mc.addChild(icon_mc);
 				icon_mc.x = (i * this.root_mc.iconSize) + (i * this.root_mc.iconSpacing);
 				icon_mc.skillIdx = i;

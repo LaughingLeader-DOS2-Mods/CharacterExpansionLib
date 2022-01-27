@@ -202,7 +202,7 @@ if isClient then
 	---@param value integer|boolean
 	function SheetManager:RequestValueChange(entry, character, value)
 		local netid = GameHelpers.GetNetID(character)
-		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Ext.JsonStringify({
+		local data = {
 			ID = entry.ID,
 			Mod = entry.Mod,
 			NetID = netid,
@@ -210,41 +210,76 @@ if isClient then
 			StatType = entry.StatType,
 			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed,
 			IsInCharacterCreation = SheetManager.IsInCharacterCreation(character)
-		}))
+		}
+		if data.IsInCharacterCreation then
+			local ccwiz = Ext.UI.GetCharacterCreationWizard()
+			local points = ccwiz.AttributePoints
+			data.AvailablePoints = {
+				Attribute = points[1],
+				Ability = points[2],
+				Civil = points[3],
+				Talent = points[5],
+			}
+		end
+		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Common.JsonStringify(data))
 	end
-else
-	RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
+
+	RegisterNetListener("CEL_SheetManager_UpdateCCWizardAvailablePoints", function (cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			local characterId = GameHelpers.GetCharacterID(data.NetID)
-			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
-			if characterId and stat then
-				--TODO CustomStat support
-				if data.IsGameMaster or not stat.UsePoints then
-					SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
-					SheetManager:SyncData(characterId)
-				else
-					local modifyPointsBy = 0
-					if stat.ValueType == "number" then
-						modifyPointsBy = stat:GetValue(characterId) - data.Value
-					elseif stat.ValueType == "boolean" then
-						modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
-					end
-					if modifyPointsBy ~= 0 then
-						if modifyPointsBy < 0 then
-							local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId)
-							if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
-								SheetManager:SyncData(characterId)
-							end
-						else
-							if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy) then
-								SheetManager:SetEntryValue(stat, characterId, data.Value, data.IsInCharacterCreation, true)
-								SheetManager:SyncData(characterId)
-							end
+			local ccwiz = Ext.UI.GetCharacterCreationWizard()
+			if ccwiz then
+				ccwiz.AttributePoints[1] = data.Attribute
+				ccwiz.AttributePoints[2] = data.Ability
+				ccwiz.AttributePoints[3] = data.Civil
+				ccwiz.AttributePoints[5] = data.Talent
+			end
+		end
+	end)
+else
+	local function ProcessPointChange(character, statId, statMod, statType, value, isGameMaster, isInCharacterCreation, availablePoints)
+		local characterId = GameHelpers.GetCharacterID(character)
+		local stat = SheetManager:GetEntryByID(statId, statMod, statType)
+		if characterId and stat then
+			--TODO CustomStat support
+			if isGameMaster or not stat.UsePoints then
+				SheetManager:SetEntryValue(stat, characterId, value, isInCharacterCreation, true)
+				return true
+			else
+				local modifyPointsBy = 0
+				if stat.ValueType == "number" then
+					modifyPointsBy = stat:GetValue(characterId) - value
+				elseif stat.ValueType == "boolean" then
+					modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
+				end
+				if modifyPointsBy ~= 0 then
+					if modifyPointsBy < 0 then
+						local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId, availablePoints)
+						if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy, availablePoints) then
+							SheetManager:SetEntryValue(stat, characterId, value, isInCharacterCreation, true)
+							return true,availablePoints
+						end
+					else
+						if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy, availablePoints) then
+							SheetManager:SetEntryValue(stat, characterId, value, isInCharacterCreation, true)
+							return true,availablePoints
 						end
 					end
 				end
+			end
+		end
+		return false
+	end
+
+	RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			if ProcessPointChange(data.NetID, data.ID, data.Mod, data.StatType, data.Value, data.IsGameMaster, data.IsInCharacterCreation, data.AvailablePoints) then
+				local player = GameHelpers.GetCharacter(data.NetID)
+				if data.AvailablePoints then
+					GameHelpers.Net.PostToUser(player, "CEL_SheetManager_UpdateCCWizardAvailablePoints", data.AvailablePoints)
+				end
+				SheetManager:SyncData(player)
 			end
 		end
 	end)

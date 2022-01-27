@@ -1,4 +1,5 @@
 Ext.Require("BootstrapShared.lua")
+Ext.Require("CharacterCreationExtended/Init.lua")
 
 ---@class CharacterExpansionLibPersistentVars
 local defaultPersistentVars = {
