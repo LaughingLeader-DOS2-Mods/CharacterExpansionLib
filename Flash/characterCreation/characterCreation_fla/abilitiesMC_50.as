@@ -64,12 +64,12 @@ package characterCreation_fla
 		
 		public function onPlus(mc:MovieClip) : *
 		{
-			ExternalInterface.call(mc.plus_mc.callbackStr,mc.statID);
+			ExternalInterface.call(mc.plus_mc.callbackStr, mc.statID, mc.isCivil);
 		}
 		
 		public function onMin(mc:MovieClip) : *
 		{
-			ExternalInterface.call(mc.min_mc.callbackStr,mc.statID);
+			ExternalInterface.call(mc.min_mc.callbackStr, mc.statID, mc.isCivil);
 		}
 		
 		public function updateAbilities(param1:Array) : *

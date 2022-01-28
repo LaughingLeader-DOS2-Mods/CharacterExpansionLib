@@ -767,8 +767,9 @@ end
 ---@param player EclCharacter
 ---@param isCharacterCreation boolean|nil
 ---@param isGM boolean|nil
+---@param availablePoints ?integer
 ---@return fun():SheetManager.TalentsUITalentEntry
-function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
+function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, availablePoints)
 	if isCharacterCreation == nil then
 		isCharacterCreation = false
 	end
@@ -776,8 +777,8 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM)
 		isGM = false
 	end
 
-	local talentPoints = SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
-	local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
+	local talentPoints = availablePoints or SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
+	local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
 
 	local entries = {}
 	--Default entries

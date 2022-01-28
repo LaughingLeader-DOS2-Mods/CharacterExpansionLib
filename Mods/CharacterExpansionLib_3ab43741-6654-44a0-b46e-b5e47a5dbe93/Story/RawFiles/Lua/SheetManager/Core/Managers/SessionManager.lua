@@ -10,7 +10,7 @@ local isClient = Ext.IsClient()
 ---@field Stats table
 ---@field PendingChanges table
 
-local SessionManager = {
+SessionManager = {
 	---@type table<UUID,CharacterCreationSessionData>
 	Sessions = {}
 }
@@ -63,10 +63,14 @@ if not isClient then
 		return self.Sessions[characterId]
 	end
 
+	---@param character  EsvCharacter
 	function SessionManager:SyncSession(character)
-		local characterId = GameHelpers.GetCharacterID(character)
-		if self.Sessions[characterId] then
-			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_SyncCharacterData", self.Sessions[characterId])
+		local player = GameHelpers.GetCharacter(character)
+		if self.Sessions[player.MyGuid] then
+			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_SyncCharacterData", {
+				NetID = player.NetID,
+				Data = self.Sessions[player.MyGuid],
+			})
 		end
 	end
 
@@ -76,20 +80,19 @@ if not isClient then
 	local function OnCharacterCreationStarted(character, respec, success)
 		SessionManager:CreateSession(StringHelpers.GetUUID(character), respec)
 	end
---[[ 
+
 	---@param region string
 	---@param state REGIONSTATE
 	---@param levelType LEVELTYPE
 	RegisterListener("RegionChanged", function (region, state, levelType)
-		Ext.PrintError("RegionChanged", region, state, levelType)
 		if levelType == LEVELTYPE.CHARACTER_CREATION and state ~= REGIONSTATE.ENDED then
 			for player in GameHelpers.Character.GetPlayers(false) do
-				fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
+				--fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
 				SessionManager:CreateSession(player, false)
 			end
 		end
 	end)
- ]]
+
 	Ext.RegisterOsirisListener("CharacterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
 			OnCharacterCreationStarted(character, respec == 2, true)
@@ -120,10 +123,17 @@ if not isClient then
 	end) ]]
 else
 	RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
-		Ext.PrintError(cmd,payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			self.Sessions[data.NetID] = data
+			self.Sessions[data.NetID] = data.Data
+
+			Ext.PrintError("SheetManager.UI.CharacterCreation.IsOpen", SheetManager.UI.CharacterCreation.IsOpen)
+
+			if SheetManager.UI.CharacterCreation.IsOpen then
+				SheetManager.UI.CharacterCreation:UpdateAttributes()
+				SheetManager.UI.CharacterCreation:UpdateAbilities()
+				SheetManager.UI.CharacterCreation:UpdateTalents()
+			end
 		end
 	end)
 
@@ -139,14 +149,50 @@ else
 end
 
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param skipSync ?boolean
 function SessionManager:ClearSession(character, skipSync)
-	character = GameHelpers.GetCharacter(character)
-	local characterId = GameHelpers.GetCharacterID(character)
-	SessionManager.Sessions[characterId] = nil
-	--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
-	if skipSync ~= true and not isClient then
-		GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
+	if not isClient then
+		character = GameHelpers.GetCharacter(character)
+		local characterId = GameHelpers.GetCharacterID(character)
+		SessionManager.Sessions[characterId] = nil
+		--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
+		if skipSync ~= true and not isClient then
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
+		end
 	end
+end
+
+---For reseting session data, such as when the preset changes.
+---@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param skipSync ?boolean
+---@param respec ?boolean
+function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
+	local characterId = GameHelpers.GetCharacterID(character)
+	local respec = respec or SessionManager.Sessions[characterId] and SessionManager.Sessions[characterId].Respec
+	SessionManager.Sessions[characterId] = nil
+	if not isClient then
+		if skipSync ~= true then
+			SessionManager:CreateSession(characterId, respec, skipSync)
+		end
+		-- if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION or SheetManager.IsInCharacterCreation(characterId) then
+		-- 	GameHelpers.Net.PostToUser(character, "CEL_CharacterCreation_UpdateEntries")
+		-- end
+	else
+		Ext.PostMessageToServer("CEL_SessionManager_ResetCharacterData", Common.JsonStringify({
+			NetID = characterId,
+			SkipSync = skipSync,
+			Respec = respec
+		}))
+	end
+end
+
+if not isClient then
+	RegisterNetListener("CEL_SessionManager_ResetCharacterData", function (cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			SessionManager:ResetSession(GameHelpers.GetCharacter(data.NetID), data.SkipSync, data.Respec)
+		end
+	end)
 end
 
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
@@ -188,6 +234,10 @@ function SessionManager:GetSession(character)
 	return self.Sessions[characterId]
 end
 
+---@type CharacterCreationWizard
+local CharacterCreationWizard = isClient and Ext.Require("SheetManager/Core/Managers/Utilities/CharacterCreationWizard.lua") or {}
+SessionManager.CharacterCreationWizard = CharacterCreationWizard
+
 ---Creates a table that can be used to get a current value of a session, that falls back to the character's Stats otherwise.
 ---This is mainly used when the UI builds the list of entries, for the character sheet or character creation UIs.
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
@@ -195,7 +245,7 @@ end
 function SessionManager:CreateCharacterSessionMetaTable(character)
 	local character = GameHelpers.GetCharacter(character)
 	local netid = character.NetID
-	local sessionData = SheetManager.SessionManager:GetSession(character)
+	local sessionData = SessionManager:GetSession(character)
 	if sessionData then
 		local targetStats = {}
 		setmetatable(targetStats, {
@@ -203,7 +253,7 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 				if isClient then
 					local stats = CharacterCreationWizard.Stats[netid]
 					if stats then
-						return stats
+						return stats[k]
 					end
 				end
 				return character.Stats[k]
@@ -217,5 +267,3 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 		return character.Stats
 	end
 end
-
-SheetManager.SessionManager = SessionManager

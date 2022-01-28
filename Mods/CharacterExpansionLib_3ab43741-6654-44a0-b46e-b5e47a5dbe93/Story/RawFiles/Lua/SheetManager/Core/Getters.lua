@@ -62,12 +62,26 @@ end
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData
 ---@param characterId UUID|NETID
 function SheetManager:GetValueByEntry(entry, characterId)
+	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
 	if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
-		local character = GameHelpers.GetCharacter(characterId)
-		if character and character.Stats then
-			local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
-			if charValue ~= nil then
-				return charValue
+		if not isInCharacterCreation then
+			local character = GameHelpers.GetCharacter(characterId)
+			if character and character.Stats then
+				local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
+				if charValue ~= nil then
+					return charValue
+				end
+			end
+		else
+			local value = SheetManager.Save.GetEntryValue(characterId, entry)
+			if value ~= nil then
+				return value
+			end
+			if isClient then
+				local stats = SessionManager.CharacterCreationWizard.Stats[characterId]
+				if stats and stats[entry.BoostAttribute] then
+					return stats[entry.BoostAttribute]
+				end
 			end
 		end
 	else
@@ -169,8 +183,8 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 	if pointType == "Custom" then
 		if isClient then
 			assert(not StringHelpers.IsNullOrWhitespace(customStatPointsID), "Param customStatPointsID needs to be a valid string (not empty/whitespace).")
-			if SheetManager.AvailablePoints[characterId] and SheetManager.AvailablePoints[characterId].Custom then
-				return SheetManager.AvailablePoints[characterId].Custom[customStatPointsID] or 0
+			if SheetManager.CustomAvailablePoints[characterId] then
+				return SheetManager.CustomAvailablePoints[characterId][customStatPointsID] or 0
 			end
 		else
 			local data = PersistentVars.CustomStatAvailablePoints[characterId]
@@ -179,42 +193,25 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 			end
 		end
 		return 0
-	else
-		if isCharacterCreation then
-			return CharacterCreationWizard.AvailablePoints[characterId]
-		end
+	elseif isClient and isCharacterCreation then
+		return SessionManager.CharacterCreationWizard.AvailablePoints[pointType]
 	end
 
-	local sessionData = SheetManager.SessionManager:GetSession(characterId)
-	if sessionData then
-		local base = 0
-		if SheetManager.AvailablePoints[characterId] then
-			base = SheetManager.AvailablePoints[characterId][pointType] or 0
-		end
-		if pointType == "Attribute" then
-			return base + sessionData.ModifyPoints.Attribute
-		elseif pointType == "Ability" then
-			return base + sessionData.ModifyPoints.Ability
-		elseif pointType == "Civil" then
-			return base + sessionData.ModifyPoints.Civil
-		elseif pointType == "Talent" then
-			return base + sessionData.ModifyPoints.Talent
-		end
-	end
-
-	if isClient then
+	if isClient or not Ext.OsirisIsCallable() then
 		local character = GameHelpers.GetCharacter(characterId)
-		if pointType == "Attribute" then
-			return character.PlayerUpgrade.AttributePoints
-		elseif pointType == "Ability" then
-			return character.PlayerUpgrade.CombatAbilityPoints
-		elseif pointType == "Civil" then
-			return character.PlayerUpgrade.CivilAbilityPoints
-		elseif pointType == "Talent" then
-			return character.PlayerUpgrade.TalentPoints
+		if character.PlayerUpgrade then
+			if pointType == "Attribute" then
+				return character.PlayerUpgrade.AttributePoints or 0
+			elseif pointType == "Ability" then
+				return character.PlayerUpgrade.CombatAbilityPoints or 0
+			elseif pointType == "Civil" then
+				return character.PlayerUpgrade.CivilAbilityPoints or 0
+			elseif pointType == "Talent" then
+				return character.PlayerUpgrade.TalentPoints or 0
+			end
 		end
-		if SheetManager.AvailablePoints[characterId] then
-			return SheetManager.AvailablePoints[characterId][pointType] or 0
+		if SheetManager.CustomAvailablePoints[characterId] then
+			return SheetManager.CustomAvailablePoints[characterId][pointType] or 0
 		end
 	else
 		if pointType == "Attribute" then

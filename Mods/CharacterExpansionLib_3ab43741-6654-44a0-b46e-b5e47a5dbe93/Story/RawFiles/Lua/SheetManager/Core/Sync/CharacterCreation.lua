@@ -7,8 +7,8 @@ function SheetManager.IsInCharacterCreation(characterId)
 	characterId = GameHelpers.GetCharacterID(characterId)
 	if isClient then
 		if Client.Character then
-			if characterId == Client.Character.NetID then
-				return Client.Character.IsInCharacterCreation
+			if characterId == Client.Character.NetID and Client.Character.IsInCharacterCreation then
+				return true
 			end
 		end
 		local ui = not Vars.ControllerEnabled and Ext.GetUIByType(Data.UIType.characterCreation) or Ext.GetUIByType(Data.UIType.characterCreation_c)
@@ -20,7 +20,16 @@ function SheetManager.IsInCharacterCreation(characterId)
 		local db = Osi.DB_Illusionist:Get(nil,nil)
 		if db and #db > 0 then
 			local playerId = StringHelpers.GetUUID(db[1][1])
-			return playerId == characterId
+			if playerId == characterId then
+				return true
+			end
+		end
+		local db = Osi.DB_AssignedDummyForUser:Get(nil,nil)
+		if db and #db > 0 then
+			local playerId = StringHelpers.GetUUID(db[1][2])
+			if playerId == characterId then
+				return true
+			end
 		end
 	end
 	return false
@@ -33,9 +42,9 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	if not isClient then
 		characterId = GameHelpers.GetCharacterID(characterId)
 		if applyChanges then
-			SheetManager.SessionManager:ApplySession(characterId)
+			SessionManager:ApplySession(characterId)
 		else
-			SheetManager.SessionManager:ClearSession(characterId)
+			SessionManager:ClearSession(characterId)
 		end
 		SheetManager:SyncData()
 	else

@@ -114,7 +114,7 @@ end
 ---@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
 function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	characterId = GameHelpers.GetCharacterID(characterId)
-	local sessionData = SheetManager.SessionManager:GetSession(characterId)
+	local sessionData = SessionManager:GetSession(characterId)
 	local pendingValues = sessionData and sessionData.PendingChanges or nil
 	if pendingValues then
 		tableName = tableName or SheetManager.Save.GetTableNameForType(entry.StatType)
@@ -143,14 +143,17 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 			defaultValue = false
 		end
 		characterId = GameHelpers.GetCharacterID(characterId)
-		local data = self.CurrentValues[characterId]
+		local data = nil
+		local sessionData = SessionManager:GetSession(characterId)
+		if sessionData then
+			data = sessionData.PendingChanges
+			assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
+		else
+			data = self.CurrentValues[characterId]
+		end
 		if data then
 			local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 			if tableName ~= nil then
-				local pendingValue = SheetManager.Save.GetPendingValue(characterId, entry, tableName)
-				if pendingValue ~= nil then
-					return pendingValue
-				end
 				local statTypeTable = data[tableName]
 				if statTypeTable then
 					local modTable = statTypeTable[entry.Mod]
@@ -176,11 +179,13 @@ end
 ---@return boolean
 function SheetManager.Save.SetEntryValue(characterId, entry, value)
 	characterId = GameHelpers.GetCharacterID(characterId)
-	local data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
-	local sessionData = SheetManager.SessionManager:GetSession(characterId)
+	local data = nil
+	local sessionData = SessionManager:GetSession(characterId)
 	if sessionData then
 		data = sessionData.PendingChanges
 		assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
+	else
+		data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
 	end
 	local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)
 	assert(tableName ~= nil, string.format("Failed to find data table for stat type (%s)", entry.StatType))
@@ -200,7 +205,8 @@ if isClient then
 	---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 	---@param character EclCharacter|NETID
 	---@param value integer|boolean
-	function SheetManager:RequestValueChange(entry, character, value)
+	---@param isInCharacterCreation ?boolean
+	function SheetManager:RequestValueChange(entry, character, value, isInCharacterCreation)
 		local netid = GameHelpers.GetNetID(character)
 		local data = {
 			ID = entry.ID,
@@ -209,16 +215,16 @@ if isClient then
 			Value = value,
 			StatType = entry.StatType,
 			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed,
-			IsInCharacterCreation = SheetManager.IsInCharacterCreation(character)
+			IsInCharacterCreation = isInCharacterCreation or SheetManager.IsInCharacterCreation(character)
 		}
 		if data.IsInCharacterCreation then
 			local ccwiz = Ext.UI.GetCharacterCreationWizard()
-			local points = ccwiz.AttributePoints
+			local points = ccwiz.AvailablePoints
 			data.AvailablePoints = {
-				Attribute = points[1],
-				Ability = points[2],
-				Civil = points[3],
-				Talent = points[5],
+				Attribute = points.Attribute,
+				Ability = points.Ability,
+				Civil = points.Civil,
+				Talent = points.Talent,
 			}
 		end
 		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Common.JsonStringify(data))
@@ -229,10 +235,12 @@ if isClient then
 		if data then
 			local ccwiz = Ext.UI.GetCharacterCreationWizard()
 			if ccwiz then
-				ccwiz.AttributePoints[1] = data.Attribute
-				ccwiz.AttributePoints[2] = data.Ability
-				ccwiz.AttributePoints[3] = data.Civil
-				ccwiz.AttributePoints[5] = data.Talent
+				ccwiz.AvailablePoints.Attribute = data.Attribute
+				ccwiz.AvailablePoints.Ability = data.Ability
+				ccwiz.AvailablePoints.Civil = data.Civil
+				ccwiz.AvailablePoints.Talent = data.Talent
+
+				SheetManager.UI.CharacterCreation.UpdateAvailablePoints()
 			end
 		end
 	end)
@@ -250,7 +258,7 @@ else
 				if stat.ValueType == "number" then
 					modifyPointsBy = stat:GetValue(characterId) - value
 				elseif stat.ValueType == "boolean" then
-					modifyPointsBy = stat:GetValue(characterId) ~= true and - 1 or 1
+					modifyPointsBy = stat:GetValue(characterId) ~= true and -1 or 1
 				end
 				if modifyPointsBy ~= 0 then
 					if modifyPointsBy < 0 then
@@ -272,14 +280,17 @@ else
 	end
 
 	RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
+		Ext.PrintError(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			if ProcessPointChange(data.NetID, data.ID, data.Mod, data.StatType, data.Value, data.IsGameMaster, data.IsInCharacterCreation, data.AvailablePoints) then
 				local player = GameHelpers.GetCharacter(data.NetID)
 				if data.AvailablePoints then
 					GameHelpers.Net.PostToUser(player, "CEL_SheetManager_UpdateCCWizardAvailablePoints", data.AvailablePoints)
+					SessionManager:SyncSession(player)
+				else
+					SheetManager:SyncData(player)
 				end
-				SheetManager:SyncData(player)
 			end
 		end
 	end)
@@ -323,7 +334,7 @@ if not isClient then
 				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
 			end
 			--fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
-			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character.MyGuid), "CEL_SheetManager_LoadCharacterSyncData", Ext.JsonStringify(data))
+			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character.MyGuid), "CEL_SheetManager_LoadCharacterSyncData", data)
 			return true
 		else
 			--Sync all characters
@@ -335,7 +346,6 @@ if not isClient then
 				end
 			end
 
-			data = Ext.JsonStringify(data)
 			if user then
 				local t = type(user)
 				if t == "number" then
@@ -419,7 +429,8 @@ if isClient then
 				if skipInvoke == nil then
 					skipInvoke = false
 				end
-				SheetManager:SetEntryValue(stat, characterId, data.Value, skipInvoke, true, data.IsInCharacterCreation)
+				SheetManager:SetEntryValue(stat, characterId, data.Value, skipInvoke, true, true)
+				--SheetManager.Save.SetEntryValue(characterId, stat, data.Value)
 			end
 		end
 	end)

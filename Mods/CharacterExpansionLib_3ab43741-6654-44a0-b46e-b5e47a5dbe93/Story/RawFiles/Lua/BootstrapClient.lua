@@ -2,7 +2,6 @@ Ext.Require("BootstrapShared.lua")
 
 Ext.Require("SheetManager/UI/CharacterCreation.lua")
 Ext.Require("SheetManager/UI/CharacterSheet.lua")
-Ext.Require("SheetManager/UI/CharacterSheetWizard.lua")
 Ext.Require("SheetManager/UI/Fixes.lua")
 Ext.Require("SheetManager/UI/TooltipCreator.lua")
 Ext.Require("SheetManager/UI/ValueChangedHandler.lua")

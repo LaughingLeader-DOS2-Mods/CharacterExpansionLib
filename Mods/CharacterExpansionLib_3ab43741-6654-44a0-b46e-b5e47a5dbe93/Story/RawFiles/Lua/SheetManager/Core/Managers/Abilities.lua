@@ -206,8 +206,10 @@ if Ext.IsClient() then
 	---@param civilOnly boolean|nil
 	---@param isCharacterCreation boolean|nil
 	---@param isGM boolean|nil
+	---@param availableAbilityPoints ?integer
+	---@param availableCivilPoints ?integer
 	---@return fun():SheetManager.AbilitiesUIEntry
-	function SheetManager.Abilities.GetVisible(player, civilOnly, isCharacterCreation, isGM)
+	function SheetManager.Abilities.GetVisible(player, civilOnly, isCharacterCreation, isGM, availableAbilityPoints, availableCivilPoints)
 		if isCharacterCreation == nil then
 			isCharacterCreation = false
 		end
@@ -217,13 +219,13 @@ if Ext.IsClient() then
 		local entries = {}
 		local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 
-		local abilityPoints = SheetManager:GetAvailablePoints(player, "Ability", nil, true)
-		local civilPoints = SheetManager:GetAvailablePoints(player, "Civil", nil, true)
+		local abilityPoints = availableAbilityPoints or SheetManager:GetAvailablePoints(player, "Ability", nil, isCharacterCreation)
+		local civilPoints = availableCivilPoints or SheetManager:GetAvailablePoints(player, "Civil", nil, isCharacterCreation)
 	
 		local maxAbility = GameHelpers.GetExtraData("CombatAbilityCap", 10)
 		local maxCivil = GameHelpers.GetExtraData("CivilAbilityCap", 5)
 
-		local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
+		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
 
 		--Defaults
 		for numId,id in Data.Ability:Get() do

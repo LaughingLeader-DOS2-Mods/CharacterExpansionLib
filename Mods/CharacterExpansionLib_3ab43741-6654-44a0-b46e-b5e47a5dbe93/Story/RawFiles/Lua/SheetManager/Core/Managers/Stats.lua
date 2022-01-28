@@ -434,8 +434,9 @@ if isClient then
 	---@param isCharacterCreation ?boolean
 	---@param isGM ?boolean
 	---@param isRespec ?boolean
+	---@param availablePoints ?integer
 	---@return fun():SheetManager.StatsUIEntry
-	function SheetManager.Stats.GetVisible(player, isCharacterCreation, isGM, isRespec)
+	function SheetManager.Stats.GetVisible(player, isCharacterCreation, isGM, isRespec, availablePoints)
 		if isCharacterCreation == nil then
 			isCharacterCreation = false
 		end
@@ -445,9 +446,9 @@ if isClient then
 
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
-		local points = SheetManager:GetAvailablePoints(player, "Attribute", nil, true)
+		local points = availablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, isCharacterCreation)
 		
-		local targetStats = SheetManager.SessionManager:CreateCharacterSessionMetaTable(player)
+		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
 
 		local defaultCanRemove = isGM or isCharacterCreation
 
@@ -520,7 +521,7 @@ if isClient then
 
 		for mod,dataTable in pairs(SheetManager.Data.Stats) do
 			for id,data in pairs(dataTable) do
-				if not isCharacterCreation or data.StatType == "PrimaryStat" then
+				if data.StatType == "PrimaryStat" then
 					local value = data:GetValue(player) or 0
 					if SheetManager:IsEntryVisible(data, player, value) then
 						local defaultCanAdd = (data.StatType == "PrimaryStat" and (data.UsePoints == true and points > 0)) or isGM

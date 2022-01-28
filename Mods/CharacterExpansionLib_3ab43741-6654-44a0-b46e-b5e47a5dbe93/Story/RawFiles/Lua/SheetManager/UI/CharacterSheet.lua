@@ -756,60 +756,6 @@ local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
 end
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 
----@param ui UIObject
-local function UpdateCharacterSheetPoints(ui, method, amount)
-	local characterId = GameHelpers.GetCharacterID(Client:GetCharacter())
-	if characterId then
-		if SheetManager.AvailablePoints[characterId] == nil then
-			SheetManager.AvailablePoints[characterId] = {
-				Attribute = 0,
-				Ability = 0,
-				Civil = 0,
-				Talent = 0,
-				Custom = 0,
-			}
-		end
-		if method == "setAvailableCombatAbilityPoints" or method == "setAvailableCivilAbilityPoints" then
-			local availablePoints = 0
-			if method == "setAvailableCombatAbilityPoints" then
-				availablePoints = SheetManager:GetAvailablePoints(characterId, "Ability")
-				if availablePoints ~= amount then
-					SheetManager.AvailablePoints[characterId].Ability = amount
-				end
-			else
-				availablePoints = SheetManager:GetAvailablePoints(characterId, "Civil")
-				if availablePoints ~= amount then
-					SheetManager.AvailablePoints[characterId].Civil = amount
-				end
-			end
-			SheetManager.Abilities.UpdateCharacterSheetPoints(ui, method, ui:GetRoot(), amount)
-		elseif method == "setAvailableStatPoints" then
-			local availablePoints = SheetManager:GetAvailablePoints(characterId, "Attribute")
-			if availablePoints ~= amount then
-				SheetManager.AvailablePoints[characterId].Attribute = amount
-			end
-		elseif method == "setAvailableTalentPoints" then
-			local availablePoints = SheetManager:GetAvailablePoints(characterId, "Talent")
-			if availablePoints ~= amount then
-				SheetManager.AvailablePoints[characterId].Talent = amount
-			end
-		end
-	end
-end
-
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableStatPoints", UpdateCharacterSheetPoints)
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableCombatAbilityPoints", UpdateCharacterSheetPoints)
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableCivilAbilityPoints", UpdateCharacterSheetPoints)
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableTalentPoints", UpdateCharacterSheetPoints)
-
-local function ResetAbilityPoints(ui, method, ...)
-	UpdateCharacterSheetPoints(ui, "setAvailableCombatAbilityPoints", 0)
-	UpdateCharacterSheetPoints(ui, "setAvailableCivilAbilityPoints", 0)
-end
-
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setAvailableLabels", ResetAbilityPoints)
-Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "hideLevelUpAbilityButtons", ResetAbilityPoints)
-
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
 
@@ -827,18 +773,6 @@ end
 
 CharacterSheet:RegisterInvokeListener("selectCharacter", OnCharacterSelected, "After", "Keyboard")
 CharacterSheet:RegisterInvokeListener("setPlayer", OnCharacterSelected, "After", "Controller")
-
----@param ui UIObject
----@param method string
----@param pointType number One of 4 values: 0,1,2,3 | 0 = attribute, 1 = combat ability points, 2 = civil points, 3 = talent points
-Ext.RegisterUITypeInvokeListener(Data.UIType.statsPanel_c, "setStatPoints", function(ui, method, pointType, amountString)
-	local points = tonumber(amountString)
-	if pointType == 1 then
-		UpdateCharacterSheetPoints(ui, "setAvailableCombatAbilityPoints", points)
-	elseif pointType == 2 then
-		UpdateCharacterSheetPoints(ui, "setAvailableCivilAbilityPoints", points)
-	end
-end)
 
 local function getTalentStateFrame(talentState)
 	if talentState == 0 then

@@ -16,6 +16,7 @@ local PresetData = {}
 local Text = {
 	AvailableAbilityPoints = ts:Create("h407af7f3g2453g4367g9a9ega9ca67d88668", "Available Ability Points:"),
 	AvailableAttributePoints = ts:Create("h9bd665efg713dg43e6g936fg5ae882e7b635", "Available Attribute Points:"),
+	AvailableTalentPoints = ts:Create("h77a814fcgc8b9g4e27g8e35g8ac9e90e1214", "Available Talents: "),
 	Available = ts:Create("h36303e10g0c17g4aebgbeb6ge0b865ba3fc6", "Available"),
 	CivilAbilityPoints = ts:Create("h529eed46g7472g4ecdgbd5eg37b2a60c8a52", "Civil Ability points"),
 }
@@ -34,6 +35,39 @@ function CharacterCreation.IsExtended()
 	end
 	return false
 end
+
+function CharacterCreation.UpdateAvailablePoints()
+	if CharacterCreation.IsOpen then
+		local this = CharacterCreation.Root
+		if this then
+			local ccwiz = Ext.UI.GetCharacterCreationWizard()
+			this.availableAttributePoints = ccwiz.AvailablePoints.Attribute
+			this.availableAbilityPoints = ccwiz.AvailablePoints.Ability
+			this.availableCivilPoints = ccwiz.AvailablePoints.Civil
+			this.availableTalentPoints = ccwiz.AvailablePoints.Talent
+			this.availableSkillPoints = ccwiz.AvailablePoints.SkillSlots
+
+			this.CCPanel_mc.attributes_mc.freePoints_txt.htmlText = string.format("%s %i", Text.AvailableAttributePoints.Value, this.availableAttributePoints)
+			this.CCPanel_mc.abilities_mc.freePoints_txt.htmlText = string.format("%s %i", Text.AvailableAbilityPoints.Value, this.availableAbilityPoints)
+			this.CCPanel_mc.abilities_mc.freePoints2_txt.htmlText = string.format("%s %s: %i", Text.Available.Value, Text.CivilAbilityPoints.Value, this.availableCivilPoints)
+			this.CCPanel_mc.talents_mc.availablePoints_txt.htmlText = string.format("%s %i", Text.AvailableTalentPoints.Value, this.availableTalentPoints)
+			
+			local maxSlots = GameHelpers.GetExtraData("CharacterBaseMemoryCapacity", 3) + ccwiz.AssignedPoints.SkillSlots
+			if this.numberOfSlots ~= maxSlots then
+				this.setAvailableSkillSlots(maxSlots)
+			end
+
+			return true
+		end
+	end
+
+	return false
+end
+
+local function GetAvailablePoints()
+	return Ext.UI.GetCharacterCreationWizard().AvailablePoints
+end
+
 -- CharacterCreation:RegisterCallListener("toggleTalent", function (self, ui, call, statID)
 -- 	local this = ui:GetRoot()
 -- 	if this and this.isExtended then
@@ -57,6 +91,9 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 
 	local engineValues = {}
 
+	local points = GetAvailablePoints().Talent
+	this.availableTalentPoints = points
+
 	--talentArray[0] is available points
 	for i=1,#this.talentArray-1,4 do
 		local statID = this.talentArray[i]
@@ -67,9 +104,9 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 			engineValues[statID] = isUnlocked
 			-- if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Talent == statID then
 			-- 	if isUnlocked then
-			-- 		SheetManager.SessionManager:RequestPointsUpdate(player, "Talent", -1)
+			-- 		SessionManager:RequestPointsUpdate(player, "Talent", -1)
 			-- 	else
-			-- 		SheetManager.SessionManager:RequestPointsUpdate(player, "Talent", 1)
+			-- 		SessionManager:RequestPointsUpdate(player, "Talent", 1)
 			-- 	end
 			-- 	updateSessionPoints[player.NetID].Talent = nil
 			-- end
@@ -79,7 +116,7 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 	---@type FlashCharacterCreationTalentsMC
 	local talentsMC = this.CCPanel_mc.talents_mc
 
-	for talent in SheetManager.Talents.GetVisible(player, true) do
+	for talent in SheetManager.Talents.GetVisible(player, true, nil, this.availableTalentPoints) do
 		if engineValues[talent.ID] ~= nil then
 			talent.HasTalent = engineValues[talent.ID]
 		end
@@ -91,6 +128,8 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 	else
 		talentsMC.talents_mc.setupLists()
 	end
+
+	this.CCPanel_mc.talents_mc.availablePoints_txt.htmlText = string.format("%s %i", Text.AvailableTalentPoints.Value, this.availableTalentPoints)
 end
 
 CharacterCreation:RegisterInvokeListener("updateTalents", CharacterCreation.UpdateTalents, "Before", "All")
@@ -107,6 +146,10 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 	local engineValues = {}
 
+	local points = GetAvailablePoints()
+	this.availableAbilityPoints = points.Ability
+	this.availableCivilPoints = points.Civil
+
 	for i=0,#this.abilityArray-1,7 do
 		--local groupID = this.abilityArray[i]
 		--local groupTitle = this.abilityArray[i+1]
@@ -120,7 +163,7 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 			Delta = abilityDelta
 		}
 		-- if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Ability == statID then
-		-- 	SheetManager.SessionManager:RequestPointsUpdate(player, "Ability", abilityValue)
+		-- 	SessionManager:RequestPointsUpdate(player, "Ability", abilityValue)
 		-- 	updateSessionPoints[player.NetID].Ability = nil
 		-- end
 	end
@@ -130,7 +173,7 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 	local abilitiesWithDelta = {}
 	local updateClassContent = SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION
 	
-	for ability in SheetManager.Abilities.GetVisible(player, nil, true) do
+	for ability in SheetManager.Abilities.GetVisible(player, nil, true, nil, this.availableAbilityPoints, this.availableCivilPoints) do
 		local updateData = engineValues[ability.ID]
 		if updateData then
 			ability.Value = updateData.Value
@@ -180,11 +223,10 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 	--this.clearArray("abilityArray")
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	local points = GetAvailablePoints().Attribute
+	this.availableAttributePoints = points
 
 	local engineValues = {}
-	for i=0,#this.attributeArray-1 do
-		Ext.PrintWarning(i, this.attributeArray[i])
-	end
 	for i=0,#this.attributeArray-1,5 do
 		--Ext.PrintWarning(i, this.attributeArray[i], this.attributeArray[i+1], this.attributeArray[i+3], this.attributeArray[i+4])
 		local statID = this.attributeArray[i]
@@ -198,21 +240,17 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 		}
 
 		-- if updateSessionPoints[player.NetID] and updateSessionPoints[player.NetID].Stat == statID then
-		-- 	SheetManager.SessionManager:RequestPointsUpdate(player, "Stat", value)
+		-- 	SessionManager:RequestPointsUpdate(player, "Stat", value)
 		-- 	updateSessionPoints[player.NetID].Stat = nil
 		-- end
 	end
 
-	--Ext.PrintWarning(Lib.serpent.block(engineValues))
-
 	local attributes_mc = this.CCPanel_mc.attributes_mc
-
-	this.availableAttributePoints = SheetManager:GetAvailablePoints(player, "Attribute")
 
 	local attributesWithDelta = {}
 	local updateClassContent = SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION
-	
-	for stat in SheetManager.Stats.GetVisible(player, true, false, not updateClassContent) do
+
+	for stat in SheetManager.Stats.GetVisible(player, true, false, not updateClassContent, this.availableAttributePoints) do
 		local updateData = engineValues[stat.ID]
 		if updateData then
 			stat.Value = updateData.Value
@@ -247,62 +285,17 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 	--attributes_mc.root_mc.CCPanel_mc.class_mc.addTabTextContent(0,val2);
 
 	attributes_mc.attributes.cleanUpElements()
-	attributes_mc.freePoints_txt.htmlText = string.format("%s %i", this.textArray[12], this.availableAttributePoints)
+	attributes_mc.freePoints_txt.htmlText = string.format("%s %i", Text.AvailableAttributePoints.Value, this.availableAttributePoints)
 end
 
 CharacterCreation:RegisterInvokeListener("updateAttributes", CharacterCreation.UpdateAttributes, "Before", "All")
-
----@private
----@param ui UIObject
-function CharacterCreation.OnClassPointsUpdated(self, ui, method, pointType, amount)
-	local this = self.Root
-	if not this or not this.isExtended then
-		return
-	end
-	if pointType ~= "Skill" then
-		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
-		--Since we don't have a way to access the points CC uses, store the change immediately
-		SheetManager.AvailablePoints[player.NetID][pointType] = amount
-		SheetManager.SessionManager:RequestPointsUpdate(player, pointType, amount, true, true)
-	end
-end
-
-CharacterCreation:RegisterCallListener("characterCreationPointsUpdated", CharacterCreation.OnClassPointsUpdated, "Before", "Keyboard")
-CharacterCreation:RegisterInvokeListener("setDetails", function (self, ui, methid, num, b)
-	local this = self.Root
-	if not this or not this.isExtended then
-		return
-	end
-	---@type EclCharacter
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
-	if player and player.PlayerCustomData then
-		local preset = player.PlayerCustomData.ClassType
-		local data = PresetData[preset]
-		if data then
-			local session = SheetManager.SessionManager:GetSession(player)
-			for _,change in pairs(data.AbilityChanges) do
-				session.Stats[change.Ability] = session.Stats[change.Ability] + change.AmountIncreased
-			end
-			for _,change in pairs(data.AttributeChanges) do
-				session.Stats[change.Attribute] = session.Stats[change.Attribute] + change.AmountIncreased
-			end
-			-- SheetManager.AvailablePoints[player.NetID] = {
-			-- 	Attribute = data.NumStartingAttributePoints,
-			-- 	Ability = data.NumStartingCombatAbilityPoints,
-			-- 	Civil = data.NumStartingCivilAbilityPoints,
-			-- 	Talent = data.NumStartingTalentPoints,
-			-- }
-		end
-	end
-end, "Before", "Keyboard")
---Ext.RegisterUITypeInvokeListener(Data.UIType.characterCreation_c, "updateAttributes", CharacterCreation.UpdateAttributes)
 
 function CharacterCreation.Started(self, ui, call)
 	CharacterCreation.IsOpen = true
 	if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
 		local this = self.Root
-		if this and this.isExtended then
-			this.isExtended = false
+		if this and not this.isExtended then
+			this.isExtended = string.find(Ext.IO.GetPathOverride(ui.Path), "CharacterExpansionLib")
 		end
 	end
 end
@@ -315,14 +308,25 @@ function CharacterCreation.CreationDone(self, ui, method, startText, backText, v
 		if not MessageBox.UI.Instance and CharacterCreation.IsOpen then
 			SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
 			CharacterCreation.IsOpen = false
-			local this = self.Root
-			if this and not this.isExtended then
-				this.isExtended = true
-			end
+			-- local this = self.Root
+			-- if this and not this.isExtended then
+			-- 	this.isExtended = true
+			-- end
 		end
 	end
 end
 CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "Before", "All")
+
+CharacterCreation:RegisterCallListener("selectOption", function(self, ui, call)
+	local this = ui:GetRoot()
+	if not this then
+		return
+	end
+	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	if player then
+		SessionManager:ResetSession(player)
+	end
+end, "Before", "All")
 
 MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
 	if isConfirmed and CharacterCreation.IsOpen then
@@ -340,17 +344,33 @@ end)
 
 SheetManager.UI.CharacterCreation = CharacterCreation
 
-RegisterListener("RegionChanged", function (region, state, levelType)
-	if levelType == LEVELTYPE.CHARACTER_CREATION then
-		local this = CharacterCreation.Root
-		if this then
-			if state ~= REGIONSTATE.ENDED then
-				if this.isExtended then this.isExtended = false end
-			else
-				if this.isExtended == false then this.isExtended = true end
-			end
-		end
-	else
-		CharacterCreation.IsOpen = false
+-- RegisterListener("RegionChanged", function (region, state, levelType)
+-- 	if levelType == LEVELTYPE.CHARACTER_CREATION then
+-- 		local this = CharacterCreation.Root
+-- 		if this then
+-- 			if state ~= REGIONSTATE.ENDED then
+-- 				if this.isExtended then this.isExtended = false end
+-- 			else
+-- 				if this.isExtended == false then this.isExtended = true end
+-- 			end
+-- 		end
+-- 	else
+-- 		CharacterCreation.IsOpen = false
+-- 	end
+-- end)
+
+RegisterListener("LuaReset", function ()
+	CharacterCreation.IsOpen = CharacterCreation.Root ~= nil
+	if CharacterCreation.IsOpen then
+		CharacterCreation.UpdateAvailablePoints()
+		--Ext.Dump(SessionManager.CharacterCreationWizard.GetStatsAsTable())
+	end
+end)
+
+RegisterNetListener("CEL_CharacterCreation_UpdateEntries", function ()
+	if CharacterCreation.IsOpen then
+		CharacterCreation:UpdateAttributes()
+		CharacterCreation:UpdateAbilities()
+		CharacterCreation:UpdateTalents()
 	end
 end)

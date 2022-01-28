@@ -565,14 +565,15 @@ package characterCreation_fla
 			var skill_mc:MovieClip = null;
 			this.numberOfSlots = numberOfSlots;
 			this.CCPanel_mc.skills_mc.chosenSkillList.clearElements();
-			var val2:int = 0;
-			while(val2 < numberOfSlots)
+			var i:int = 0;
+			while(i < numberOfSlots)
 			{
 				skill_mc = new Skill();
 				skill_mc.Init();
-				skill_mc.slotPos = val2;
+				//CharacterExpansionLib - Typo fix. slotPos->listPos
+				skill_mc.listPos = i;
 				this.CCPanel_mc.skills_mc.chosenSkillList.addElement(skill_mc,true);
-				val2++;
+				i++;
 			}
 			this.CCPanel_mc.skills_mc.chosenSkillList.positionElements();
 		}

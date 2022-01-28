@@ -21,6 +21,7 @@ package
 		public var value:uint;
 
 		//CharacterExpansionLib Changes
+		public var isCivil:Boolean = false;
 		public var statID:Number;
 		public var callbackStr:String = "showAbilityTooltip";
 		public var isCustom:Boolean = false;

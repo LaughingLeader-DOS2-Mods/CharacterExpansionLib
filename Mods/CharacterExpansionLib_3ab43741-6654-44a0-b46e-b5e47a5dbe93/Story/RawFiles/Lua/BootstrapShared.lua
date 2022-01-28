@@ -67,6 +67,7 @@ if version >= 56 then
 		end
 		local listeners = _netListeners[id]
 		local wrapper = function (_id, payload, user)
+			fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
 			-- if Vars.LeaderDebugMode and printMessages[id] then
 			-- 	--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
 			-- 	fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)

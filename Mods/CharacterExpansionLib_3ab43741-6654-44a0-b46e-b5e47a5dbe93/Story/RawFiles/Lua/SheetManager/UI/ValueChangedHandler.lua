@@ -64,15 +64,7 @@ local function RequestBaseValueChange(statType, id, modifyBy, skipPointsCheck)
 			if character then
 				local points = 0
 				if not skipPointsCheck then
-					if entryType == "Ability" then
-						if SheetManager.Abilities.Data.Abilities[stat].Civil then
-							points = SheetManager.AvailablePoints[character.NetID] and SheetManager.AvailablePoints[character.NetID].Civil or 0
-						else
-							points = SheetManager.AvailablePoints[character.NetID] and SheetManager.AvailablePoints[character.NetID].Ability or 0
-						end
-					else
-						points = SheetManager.AvailablePoints[character.NetID] and SheetManager.AvailablePoints[character.NetID][entryType] or 0
-					end
+					points = SheetManager:GetAvailablePoints(character, entryType)
 				end
 				if skipPointsCheck or points == 0 then
 					if entryType == "Talent" then

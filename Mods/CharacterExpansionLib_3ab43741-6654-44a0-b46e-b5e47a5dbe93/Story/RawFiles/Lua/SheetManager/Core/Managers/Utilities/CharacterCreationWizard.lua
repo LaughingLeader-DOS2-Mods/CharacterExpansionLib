@@ -1,4 +1,5 @@
-CharacterCreationWizard = {}
+---@class CharacterCreationWizard
+local CharacterCreationWizard = {}
 
 ---@private
 ---@class CCAbilityChangeEntry
@@ -192,6 +193,29 @@ CharacterCreationWizard = {}
 
 ---@class CCWizardCurrentStats:CCWizardAttributes
 
+---Get the current available point values of the CC wizard. This table isn't linked with metadata, so don't use it for long-term point referencing.
+---@return CCWizardAvailablePoints
+function CharacterCreationWizard.GetAvailablePointsAsTable()
+	local ccwiz = Ext.UI.GetCharacterCreationWizard()
+	if ccwiz then
+		return {
+			Attribute = ccwiz.AvailablePoints.Attribute,
+			Ability = ccwiz.AvailablePoints.Ability,
+			Civil = ccwiz.AvailablePoints.Civil,
+			Talent = ccwiz.AvailablePoints.Talent,
+			SkillSlots = ccwiz.AvailablePoints.SkillSlots,
+		}
+	end
+	fprint(LOGLEVEL.ERROR, "[CharacterCreationWizard] Failed to get current available points.")
+	return {
+		Attribute = 0,
+		Ability = 0,
+		Civil = 0,
+		Talent = 0,
+		SkillSlots = 0,
+	}
+end
+
 ---@class CCWizardAvailablePoints
 ---@field Attribute integer
 ---@field Ability integer
@@ -199,53 +223,96 @@ CharacterCreationWizard = {}
 ---@field Talent integer
 ---@field SkillSlots integer
 CharacterCreationWizard.AvailablePoints = {}
-setmetatable(CharacterCreationWizard.Points, {
+setmetatable(CharacterCreationWizard.AvailablePoints, {
 	__index = function(tbl, k)
 		local ccwiz = Ext.UI.GetCharacterCreationWizard()
 		if ccwiz then
-			local points = ccwiz.AttributePoints
+			local points = ccwiz.AvailablePoints
 			if k == "Attribute" then
-				return points[1]
+				return points.Attribute
 			elseif k == "Ability" then
-				return points[2]
+				return points.Ability
 			elseif k == "Civil" then
-				return points[3]
+				return points.Civil
 			elseif k == "Talent" then
-				return points[5]
+				return points.Talent
 			elseif k == "SkillSlots" then
-				return points[4]
+				return points.SkillSlots
 			end
 		end
 	end,
-	__newindex = function(tbl, k, v)
-		local ccwiz = Ext.UI.GetCharacterCreationWizard()
-		if ccwiz then
-			local points = ccwiz.AttributePoints
-			if k == "Attribute" then
-				points[1] = v
-			elseif k == "Ability" then
-				points[2] = v
-			elseif k == "Civil" then
-				points[3] = v
-			elseif k == "Talent" then
-				points[5] = v
-			elseif k == "SkillSlots" then
-				points[4] = v
-			end
-		end
-	end
+	-- __newindex = function(tbl, k, v)
+	-- 	local ccwiz = Ext.UI.GetCharacterCreationWizard()
+	-- 	if ccwiz then
+	-- 		local points = ccwiz.AvailablePoints
+	-- 		if k == "Attribute" then
+	-- 			points[1] = v
+	-- 		elseif k == "Ability" then
+	-- 			points[2] = v
+	-- 		elseif k == "Civil" then
+	-- 			points[3] = v
+	-- 		elseif k == "Talent" then
+	-- 			points[5] = v
+	-- 		elseif k == "SkillSlots" then
+	-- 			points[4] = v
+	-- 		end
+	-- 	end
+	-- end
 })
 
 ---@param character  EclCharacter
 local function GetWizCustomizationForCharacter(character)
 	local ccwiz = Ext.UI.GetCharacterCreationWizard()
-	for i,v in pairs(ccwiz.Customizations) do
+	for i,v in pairs(ccwiz.CharacterCreationManager.Customizations) do
 		local entryCharacter = GameHelpers.GetCharacter(v.CharacterHandle)
 		if entryCharacter and entryCharacter.NetID == character.NetID then
-			return v
+			return v.State
 		end
 	end
 	return nil
+end
+
+CharacterCreationWizard.GetWizCustomizationForCharacter = GetWizCustomizationForCharacter
+
+---Get the current available point values of the CC wizard. This table isn't linked with metadata, so don't use it for long-term point referencing.
+---@return CCWizardAvailablePoints
+function CharacterCreationWizard.GetStatsAsTable()
+	local ccwiz = Ext.UI.GetCharacterCreationWizard()
+	if ccwiz then
+		local player = GameHelpers.Client.GetCharacterCreationCharacter()
+		local customization = GetWizCustomizationForCharacter(player)
+		if customization then
+			local stats = {}
+			for i,k in Data.Attribute:Get() do
+				stats[k] = player.Stats[k]
+			end
+			for i,k in Data.Ability:Get() do
+				stats[k] = player.Stats[k]
+			end
+			for i,k in Data.Talents:Get() do
+				local talentid = "TALENT_" .. k
+				stats[talentid] = player.Stats[talentid]
+			end
+			for i,v in pairs(customization.Class.AttributeChanges) do
+				stats[v.Attribute] = stats[v.Attribute] + v.AmountIncreased
+			end
+			for i,v in pairs(customization.Class.AbilityChanges) do
+				stats[v.Ability] = stats[v.Ability] + v.AmountIncreased
+			end
+			for i,v in pairs(customization.Class.TalentsAdded) do
+				stats["TALENT_" .. v] = true
+			end
+			return stats
+		end
+	end
+	fprint(LOGLEVEL.ERROR, "[CharacterCreationWizard] Failed to get current available points.")
+	return {
+		Attribute = 0,
+		Ability = 0,
+		Civil = 0,
+		Talent = 0,
+		SkillSlots = 0,
+	}
 end
 
 local function GetCharacterStats(character)
@@ -279,7 +346,7 @@ local function GetCharacterStats(character)
 							end
 						end
 					elseif Data.TalentEnum[k] then
-						base = player.Stats["TALENT_" + k]
+						base = player.Stats["TALENT_" .. k]
 						current = base
 						for i,v in pairs(customization.Class.TalentsAdded) do
 							if v == k then
@@ -332,3 +399,5 @@ setmetatable(CharacterCreationWizard.Stats, {
 		return GetCharacterStats(k)
 	end
 })
+
+return CharacterCreationWizard

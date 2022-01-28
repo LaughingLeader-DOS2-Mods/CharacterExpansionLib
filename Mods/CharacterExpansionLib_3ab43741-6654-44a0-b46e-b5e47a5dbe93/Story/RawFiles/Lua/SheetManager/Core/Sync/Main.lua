@@ -11,9 +11,9 @@ SheetManager.Sync = {}
 function SheetManager:SyncData(character)
 	if not isClient then
 		SheetManager.Sync.EntryValues(character)
-		SheetManager.Sync.AvailablePoints(character)
+		SheetManager.Sync.CustomAvailablePoints(character)
 		if character ~= nil then
-			SheetManager.SessionManager:SyncSession(character)
+			SessionManager:SyncSession(character)
 			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character), "CEL_SheetManager_NotifyDataSynced", "")
 		else
 			GameHelpers.Net.Broadcast("CEL_SheetManager_NotifyDataSynced", "")
