@@ -61,16 +61,16 @@ if not isClient then
 			self:SyncSession(character)
 		end
 
-		return self.Sessions[characterId]
+		return data
 	end
 
 	---@param character  EsvCharacter
 	function SessionManager:SyncSession(character)
 		local player = GameHelpers.GetCharacter(character)
-		if self.Sessions[player.MyGuid] then
+		if self.Sessions[player.ReservedUserID] then
 			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_SyncCharacterData", {
 				NetID = player.NetID,
-				Data = self.Sessions[player.MyGuid],
+				Data = self.Sessions[player.ReservedUserID],
 			})
 		end
 	end
@@ -158,7 +158,7 @@ function SessionManager:ClearSession(character, skipSync)
 	if not isClient then
 		character = GameHelpers.GetCharacter(character)
 		local characterId = GameHelpers.GetCharacterID(character)
-		SessionManager.Sessions[characterId] = nil
+		SessionManager.Sessions[character.ReservedUserID] = nil
 		--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
 		if skipSync ~= true and not isClient then
 			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
@@ -206,25 +206,34 @@ function SessionManager:ApplySession(character)
 		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
 	else
 		local characterId = GameHelpers.GetUUID(character)
-		local sessionData = self.Sessions[characterId]
+		local sessionData = self:GetSession(character)
 		if sessionData then
 			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 			if sessionData.PendingChanges then
-				local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+				-- local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+				-- for statType,mods in pairs(sessionData.PendingChanges) do
+				-- 	if not data[statType] then
+				-- 		data[statType] = {}
+				-- 	end
+				-- 	for modId,entries in pairs(mods) do
+				-- 		if data[statType][modId] == nil then
+				-- 			data[statType][modId] = entries
+				-- 		else
+				-- 			for id,value in pairs(entries) do
+				-- 				data[statType][modId][id] = value
+				-- 			end
+				-- 		end
+				-- 	end
+				-- end
 				for statType,mods in pairs(sessionData.PendingChanges) do
-					if not data[statType] then
-						data[statType] = {}
-					end
 					for modId,entries in pairs(mods) do
-						if data[statType][modId] == nil then
-							data[statType][modId] = entries
-						else
-							for id,value in pairs(entries) do
-								data[statType][modId][id] = value
-							end
+						for id,value in pairs(entries) do
+							local stat = SheetManager:GetEntryByID(id, modId, statType)
+							SheetManager:SetEntryValue(stat, character, value, false, true)
 						end
 					end
 				end
+				SheetManager:SyncData(character)
 			end
 		else
 			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", characterId, Lib.serpent.block(self.Sessions))
@@ -236,8 +245,12 @@ end
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
 ---@return CharacterCreationSessionData
 function SessionManager:GetSession(character)
-	local characterId = GameHelpers.GetCharacterID(character)
-	return self.Sessions[characterId]
+	character = GameHelpers.GetCharacter(character)
+	if not isClient then
+		return self.Sessions[character.ReservedUserID]
+	else
+		return self.Sessions[character.NetID]
+	end
 end
 
 ---@type CharacterCreationWizard
