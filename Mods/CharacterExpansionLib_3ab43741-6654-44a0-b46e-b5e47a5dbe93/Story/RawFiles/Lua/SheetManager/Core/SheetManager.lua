@@ -184,12 +184,11 @@ local function LoadData()
 	end
 end
 
-if not isClient then
-	RegisterListener("Initialized", LoadData)
-else
-	Ext.RegisterListener("SessionLoaded", LoadData)
-	--Ext.Require("SheetManager/Core/UI/_Init.lua")
-end
+RegisterListener("RegionChanged", function ()
+	if not SheetManager.Loaded then
+		LoadData()
+	end
+end)
 
 if isClient then
 	if SheetManager.UI == nil then

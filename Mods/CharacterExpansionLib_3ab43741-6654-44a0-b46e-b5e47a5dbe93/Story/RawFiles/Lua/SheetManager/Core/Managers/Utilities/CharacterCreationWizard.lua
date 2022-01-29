@@ -263,12 +263,15 @@ setmetatable(CharacterCreationWizard.AvailablePoints, {
 ---@param character  EclCharacter
 local function GetWizCustomizationForCharacter(character)
 	local ccwiz = Ext.UI.GetCharacterCreationWizard()
-	for i,v in pairs(ccwiz.CharacterCreationManager.Customizations) do
-		local entryCharacter = GameHelpers.GetCharacter(v.CharacterHandle)
-		if entryCharacter and entryCharacter.NetID == character.NetID then
-			return v.State
+	if ccwiz then
+		for i,v in pairs(ccwiz.CharacterCreationManager.Customizations) do
+			local entryCharacter = GameHelpers.GetCharacter(v.CharacterHandle)
+			if entryCharacter and entryCharacter.NetID == character.NetID then
+				return v.State
+			end
 		end
 	end
+
 	return nil
 end
 

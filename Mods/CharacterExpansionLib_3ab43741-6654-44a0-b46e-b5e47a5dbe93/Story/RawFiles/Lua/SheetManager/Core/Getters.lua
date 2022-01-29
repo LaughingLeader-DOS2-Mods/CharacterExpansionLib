@@ -22,7 +22,9 @@ function SheetManager:GetEntryByID(id, mod, statType)
 	end
 	if targetTable then
 		if mod then
-			return targetTable[mod][id]
+			if targetTable[mod] then
+				return targetTable[mod][id]
+			end
 		else
 			for modId,tbl in pairs(targetTable) do
 				if tbl[id] then

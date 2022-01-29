@@ -39,18 +39,17 @@ end
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 ---@param applyChanges boolean
 function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
+	local player = GameHelpers.GetCharacter(characterId)
 	if not isClient then
-		characterId = GameHelpers.GetCharacterID(characterId)
 		if applyChanges then
-			SessionManager:ApplySession(characterId)
+			SessionManager:ApplySession(player)
 		else
-			SessionManager:ClearSession(characterId)
+			SessionManager:ClearSession(player, true)
 		end
 		SheetManager:SyncData()
 	else
-		local netid = GameHelpers.GetNetID(characterId)
 		Ext.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", Ext.JsonStringify({
-			NetID = netid,
+			UserId = player.ReservedUserID,
 			ApplyChanges = applyChanges
 		}))
 	end
@@ -60,13 +59,13 @@ if not isClient then
 	RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			local character = Ext.GetCharacter(data.NetID)
+			local character = GameHelpers.GetCharacter(GetCurrentCharacter(data.UserId))
 			if character then
 				local applyChanges = data.ApplyChanges
 				if applyChanges == nil then
 					applyChanges = false
 				end
-				SheetManager.Save.CharacterCreationDone(character.MyGuid, applyChanges)
+				SheetManager.Save.CharacterCreationDone(character, applyChanges)
 			end
 		end
 	end)

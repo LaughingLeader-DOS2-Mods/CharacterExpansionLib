@@ -38,6 +38,7 @@ if not isClient then
 		end
 
 		local data = {
+			UserID = character.ReservedUserID,
 			UUID = characterId,
 			NetID = character.NetID,
 			PendingChanges = {},
@@ -54,7 +55,7 @@ if not isClient then
 		-- 	data.Stats["TALENT_" .. k] = character.Stats["TALENT_" .. k]
 		-- end
 
-		self.Sessions[characterId] = data
+		self.Sessions[character.ReservedUserID] = data
 
 		if skipSync ~= true then
 			self:SyncSession(character)
@@ -107,10 +108,15 @@ if not isClient then
 
 	--Fallback in case none of the UI listeners notify the server that CC is done
 	Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
+		print("CharacterCreationFinished", character)
 		if not StringHelpers.IsNullOrEmpty(character) then
 			Timer.StartOneshot("", 900, function()
 				SheetManager.Save.CharacterCreationDone(character, true)
 			end)
+		else
+			for player in GameHelpers.Character.GetPlayers(false) do
+				SheetManager.Save.CharacterCreationDone(player, true)
+			end
 		end
 	end)
 
@@ -126,9 +132,6 @@ else
 		local data = Common.JsonParse(payload)
 		if data then
 			self.Sessions[data.NetID] = data.Data
-
-			Ext.PrintError("SheetManager.UI.CharacterCreation.IsOpen", SheetManager.UI.CharacterCreation.IsOpen)
-
 			if SheetManager.UI.CharacterCreation.IsOpen then
 				SheetManager.UI.CharacterCreation:UpdateAttributes()
 				SheetManager.UI.CharacterCreation:UpdateAbilities()
@@ -142,9 +145,10 @@ else
 		SessionManager:ClearSession(netid, true)
 	end)
 
-	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, netid)
-		netid = tonumber(netid)
-		SessionManager:ApplySession(netid)
+	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, userid)
+		userid = tonumber(userid)
+		local player = GameHelpers.GetCharacter(GetCurrentCharacter(userid))
+		SessionManager:ApplySession(player)
 	end)
 end
 
@@ -167,19 +171,19 @@ end
 ---@param skipSync ?boolean
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
-	local characterId = GameHelpers.GetCharacterID(character)
-	local respec = respec or SessionManager.Sessions[characterId] and SessionManager.Sessions[characterId].Respec
-	SessionManager.Sessions[characterId] = nil
+	character = GameHelpers.GetCharacter(character)
+	local respec = respec or SessionManager.Sessions[character.ReservedUserID] and SessionManager.Sessions[character.ReservedUserID].Respec
+	SessionManager.Sessions[character.ReservedUserID] = nil
 	if not isClient then
 		if skipSync ~= true then
-			SessionManager:CreateSession(characterId, respec, skipSync)
+			SessionManager:CreateSession(character, respec, skipSync)
 		end
 		-- if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION or SheetManager.IsInCharacterCreation(characterId) then
 		-- 	GameHelpers.Net.PostToUser(character, "CEL_CharacterCreation_UpdateEntries")
 		-- end
 	else
 		Ext.PostMessageToServer("CEL_SessionManager_ResetCharacterData", Common.JsonStringify({
-			NetID = characterId,
+			NetID = character.NetID,
 			SkipSync = skipSync,
 			Respec = respec
 		}))
@@ -199,7 +203,7 @@ end
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
 	if isClient then
-		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
+		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
 	else
 		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self.Sessions[characterId]
@@ -222,6 +226,8 @@ function SessionManager:ApplySession(character)
 					end
 				end
 			end
+		else
+			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", characterId, Lib.serpent.block(self.Sessions))
 		end
 	end
 	SessionManager:ClearSession(character)
