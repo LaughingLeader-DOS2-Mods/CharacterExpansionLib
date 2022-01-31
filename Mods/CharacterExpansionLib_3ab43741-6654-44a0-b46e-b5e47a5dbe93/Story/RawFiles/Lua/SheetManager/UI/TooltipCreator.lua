@@ -24,7 +24,7 @@ Game.Tooltip.RegisterRequestListener("Talent", function(request, ui, uiType, eve
 end, "before")
 
 Game.Tooltip.RegisterBeforeNotifyListener("CustomStat", function(request, ui, method, tooltip, ...)
-	if request.RequestUpdate then
+	if request.RequestUpdate or type(request.Stat) ~= "table" then
 		SheetManager.CustomStats:UpdateStatTooltipArray(ui, request.Stat, tooltip, request)
 		request.RequestUpdate = false
 	end
@@ -51,10 +51,9 @@ local function CreateTooltip(tooltipType, requestedUI, call, idOrCharacter, idOr
 		local this = ui:GetRoot()
 		local data = SheetManager:GetEntryByGeneratedID(id, tooltipType)
 		if this and this.tooltip_array and data then
-			local request = {
-				Type = data.TooltipType,
-				Character = SheetManager.UI.CharacterSheet.GetCharacter()
-			}
+			local request = Game.Tooltip.RequestProcessor.CreateRequest()
+			request.Type = data.TooltipType
+			request.CharacterNetID = SheetManager.UI.CharacterSheet.GetCharacter().NetID
 
 			local resolved = false
 			if tooltipType == "Ability" then
