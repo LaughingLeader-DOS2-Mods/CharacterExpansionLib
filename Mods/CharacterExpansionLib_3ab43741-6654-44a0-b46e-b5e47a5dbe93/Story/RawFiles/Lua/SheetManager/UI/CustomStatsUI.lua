@@ -5,7 +5,6 @@ self.Requesting = false
 local lastTooltipX = nil
 local lastTooltipY = nil
 self.LastIconId = 1212
-self.TooltipValueEnabled = {}
 self.Syncing = false
 self.MaxVisibleValue = 999 -- Values greater than this are truncated visually in the UI
 
@@ -426,12 +425,6 @@ function CustomStatSystem:OnStatAdded(ui, call, doubleHandle, index)
 			end
 		end
 
-		if stat.DisplayValueInTooltip ~= true then
-			self.TooltipValueEnabled[stat.ID] = nil
-		else
-			self.TooltipValueEnabled[stat.ID] = true
-		end
-
 		stat_mc.label_txt.htmlText = stat:GetDisplayName()
 
 		local character = Client:GetCharacter()
@@ -798,7 +791,7 @@ end)
 ---@param stat SheetCustomStatData
 ---@param tooltip TooltipData
 function CustomStatSystem:OnTooltip(ui, character, stat, tooltip)
-	if self.TooltipValueEnabled[stat.ID] then
+	if stat and stat.DisplayValueInTooltip then
 		local element = tooltip:GetLastElement({"StatsDescription", "TagDescription"})
 		if element then
 			local valueFormatted = StringHelpers.CommaNumber(stat:GetValue(character))

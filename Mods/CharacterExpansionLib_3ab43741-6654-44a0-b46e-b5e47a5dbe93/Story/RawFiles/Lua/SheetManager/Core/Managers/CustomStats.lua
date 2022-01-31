@@ -145,12 +145,6 @@ function CustomStatSystem.Initialize()
 			category.GroupId = categoryId
 			categoryId = categoryId + 1
 		end
-		CustomStatSystem.TooltipValueEnabled = {}
-		for stat in CustomStatSystem:GetAllStats() do
-			if stat.DisplayValueInTooltip then
-				CustomStatSystem.TooltipValueEnabled[stat.ID] = true
-			end
-		end
 	end
 	CustomStatSystem.Loaded = true
 
