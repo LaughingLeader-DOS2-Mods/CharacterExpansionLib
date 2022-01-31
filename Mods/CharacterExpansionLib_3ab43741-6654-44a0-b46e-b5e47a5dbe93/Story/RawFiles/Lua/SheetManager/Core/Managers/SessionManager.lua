@@ -172,8 +172,9 @@ end
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
 	character = GameHelpers.GetCharacter(character)
-	local respec = respec or SessionManager.Sessions[character.ReservedUserID] and SessionManager.Sessions[character.ReservedUserID].Respec
-	SessionManager.Sessions[character.ReservedUserID] = nil
+	local id = isClient and character.NetID or character.ReservedUserID
+	local respec = respec or SessionManager.Sessions[id] and SessionManager.Sessions[id].Respec
+	SessionManager.Sessions[id] = nil
 	if not isClient then
 		if skipSync ~= true then
 			SessionManager:CreateSession(character, respec, skipSync)
