@@ -54,7 +54,7 @@
 			"IsRacial": true
 		}
 	},
-	"CustomStatsCategories" : {
+	"CustomStatCategories" : {
 		"Personality": {
 			"DisplayName": "Personality",
 			"Description": "Personality stats related to who you are.",

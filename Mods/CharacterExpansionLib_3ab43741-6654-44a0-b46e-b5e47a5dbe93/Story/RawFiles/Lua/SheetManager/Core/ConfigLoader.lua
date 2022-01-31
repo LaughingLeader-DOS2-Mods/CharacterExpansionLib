@@ -28,7 +28,7 @@ Format:
 			"Description": ""
 		}
 	},
-	"CustomStatsCategories": {
+	"CustomStatCategories": {
 		"ID": {
 			"DisplayName": "",
 			"Description": ""
