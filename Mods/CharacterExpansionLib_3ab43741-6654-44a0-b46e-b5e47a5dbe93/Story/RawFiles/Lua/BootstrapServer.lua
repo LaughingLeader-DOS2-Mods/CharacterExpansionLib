@@ -1,6 +1,3 @@
-Ext.Require("BootstrapShared.lua")
-Ext.Require("CharacterCreationExtended/Init.lua")
-
 ---@class CharacterExpansionLibPersistentVars
 local defaultPersistentVars = {
 	---Used in story mode for storing values, since CustomStats get added to everything.
@@ -12,10 +9,10 @@ local defaultPersistentVars = {
 	CharacterSheetValues = {},
 }
 
----@private
----@type CharacterExpansionLibPersistentVars
-PersistentVars = Common.CloneTable(defaultPersistentVars, true)
+Ext.Require("BootstrapShared.lua")
+Ext.Require("CharacterCreationExtended/Init.lua")
 
-RegisterListener("PersistentVarsLoaded", function()
-    Common.InitializeTableFromSource(PersistentVars, defaultPersistentVars)
+---@type CharacterExpansionLibPersistentVars
+PersistentVars = GameHelpers.PersistentVars.Initialize(Mods.CharacterExpansionLib, defaultPersistentVars, function ()
+	PersistentVars = GameHelpers.PersistentVars.Update(defaultPersistentVars, PersistentVars)
 end)
