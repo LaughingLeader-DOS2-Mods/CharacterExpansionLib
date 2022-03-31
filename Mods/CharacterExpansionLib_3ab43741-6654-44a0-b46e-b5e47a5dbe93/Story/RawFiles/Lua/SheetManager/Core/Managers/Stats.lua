@@ -510,7 +510,7 @@ if isClient then
 							IconClipName = "",
 							IconDrawCallName = ""
 						}
-						if not isRespec then
+						if isCharacterCreation and not isRespec then
 							entry.ID = entry.ID + 1
 						end
 						entries[#entries+1] = entry

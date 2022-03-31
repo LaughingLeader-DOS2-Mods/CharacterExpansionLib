@@ -315,7 +315,7 @@ function CharacterCreation.CreationDone(self, ui, method, startText, backText, v
 		end
 	end
 end
-CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "Before", "All")
+--CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "Before", "All")
 
 CharacterCreation:RegisterCallListener("selectOption", function(self, ui, call)
 	local this = ui:GetRoot()
@@ -326,7 +326,22 @@ CharacterCreation:RegisterCallListener("selectOption", function(self, ui, call)
 	if player then
 		SessionManager:ResetSession(player)
 	end
+	-- local color = math.tointeger(0xCC00FF); local wiz = Ext.UI.GetCharacterCreationWizard().CharacterCreationManager.Customizations[0].State; wiz.SkinColor.Value = color; Ext.GetUIByType(3):ExternalInterfaceCall("setArmourState", 0); --Ext.GetUIByType(119):ExternalInterfaceCall("setHelmetOption", 0) --Ext.GetUIByType(3):ExternalInterfaceCall("setGender", true); 
+	-- local wiz = Ext.UI.GetCharacterCreationWizard()
+	-- if wiz then
+	-- 	local raceData = wiz.CharacterCreationManager.Customizations[0].State
+	-- 	raceData.SkinColor.Value = math.tointeger(0xCC00FF)
+	-- end
 end, "Before", "All")
+
+--Ext.SaveFile("CC_UI_Dump.json", Ext.DumpExport(Ext.UI.GetCharacterCreationWizard()))
+-- CharacterCreation:RegisterInvokeListener("updatePortraits", function(self, ui, call)
+-- 	local wiz = Ext.UI.GetCharacterCreationWizard()
+-- 	if wiz then
+-- 		local raceData = wiz.CharacterCreationManager.Customizations[0].State
+-- 		raceData.SkinColor.Value = math.tointeger(0xCC00FF)
+-- 	end
+-- end, "Before", "All")
 
 MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
 	if isConfirmed and CharacterCreation.IsOpen then

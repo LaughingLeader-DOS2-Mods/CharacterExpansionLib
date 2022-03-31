@@ -41,7 +41,7 @@ end
 function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	local player = GameHelpers.GetCharacter(characterId)
 	if not isClient then
-		if applyChanges then
+		if applyChanges == true then
 			SessionManager:ApplySession(player)
 		else
 			SessionManager:ClearSession(player, true)
@@ -49,7 +49,7 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 		SheetManager:SyncData()
 	else
 		Ext.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", Ext.JsonStringify({
-			UserId = player.ReservedUserID,
+			UserId = Client.Character.ID,
 			ApplyChanges = applyChanges
 		}))
 	end
