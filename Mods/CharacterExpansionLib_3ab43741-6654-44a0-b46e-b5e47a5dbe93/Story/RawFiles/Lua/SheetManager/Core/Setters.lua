@@ -9,7 +9,7 @@ local function ErrorMessage(prefix, txt, ...)
 	end
 end
 
-local function SetValue(characterId, character, stat, value, isInCharacterCreation)
+local function SetValue(characterId, character, stat, value, isInCharacterCreation, skipSessionCheck)
 	if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
 		if character and character.Stats then
 			if not isClient then
@@ -75,8 +75,8 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 			fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", isClient and "CLIENT" or "SERVER", stat.ID, characterId)
 		end
 	else
-		if isClient or stat.StatType ~= SheetManager.StatType.Custom or not CustomStatSystem:GMStatsEnabled() then
-			SheetManager.Save.SetEntryValue(characterId, stat, value)
+		if isClient or (stat.StatType ~= SheetManager.StatType.Custom or not CustomStatSystem:GMStatsEnabled()) then
+			SheetManager.Save.SetEntryValue(characterId, stat, value, skipSessionCheck)
 		else
 			if StringHelpers.IsNullOrWhitespace(stat.UUID) and not isClient then
 				stat.UUID = Ext.CreateCustomStat(stat.DisplayName, stat.Description)
@@ -94,16 +94,17 @@ end
 ---@param skipListenerInvoke ?boolean If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync ?boolean If on the client and this is true, the value change won't be sent to the server.
 ---@param force ?boolean Skip requesting changes if on the client side.
-function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync, force)
+---@param skipSessionCheck ?boolean Used by the SessionManager to write changes directly when applying changes.
+function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
 	local last = stat:GetValue(characterId)
 	characterId = GameHelpers.GetCharacterID(characterId)
 	local character = GameHelpers.GetCharacter(characterId)
-	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
+	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(characterId)
 
 	if isClient and not force then
 		self:RequestValueChange(stat, characterId, value, false)
 	else
-		SetValue(characterId, character, stat, value, isInCharacterCreation)
+		SetValue(characterId, character, stat, value, isInCharacterCreation, skipSessionCheck)
 	end
 
 	if stat.StatType == SheetManager.StatType.Custom then
