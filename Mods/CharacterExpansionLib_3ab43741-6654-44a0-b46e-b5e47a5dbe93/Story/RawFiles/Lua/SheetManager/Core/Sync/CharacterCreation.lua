@@ -5,6 +5,9 @@ if SheetManager.Save == nil then SheetManager.Save = {} end
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 function SheetManager.IsInCharacterCreation(characterId)
 	characterId = GameHelpers.GetCharacterID(characterId)
+	if GameHelpers.IsLevelType(nil, LEVELTYPE.CHARACTER_CREATION) then
+		return true
+	end
 	if isClient then
 		if Client.Character then
 			if characterId == Client.Character.NetID and Client.Character.IsInCharacterCreation then
