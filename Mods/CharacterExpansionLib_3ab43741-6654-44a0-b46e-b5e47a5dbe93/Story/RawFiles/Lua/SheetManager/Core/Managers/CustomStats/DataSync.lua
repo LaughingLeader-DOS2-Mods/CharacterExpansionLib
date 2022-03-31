@@ -208,7 +208,11 @@ RegisterNetListener("CEL_CustomStatSystem_RemoveStatByUUID", function(cmd, paylo
 		end
 		CustomStatSystem.UnregisteredStats[data.UUID] = nil
 		if not isClient then
-			GameHelpers.Net.Broadcast("CEL_CustomStatSystem_RemoveStatByUUID", data.UUID, data.Client)
+			if data.Client then
+				GameHelpers.Net.PostToUser(data.Client, "CEL_CustomStatSystem_RemoveStatByUUID", data.UUID)
+			else
+				GameHelpers.Net.Broadcast("CEL_CustomStatSystem_RemoveStatByUUID", data.UUID)
+			end
 		end
 	end
 end)
