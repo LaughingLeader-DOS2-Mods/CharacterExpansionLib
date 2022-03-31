@@ -53,7 +53,7 @@ package characterCreation_fla
 		public var cibilAbilityCap:int;
 		public var layout:String;
 		public var alignment:String;
-		public var isDragging:Boolean;
+		public var isDragging:Boolean = false;
 		public var isGM:Boolean;
 		public var isMaster:Boolean;
 		public var screenWidth:Number;
@@ -569,6 +569,7 @@ package characterCreation_fla
 			while(i < numberOfSlots)
 			{
 				skill_mc = new Skill();
+				skill_mc.root_mc = this;
 				skill_mc.Init();
 				//CharacterExpansionLib - Typo fix. slotPos->listPos
 				skill_mc.listPos = i;
