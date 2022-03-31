@@ -11,8 +11,9 @@ local isClient = Ext.IsClient()
 ---@field PendingChanges table
 
 SessionManager = {
-	---@type table<UUID,CharacterCreationSessionData>
-	Sessions = {}
+	---@type table<integer,CharacterCreationSessionData>
+	Sessions = {},
+	HasSessionData = false
 }
 
 local self = SessionManager
@@ -57,6 +58,8 @@ if not isClient then
 
 		self.Sessions[character.ReservedUserID] = data
 
+		SessionManager.HasSessionData = true
+
 		if skipSync ~= true then
 			self:SyncSession(character)
 		end
@@ -86,11 +89,25 @@ if not isClient then
 	---@param state REGIONSTATE
 	---@param levelType LEVELTYPE
 	RegisterListener("RegionChanged", function (region, state, levelType)
-		if levelType == LEVELTYPE.CHARACTER_CREATION and state ~= REGIONSTATE.ENDED then
+		if levelType == LEVELTYPE.CHARACTER_CREATION and state == REGIONSTATE.GAME then
 			for player in GameHelpers.Character.GetPlayers(false) do
-				--fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
-				SessionManager:CreateSession(player, false)
+				if state == REGIONSTATE.GAME then
+					--fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
+					SessionManager:CreateSession(player, false)
+				elseif state == REGIONSTATE.ENDED then
+					SessionManager:ApplySession(player)
+				end
 			end
+		elseif levelType == LEVELTYPE.GAME and state == REGIONSTATE.GAME and SessionManager.HasSessionData then
+			for userId,data in pairs(SessionManager.Sessions) do
+				for player in GameHelpers.Character.GetPlayers(false) do
+					if player.ReservedUserID == userId then
+						SessionManager:ApplySession(player)
+						break
+					end
+				end
+			end
+			SessionManager.HasSessionData = false
 		end
 	end)
 
@@ -107,18 +124,17 @@ if not isClient then
 	end)
 
 	--Fallback in case none of the UI listeners notify the server that CC is done
-	Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
-		print("CharacterCreationFinished", character)
-		if not StringHelpers.IsNullOrEmpty(character) then
-			Timer.StartOneshot("", 900, function()
-				SheetManager.Save.CharacterCreationDone(character, true)
-			end)
-		else
-			for player in GameHelpers.Character.GetPlayers(false) do
-				SheetManager.Save.CharacterCreationDone(player, true)
-			end
-		end
-	end)
+	-- Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
+	-- 	if not StringHelpers.IsNullOrEmpty(character) then
+	-- 		Timer.StartOneshot("", 900, function()
+	-- 			SheetManager.Save.CharacterCreationDone(character, true)
+	-- 		end)
+	-- 	else
+	-- 		for player in GameHelpers.Character.GetPlayers(false) do
+	-- 			SheetManager.Save.CharacterCreationDone(player, true)
+	-- 		end
+	-- 	end
+	-- end)
 
 	--[[ Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
 		if character ~= StringHelpers.NULL_UUID then
@@ -164,6 +180,7 @@ function SessionManager:ClearSession(character, skipSync)
 			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
 		end
 	end
+	SessionManager.HasSessionData = Common.TableHasAnyEntry(SessionManager.Sessions)
 end
 
 ---For reseting session data, such as when the preset changes.
@@ -209,8 +226,8 @@ function SessionManager:ApplySession(character)
 		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self:GetSession(character)
 		if sessionData then
-			fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 			if sessionData.PendingChanges then
+				fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 				-- local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
 				-- for statType,mods in pairs(sessionData.PendingChanges) do
 				-- 	if not data[statType] then
@@ -230,11 +247,14 @@ function SessionManager:ApplySession(character)
 					for modId,entries in pairs(mods) do
 						for id,value in pairs(entries) do
 							local stat = SheetManager:GetEntryByID(id, modId, statType)
-							SheetManager:SetEntryValue(stat, character, value, false, true)
+							--SheetManager.Save.SetEntryValue(character.MyGuid, stat, value)
+							SheetManager:SetEntryValue(stat, characterId, value, false, true, true, true)
 						end
 					end
 				end
 				SheetManager:SyncData(character)
+			else
+				fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] Session data is missing PendingChanges for character %s", character.DisplayName)
 			end
 		else
 			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", characterId, Lib.serpent.block(self.Sessions))

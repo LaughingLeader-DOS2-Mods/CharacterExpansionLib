@@ -176,14 +176,19 @@ end
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param value integer|boolean
+---@param skipSessionCheck ?boolean
 ---@return boolean
-function SheetManager.Save.SetEntryValue(characterId, entry, value)
+function SheetManager.Save.SetEntryValue(characterId, entry, value, skipSessionCheck)
 	characterId = GameHelpers.GetCharacterID(characterId)
 	local data = nil
-	local sessionData = SessionManager:GetSession(characterId)
-	if sessionData then
-		data = sessionData.PendingChanges
-		assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
+	if skipSessionCheck ~= true then
+		local sessionData = SessionManager:GetSession(characterId)
+		if sessionData then
+			data = sessionData.PendingChanges
+			assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
+		else
+			data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
+		end
 	else
 		data = self.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
 	end
@@ -219,13 +224,15 @@ if isClient then
 		}
 		if data.IsInCharacterCreation then
 			local ccwiz = Ext.UI.GetCharacterCreationWizard()
-			local points = ccwiz.AvailablePoints
-			data.AvailablePoints = {
-				Attribute = points.Attribute,
-				Ability = points.Ability,
-				Civil = points.Civil,
-				Talent = points.Talent,
-			}
+			if ccwiz then
+				local points = ccwiz.AvailablePoints
+				data.AvailablePoints = {
+					Attribute = points.Attribute,
+					Ability = points.Ability,
+					Civil = points.Civil,
+					Talent = points.Talent,
+				}
+			end
 		end
 		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Common.JsonStringify(data))
 	end
