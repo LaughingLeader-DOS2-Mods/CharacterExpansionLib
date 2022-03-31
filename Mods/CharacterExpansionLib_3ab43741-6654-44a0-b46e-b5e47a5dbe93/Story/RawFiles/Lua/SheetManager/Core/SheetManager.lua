@@ -149,7 +149,7 @@ local function LoadData()
 				if statTypeCount <= 0 then
 					PersistentVars.CharacterSheetValues[uuid][statType] = nil
 				else
-					characterCount = characterCount + characterCount
+					characterCount = characterCount + 1
 				end
 			end
 			if characterCount <= 0 then
