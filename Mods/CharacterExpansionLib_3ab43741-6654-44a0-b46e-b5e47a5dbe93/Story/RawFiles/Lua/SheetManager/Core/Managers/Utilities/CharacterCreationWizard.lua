@@ -330,6 +330,9 @@ local function GetCharacterStats(character)
 					local player = GameHelpers.GetCharacter(netid)
 					local customization = GetWizCustomizationForCharacter(player)
 					local base, current = 0,0
+					if string.find(k, "TALENT_") then
+						k = StringHelpers.Replace(k, "TALENT_", "")
+					end
 					if Data.AttributeEnum[k] then
 						base = player.Stats[k]
 						current = base
