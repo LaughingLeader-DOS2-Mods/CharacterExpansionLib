@@ -101,18 +101,31 @@ package
 			}
 		}
 
-		//CharacterExpansionLib
-		public function setValue(value:Number) : void
+		public function formatText() : void
 		{
-			this.am = value;
-			this.text_txt.htmlText = String(value);
 			var tf:TextFormat = this.text_txt.getTextFormat();
-			tf.align = TextFormatAlign.CENTER;
+			tf.align = TextFormatAlign.LEFT;
 			this.text_txt.setTextFormat(tf);
 			this.text_txt.x = 187.5; // Adjusted for 64 width
 			this.text_txt.width = 64; // Wider for larger text like 33.3M
 			this.text_txt.y = 0;
 			this.text_txt.height = 24;
+			trace(this.label_txt.htmlText, tf.align);
+		}
+
+		//CharacterExpansionLib
+		public function setValue(value:Number) : void
+		{
+			this.am = value;
+			this.text_txt.htmlText = String(value);
+			this.formatText();
+		}
+
+		//CharacterExpansionLib Alternative for percentage or short number display (like 2K)
+		public function setTextValue(text:String) : void
+		{
+			this.text_txt.htmlText = text;
+			this.formatText();
 		}
 		
 		public function frame1() : *

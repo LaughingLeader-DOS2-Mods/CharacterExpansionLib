@@ -88,9 +88,9 @@ if not AbilityManager then
 	AbilityManager = SheetManager.Abilities
 end
 
-if not Mods.LeaderLib.AbilityManager then
-	Mods.LeaderLib.AbilityManager = SheetManager.Abilities
-end
+-- if not Mods.LeaderLib.AbilityManager then
+-- 	Mods.LeaderLib.AbilityManager = SheetManager.Abilities
+-- end
 
 function SheetManager.Abilities.EnableAbility(abilityName, modID)
 	if StringHelpers.Equals(abilityName, "all", true) then
@@ -188,7 +188,7 @@ if Ext.IsClient() then
 
 	---@class SheetManager.AbilitiesUIEntry
 	---@field ID string
-	---@field SheetID integer
+	---@field GeneratedID integer
 	---@field DisplayName string
 	---@field IsCivil boolean
 	---@field GroupID integer
@@ -200,6 +200,7 @@ if Ext.IsClient() then
 	---@field CanAdd boolean
 	---@field CanRemove boolean
 	---@field IsCustom boolean
+	---@field Visible boolean
 
 	---@private
 	---@param player EclCharacter
@@ -255,8 +256,8 @@ if Ext.IsClient() then
 
 					---@type TalentManagerUITalentEntry
 					local data = {
-						--ID = id,
-						ID = Data.AbilityEnum[id],
+						ID = id,
+						GeneratedID = Data.AbilityEnum[id],
 						DisplayName = name,
 						IsCivil = isCivil,
 						GroupID = groupID,
@@ -268,6 +269,7 @@ if Ext.IsClient() then
 						RemovePointsTooltip = "",
 						CanAdd = canAddPoints,
 						CanRemove = isCharacterCreation or isGM,
+						Visible = true,
 					}
 					entries[#entries+1] = data
 				end
@@ -294,7 +296,8 @@ if Ext.IsClient() then
 
 					---@type TalentManagerUITalentEntry
 					local data = {
-						ID = data.GeneratedID,
+						ID = data.ID,
+						GeneratedID = data.GeneratedID,
 						DisplayName = data:GetDisplayName(),
 						IsCivil = data.IsCivil,
 						GroupID = data.GroupID,
@@ -306,6 +309,7 @@ if Ext.IsClient() then
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),
 						CanRemove = SheetManager:GetIsMinusVisible(data, player, isCharacterCreation, value),
+						Visible = true
 					}
 					entries[#entries+1] = data
 				end

@@ -8,6 +8,9 @@ SheetManager.Listeners = {
 	CanRemove = {All = {}},
 	---@type table<string, OnSheetEntryVisibilityCallback[]>
 	IsEntryVisible = {All = {}},
+	---Client-side listener invoked when a visible sheet entry is about to be added to the UI.
+	---@type table<string, OnSheetEntryUpdatingCallback[]>
+	EntryUpdating = {All = {}},
 }
 
 local self = SheetManager
@@ -26,6 +29,8 @@ local isClient = Ext.IsClient()
 ---@alias OnSheetCanRemoveTalentCallback fun(id:string, stat:SheetTalentData, character:EclCharacter, currentValue:boolean, canRemove:boolean):boolean
 
 ---@alias OnSheetEntryVisibilityCallback fun(id:string, stat:SheetStatData|SheetAbilityData|SheetTalentData, character:EclCharacter, currentValue:boolean, isVisible:boolean):boolean
+
+---@alias OnSheetEntryUpdatingCallback fun(id:string, data:SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUITalentEntry, character:EclCharacter):void
 
 ---@private
 ---@vararg function[]
@@ -228,4 +233,30 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 		end
 	end
 	return bResult
+end
+
+---@param id string|string[]|number|number[]
+---@param callback OnSheetEntryUpdatingCallback
+function SheetManager:RegisterEntryUpdatingListener(id, callback)
+	if isClient then
+		if StringHelpers.Equals(id, "All", true) then
+			id = "All"
+		end
+		self:RegisterListener(self.Listeners.EntryUpdating, callback, id)
+	else
+		error("SheetManager:RegisterEntryUpdatingListener is a client-side listener only.", 2)
+	end
+end
+
+---@param entry SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUITalentEntry
+---@param player EclCharacter
+function SheetManager:InvokeEntryUpdatingCallbacks(entry, player)
+	if isClient then
+		for listener in self:GetListenerIterator(SheetManager.Listeners.EntryUpdating[entry.ID], SheetManager.Listeners.EntryUpdating.All) do
+			local b,err = xpcall(listener, debug.traceback, entry, player)
+			if not b then
+				fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager] Error calling InvokeEntryUpdatingCallbacks listener for entry (%s):\n%s", entry, err)
+			end
+		end
+	end
 end

@@ -67,7 +67,7 @@ if version >= 56 then
 		end
 		local listeners = _netListeners[id]
 		local wrapper = function (_id, payload, user)
-			fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
+			--fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
 			-- if Vars.LeaderDebugMode and printMessages[id] then
 			-- 	--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
 			-- 	fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
@@ -84,10 +84,10 @@ else
 	---@param callback fun(id:string, payload:string, user:integer|nil):void
 	function RegisterNetListener(id, callback)
 		local wrapper = function (_id, payload, user)
-			if Vars.LeaderDebugMode and printMessages[id] then
-				--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
-				fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
-			end
+			-- if Vars.LeaderDebugMode and printMessages[id] then
+			-- 	--fprint(LOGLEVEL.WARNING,"%s (%s)", id, isClient and "CLIENT" or "SERVER")
+			-- 	fprint(LOGLEVEL.WARNING, "[%s:NetListener] id(%s) user(%s) payload:\n%s", isClient and "CLIENT" or "SERVER", _id, user, payload)
+			-- end
 			local b,err = xpcall(callback, debug.traceback, _id, payload, user)
 			if not b then
 				Ext.PrintError(err)
@@ -129,6 +129,6 @@ local function CheckOsiToolsConfig()
 end
 
 RegisterListener("LuaReset", function()
-	Mods.LeaderLib.Vars.Print.UI = true
+	--Mods.LeaderLib.Vars.Print.UI = true
 	--CheckOsiToolsConfig()
 end)

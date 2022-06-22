@@ -17,19 +17,19 @@ function SheetManager:GetEntryByID(id, mod, statType)
 		elseif statType == self.StatType.Talent or statType == "Talents" then
 			targetTable = self.Data.Talents
 		elseif statType == self.StatType.Custom or statType == "CustomStats" then
+			--targetTable = self.Data.CustomStats
 			return SheetManager.CustomStats:GetStatByID(id, mod)
+		elseif statType == "CustomStatCategories" then
+			targetTable = self.Data.CustomStatCategories
 		end
 	end
 	if targetTable then
-		if mod then
-			if targetTable[mod] then
-				return targetTable[mod][id]
-			end
-		else
-			for modId,tbl in pairs(targetTable) do
-				if tbl[id] then
-					return tbl[id]
-				end
+		if mod and targetTable[mod] and targetTable[mod][id] then
+			return targetTable[mod][id]
+		end
+		for modId,tbl in pairs(targetTable) do
+			if tbl[id] then
+				return tbl[id]
 			end
 		end
 	end

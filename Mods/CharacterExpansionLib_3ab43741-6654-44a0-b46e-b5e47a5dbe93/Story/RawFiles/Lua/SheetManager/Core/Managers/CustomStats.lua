@@ -7,9 +7,9 @@ if CustomStatSystem == nil then
 	CustomStatSystem = {}
 end
 
-if not Mods.LeaderLib.CustomStatSystem then
-	Mods.LeaderLib.CustomStatSystem = CustomStatSystem
-end
+-- if not Mods.LeaderLib.CustomStatSystem then
+-- 	Mods.LeaderLib.CustomStatSystem = CustomStatSystem
+-- end
 
 setmetatable(CustomStatSystem, {
 	__index = function(_,k)
@@ -57,7 +57,7 @@ CustomStatSystem.TooltipType = {
 
 local self = CustomStatSystem
 
----@type table<UUID|NETID, table<CUSTOMSTATID, integer>>
+---@type table<UUID|NETID, table<string, integer>>
 CustomStatSystem.PointsPool = {}
 if not isClient then
 	local PointsPoolHandler = {
