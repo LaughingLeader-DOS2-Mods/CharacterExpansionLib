@@ -580,6 +580,7 @@ function CharacterSheet.Update(ui, method, params)
 	if updateTargets.PrimaryStats or updateTargets.SecondaryStats then
 		--this.clearStats()
 		for stat in SheetManager.Stats.GetVisible(player, false, isGM) do
+			SheetManager:InvokeEntryUpdatingCallbacks(stat, player)
 			-- local arrayData = modChanges.Stats[stat.ID]
 			-- if arrayData then
 			-- 	if arrayData.Value ~= stat.Value then
@@ -589,27 +590,30 @@ function CharacterSheet.Update(ui, method, params)
 			-- if stat.IsCustom then
 			-- 	print(Lib.serpent.block(stat))
 			-- end
-			if not Vars.ControllerEnabled then
-				if stat.StatType == SheetManager.Stats.Data.StatType.PrimaryStat then
-					targetsUpdated.PrimaryStats = true
-					this.stats_mc.addPrimaryStat(stat.ID, stat.DisplayName, stat.Value, stat.ID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame, stat.IconClipName)
-					if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
-						ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
-					end
-				else
-					targetsUpdated.SecondaryStats = true
-					if stat.StatType == SheetManager.Stats.Data.StatType.Spacing then
-						this.stats_mc.addSpacing(stat.ID, stat.SpacingHeight)
-					else
-						this.stats_mc.addSecondaryStat(stat.SecondaryStatTypeInteger, stat.DisplayName, stat.Value, stat.ID, stat.Frame, stat.BoostValue, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.IconClipName or "")
+			--Mods may set this to false in the listener, to hide the entry
+			if stat.Visible then
+				if not Vars.ControllerEnabled then
+					if stat.StatType == SheetManager.Stats.Data.StatType.PrimaryStat then
+						targetsUpdated.PrimaryStats = true
+						this.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value, stat.GeneratedID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame, stat.IconClipName)
 						if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 							ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
 						end
+					else
+						targetsUpdated.SecondaryStats = true
+						if stat.StatType == SheetManager.Stats.Data.StatType.Spacing then
+							this.stats_mc.addSpacing(stat.GeneratedID, stat.SpacingHeight)
+						else
+							this.stats_mc.addSecondaryStat(stat.SecondaryStatTypeInteger, stat.DisplayName, stat.Value, stat.GeneratedID, stat.Frame, stat.BoostValue, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.IconClipName or "")
+							if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
+								ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
+							end
+						end
 					end
+				else
+					--TODO
+					--this.mainpanel_mc.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value, stat.TooltipID, canAdd, canRemove, stat.IsCustom)
 				end
-			else
-				--TODO
-				--this.mainpanel_mc.stats_mc.addPrimaryStat(stat.ID, stat.DisplayName, stat.Value, stat.TooltipID, canAdd, canRemove, stat.IsCustom)
 			end
 		end
 	end
@@ -618,23 +622,29 @@ function CharacterSheet.Update(ui, method, params)
 		--this.clearTalents()
 		--local points = this.stats_mc.pointsWarn[3].avPoints
 		for talent in SheetManager.Talents.GetVisible(player, false, isGM) do
-			targetsUpdated.Talents = true
-			if not Vars.ControllerEnabled then
-				this.stats_mc.addTalent(talent.DisplayName, talent.ID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
-			else
-				this.mainpanel_mc.stats_mc.talents_mc.addTalent(talent.DisplayName, talent.ID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
+			SheetManager:InvokeEntryUpdatingCallbacks(talent, player)
+			if talent.Visible then
+				if not Vars.ControllerEnabled then
+					this.stats_mc.addTalent(talent.DisplayName, talent.GeneratedID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
+				else
+					this.mainpanel_mc.stats_mc.talents_mc.addTalent(talent.DisplayName, talent.GeneratedID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
+				end
 			end
+			targetsUpdated.Talents = true
 		end
 	end
 
 	if updateTargets.Abilities then
 		--this.clearAbilities()
 		for ability in SheetManager.Abilities.GetVisible(player, updateTargets.Civil, false, isGM) do
-			this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.ID, ability.DisplayName, ability.Value, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
-			if ability.IsCivil then
-				targetsUpdated.Civil = true
-			else
-				targetsUpdated.Abilities = true
+			SheetManager:InvokeEntryUpdatingCallbacks(ability, player)
+			if ability.Visible then
+				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, ability.Value, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
+				if ability.IsCivil then
+					targetsUpdated.Civil = true
+				else
+					targetsUpdated.Abilities = true
+				end
 			end
 		end
 		--this.stats_mc.addAbility(false, 1, 77, "Test Ability", "0", "", "", false, false, true)
@@ -850,16 +860,16 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 				local ui = CharacterSheet.Instance
 				local visible = CustomStatSystem:GetStatVisibility(ui, entry.Double, entry, character)
 				if visible then
-					local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
+					--local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
 					local plusVisible = CustomStatSystem:GetCanAddPoints(ui, entry.Double, character, entry)
 					local minusVisible = CustomStatSystem:GetCanRemovePoints(ui, entry.Double, character, entry)
 
-					mc.setValue(value)
+					mc.am = value
 
 					if entry.DisplayMode == "Percentage" then
-						mc.text_txt.htmlText = string.format("%s%%%s", math.floor(value), entry.Suffix or "")
+						mc.setTextValue(string.format("%s%%%s", math.floor(value), entry.Suffix or ""))
 					elseif value > CustomStatSystem.MaxVisibleValue then
-						mc.text_txt.htmlText = string.format("%s%s", StringHelpers.GetShortNumberString(value), entry.Suffix or "")
+						mc.setTextValue(string.format("%s%s", StringHelpers.GetShortNumberString(value), entry.Suffix or ""))
 					end
 
 					mc.plus_mc.visible = plusVisible
@@ -901,9 +911,6 @@ function CharacterSheet.UpdateAllEntries()
 					mc.minus_mc.visible = minusVisible
 				end
 
-				if mc.type ~= entry.StatType then
-					Ext.PrintError(entry.ID, entry.StatType, mc.type, mc.statID, mc.callbackStr)
-				end
 				if mc.type == "PrimaryStat" then
 					mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 					mc.statBasePoints = value

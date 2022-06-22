@@ -1,12 +1,12 @@
 local self = CustomStatSystem
 
-self.Visible = false
-self.Requesting = false
+CustomStatSystem.Visible = false
+CustomStatSystem.Requesting = false
 local lastTooltipX = nil
 local lastTooltipY = nil
-self.LastIconId = 1212
-self.Syncing = false
-self.MaxVisibleValue = 999 -- Values greater than this are truncated visually in the UI
+CustomStatSystem.LastIconId = 1212
+CustomStatSystem.Syncing = false
+CustomStatSystem.MaxVisibleValue = 999 -- Values greater than this are truncated visually in the UI
 
 ---Called when a stat movieclip is added or updated in the UI.
 ---@alias CustomStatMovieClipAddedCallback fun(id:string, stat:SheetCustomStatData, character:EsvCharacter, stat_mc:FlashCustomStat):void
@@ -418,10 +418,10 @@ function CustomStatSystem:OnStatAdded(ui, call, doubleHandle, index)
 			so display a small version and use the tooltip to display the full value.
 		]]
 		if stat.DisplayMode == "Percentage" then
-			stat_mc.text_txt.htmlText = string.format("%s%%", math.floor(stat_mc.am))
+			stat_mc.setTextValue(string.format("%s%%", math.floor(stat_mc.am)))
 		else
 			if stat_mc.am > self.MaxVisibleValue then
-				stat_mc.text_txt.htmlText = StringHelpers.GetShortNumberString(stat_mc.am)
+				stat_mc.setTextValue(StringHelpers.GetShortNumberString(stat_mc.am))
 			end
 		end
 

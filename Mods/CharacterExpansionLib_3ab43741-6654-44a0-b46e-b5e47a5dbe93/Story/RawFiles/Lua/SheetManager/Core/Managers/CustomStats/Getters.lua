@@ -1,11 +1,11 @@
 local self = CustomStatSystem
-local isClient = Ext.IsClient() 
+local isClient = Ext.IsClient()
 
 --region Stat/Category Getting
 ---@param displayName string
 ---@return SheetCustomStatData
 function CustomStatSystem:GetStatByName(displayName)
-	for uuid,stats in pairs(self.Stats) do
+	for uuid,stats in pairs(SheetManager.Data.CustomStats) do
 		for id,stat in pairs(stats) do
 			if stat.DisplayName == displayName or stat:GetDisplayName() == displayName then
 				return stat
@@ -24,16 +24,13 @@ end
 ---@param mod string|nil Optional mod UUID to filter for.
 ---@return SheetCustomStatData
 function CustomStatSystem:GetStatByID(id, mod)
-	if not self.Loaded then
-		return nil
-	end
 	if not StringHelpers.IsNullOrWhitespace(mod) then
-		local stats = self.Stats[mod]
+		local stats = SheetManager.Data.CustomStats[mod]
 		if stats and stats[id] then
 			return stats[id]
 		end
 	end
-	for uuid,stats in pairs(self.Stats) do
+	for modid,stats in pairs(SheetManager.Data.CustomStats) do
 		local stat = stats[id]
 		if stat then
 			return stat
@@ -50,7 +47,7 @@ end
 ---@param uuid string Unique UUID for the stat.
 ---@return SheetCustomStatData
 function CustomStatSystem:GetStatByUUID(uuid)
-	for mod,stats in pairs(self.Stats) do
+	for mod,stats in pairs(SheetManager.Data.CustomStats) do
 		for id,stat in pairs(stats) do
 			if stat.UUID == uuid then
 				return stat
@@ -92,7 +89,7 @@ function CustomStatSystem:GetAllStats(inSheetOnly, sortStats, includeUnregistere
 	end
 
 	if findAll then
-		for uuid,stats in pairs(self.Stats) do
+		for uuid,stats in pairs(SheetManager.Data.CustomStats) do
 			for id,stat in pairs(stats) do
 				allStats[#allStats+1] = stat
 			end
@@ -254,7 +251,7 @@ end
 function CustomStatSystem:GetTotalStatsInCategory(categoryId, visibleOnly)
 	local total = 0
 	local isUnsortedCategory = StringHelpers.IsNullOrWhitespace(categoryId)
-	for mod,stats in pairs(self.Stats) do
+	for mod,stats in pairs(SheetManager.Data.CustomStats) do
 		for id,stat in pairs(stats) do
 			local isRegistered = not self:GMStatsEnabled() or not StringHelpers.IsNullOrWhitespace(stat.UUID)
 			local statIsVisible = isRegistered and self:GetStatVisibility(nil, stat.Double, stat) == true
@@ -332,7 +329,7 @@ function CustomStatSystem:GetStatValueForCategory(character, id, mod)
 	if not category then
 		return 0
 	end
-	for uuid,stats in pairs(self.Stats) do
+	for uuid,stats in pairs(SheetManager.Data.CustomStats) do
 		for statId,stat in pairs(stats) do
 			if stat.Category == category.ID then
 				statValue = statValue + self:GetStatValueForCharacter(character, stat)

@@ -22,9 +22,9 @@ if not TalentManager then
 	TalentManager = SheetManager.Talents
 end
 
-if not Mods.LeaderLib.TalentManager then
-	Mods.LeaderLib.TalentManager = SheetManager.Talents
-end
+-- if not Mods.LeaderLib.TalentManager then
+-- 	Mods.LeaderLib.TalentManager = SheetManager.Talents
+-- end
 
 SheetManager.Talents.Data.TalentState = {
 	Selected = 0,
@@ -752,7 +752,7 @@ end
 
 ---@class SheetManager.TalentsUITalentEntry
 ---@field ID string
----@field SheetID integer
+---@field GeneratedID integer
 ---@field Enum string
 ---@field HasTalent boolean
 ---@field DisplayName string
@@ -762,6 +762,7 @@ end
 ---@field CanRemove boolean
 ---@field IsCustom boolean
 ---@field State integer
+---@field Visible boolean
 
 ---@private
 ---@param player EclCharacter
@@ -789,17 +790,17 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 			local name = SheetManager.Talents.GetTalentDisplayName(talentId, talentState)
 			local isRacial = SheetManager.Talents.Data.RacialTalents[talentId] ~= nil
 			local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
-			if hasTalent then 
-				--fprint(LOGLEVEL.WARNING, "[%s] Name(%s) State(%s) hasTalent(%s) isChoosable(%s) isRacial(%s)", talentId, name, talentState, hasTalent, isChoosable, isRacial)
-			end
+			-- if hasTalent then 
+			-- 	fprint(LOGLEVEL.WARNING, "[%s] Name(%s) State(%s) hasTalent(%s) isChoosable(%s) isRacial(%s)", talentId, name, talentState, hasTalent, isChoosable, isRacial)
+			-- end
 
 			local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == SheetManager.Talents.Data.TalentState.Selectable))
 			local canRemove = hasTalent and ((not isRacial and isCharacterCreation) or isGM)
 
 			---@type SheetManager.TalentsUITalentEntry
 			local data = {
-				--ID = talentId,
-				ID = Data.TalentEnum[talentId],
+				ID = talentId,
+				GeneratedID = Data.TalentEnum[talentId],
 				HasTalent = hasTalent,
 				DisplayName = name,
 				IsRacial = isRacial,
@@ -808,6 +809,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 				IsCustom = false,
 				CanAdd = canAdd,
 				CanRemove = canRemove,
+				Visible = true,
 			}
 			entries[#entries+1] = data
 		end
@@ -824,7 +826,8 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 				local canRemove = hasTalent and (isCharacterCreation or isGM)
 				---@type SheetManager.TalentsUITalentEntry
 				local sheetData = {
-					ID = data.GeneratedID,
+					ID = data.ID,
+					GeneratedID = data.GeneratedID,
 					HasTalent = hasTalent,
 					DisplayName = name .. data.Suffix,
 					IsRacial = isRacial,
@@ -833,6 +836,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 					CanRemove = SheetManager:GetIsMinusVisible(data, player, canRemove, hasTalent),
 					State = talentState,
 					IsCustom = true,
+					Visible = true,
 				}
 				entries[#entries+1] = sheetData
 			end

@@ -27,6 +27,7 @@ SheetManager.StatType = {
 
 local isClient = Ext.IsClient()
 
+Ext.Require("SheetManager/Core/Listeners.lua")
 Ext.Require("SheetManager/Core/Data/SheetDataValues.lua")
 Ext.Require("SheetManager/Core/Sync/Main.lua")
 Ext.Require("SheetManager/Core/Sync/AvailablePoints.lua")
@@ -35,7 +36,6 @@ Ext.Require("SheetManager/Core/Sync/EntryValues.lua")
 Ext.Require("SheetManager/Core/Sync/SyncEvents.lua")
 Ext.Require("SheetManager/Core/Getters.lua")
 Ext.Require("SheetManager/Core/Setters.lua")
-Ext.Require("SheetManager/Core/Listeners.lua")
 
 SheetManager.Data = {
 	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetAbilityData>>
@@ -84,7 +84,6 @@ local function LoadData()
 	local b,data = xpcall(loader, debug.traceback)
 	if b and data then
 		for modId,entryData in pairs(data) do
-
 			if not SheetManager.Data.Abilities[modId] then
 				SheetManager.Data.Abilities[modId] = entryData.Abilities or {}
 			elseif entryData.Abilities then

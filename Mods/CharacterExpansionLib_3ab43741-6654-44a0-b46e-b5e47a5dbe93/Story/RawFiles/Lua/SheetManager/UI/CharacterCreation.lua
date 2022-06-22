@@ -303,19 +303,22 @@ end
 CharacterCreation:RegisterCallListener("characterCreationStarted", CharacterCreation.Started, "Before", "All")
 
 function CharacterCreation.CreationDone(self, ui, method, startText, backText, visible)
-	if visible == false then
-		-- UI is closing with no message box confirmation, which can happen if points were only spent on custom entries
-		if not MessageBox.UI.Instance and CharacterCreation.IsOpen then
-			SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
-			CharacterCreation.IsOpen = false
-			-- local this = self.Root
-			-- if this and not this.isExtended then
-			-- 	this.isExtended = true
-			-- end
-		end
+	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
+		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
 	end
+	-- if visible == false then
+	-- 	-- UI is closing with no message box confirmation, which can happen if points were only spent on custom entries
+	-- 	if not MessageBox.UI.Instance and CharacterCreation.IsOpen then
+	-- 		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
+	-- 		CharacterCreation.IsOpen = false
+	-- 		-- local this = self.Root
+	-- 		-- if this and not this.isExtended then
+	-- 		-- 	this.isExtended = true
+	-- 		-- end
+	-- 	end
+	-- end
 end
---CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "Before", "All")
+--CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "After", "All")
 
 CharacterCreation:RegisterCallListener("selectOption", function(self, ui, call)
 	local this = ui:GetRoot()

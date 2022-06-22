@@ -373,13 +373,17 @@ if not isClient then
 else
 	local function NotifyValueChanges(character, lastValues, values)
 		for entryType,mods in pairs(values) do
-			for modId,entries in pairs(mods) do
-				for entryId,value in pairs(entries) do
-					local entry = SheetManager:GetEntryByID(entryId, modId, entryType)
-					assert(entry ~= nil, string.format("Failed to get sheet entry from id(%s) mod(%s) entryType(%s)", entryId, modId, entryType))
+			for modid,entries in pairs(mods) do
+				for id,value in pairs(entries) do
+					local entry = SheetManager:GetEntryByID(id, modid, entryType)
+					if entry == nil then
+						Ext.PrintWarning(entryType, SheetManager.Loaded, Ext.DumpExport(entries))
+						Ext.PrintWarning(SheetManager.Data.CustomStats[modid])
+					end
+					assert(entry ~= nil, string.format("Failed to get sheet entry from id(%s) mod(%s) entryType(%s)", id, modid, entryType))
 					local last = entryType == "Talents" and false or 0
-					if lastValues and lastValues[entryType] and lastValues[entryType][modId] and lastValues[entryType][modId][entryId] then
-						last = lastValues[entryType][modId][entryId]
+					if lastValues and lastValues[entryType] and lastValues[entryType][modid] and lastValues[entryType][modid][id] then
+						last = lastValues[entryType][modid][id]
 					end
 					for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[entry.ID], self.Listeners.OnEntryChanged.All) do
 						local b,err = xpcall(listener, debug.traceback, entry.ID, entry, character, last, value, isClient)
@@ -392,17 +396,34 @@ else
 		end
 	end
 
+	local delayNotify = false
+
 	RegisterNetListener("CEL_SheetManager_LoadSyncData", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			local lastValues = TableHelpers.Clone(self.CurrentValues)
 			self.CurrentValues = data
 
-			for netid,data in pairs(self.CurrentValues) do
-				local character = Ext.GetCharacter(netid)
-				if character then
-					NotifyValueChanges(character, lastValues[netid], data)
+			if SheetManager.Loaded then
+				delayNotify = false
+				for netid,data in pairs(self.CurrentValues) do
+					local character = Ext.GetCharacter(netid)
+					if character then
+						NotifyValueChanges(character, lastValues[netid], data)
+					end
 				end
+			else
+				delayNotify = true
+			end
+		end
+	end)
+
+	SheetManager:RegisterLoadedListener(function ()
+		if delayNotify then
+			delayNotify = false
+			local client = Client:GetCharacter()
+			if client then
+				Ext.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", client.NetID)
 			end
 		end
 	end)

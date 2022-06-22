@@ -7,8 +7,11 @@ SheetManager.Save = {}
 SheetManager.Sync = {}
 
 ---Sync all current values and available points for a specific character, or all characters if nil.
----@param character UUID|EsvCharacter
+---@param character UUID|EsvCharacter|nil
 function SheetManager:SyncData(character)
+	if SheetManager.Loaded ~= true then
+		return false
+	end
 	if not isClient then
 		SheetManager.Sync.EntryValues(character)
 		SheetManager.Sync.CustomAvailablePoints(character)
