@@ -70,7 +70,10 @@ SheetManager.Stats = {
 					DisplayName = LocalizedText.CharacterSheet.Movement,
 					Type = "SecondaryStat",
 					Frame = 18,
-					Attribute = "Movement"
+					---@param character StatCharacter
+					Attribute = function (character)
+						return GameHelpers.GetMovement(character)
+					end
 				},
 				Initiative = {
 					StatID = 21,
@@ -194,7 +197,7 @@ SheetManager.Stats = {
 							maxDamage = maxDamage + range.Max
 						end
 
-						return string.format("%s - %s", minDamage, maxDamage) 
+						return string.format("%s - %s", minDamage, maxDamage)
 					end
 				},
 				Vitality = {
@@ -412,7 +415,8 @@ SheetManager.Stats.__index = SheetManager.Stats
 
 if isClient then
 	---@class SheetManager.StatsUIEntry
-	---@field ID integer
+	---@field ID string
+	---@field GeneratedID integer
 	---@field DisplayName string
 	---@field Value string
 	---@field StatType string
@@ -428,6 +432,9 @@ if isClient then
 	---@field Icon string
 	---@field IconWidth number
 	---@field IconHeight number
+	---@field Visible boolean
+
+	local _NEGATIVE_FORMAT = "<font color='#C80030'>%s</font>"
 
 	---@private
 	---@param player EclCharacter
@@ -492,11 +499,20 @@ if isClient then
 							delta = value - Ext.ExtraData.AttributeBaseValue
 						end
 
+						local name = data.DisplayName.Value
+						local valueLabel = string.format("%s%s", value, data.Suffix or "")
+						--TODO Red text conditions may be more complex (like it looking for a negative boost)
+						if type(value) == "number" and value < 0 then
+							name = string.format(_NEGATIVE_FORMAT, name)
+							valueLabel = string.format(_NEGATIVE_FORMAT, valueLabel)
+						end
+
 						local entry = {
-							ID = data.StatID,
-							DisplayName = data.DisplayName.Value,
+							ID = id,
+							GeneratedID = data.StatID,
+							DisplayName = name,
 							Description = "",
-							Value = string.format("%s%s", value, data.Suffix or ""),
+							Value = valueLabel,
 							Delta = delta,
 							CanAdd = canAdd,
 							CanRemove = canRemove,
@@ -508,10 +524,11 @@ if isClient then
 							IconWidth = 0,
 							IconHeight = 0,
 							IconClipName = "",
-							IconDrawCallName = ""
+							IconDrawCallName = "",
+							Visible = true,
 						}
 						if isCharacterCreation and not isRespec then
-							entry.ID = entry.ID + 1
+							entry.GeneratedID = entry.GeneratedID + 1
 						end
 						entries[#entries+1] = entry
 					end
@@ -525,11 +542,20 @@ if isClient then
 					local value = data:GetValue(player) or 0
 					if SheetManager:IsEntryVisible(data, player, value) then
 						local defaultCanAdd = (data.StatType == "PrimaryStat" and (data.UsePoints == true and points > 0)) or isGM
+
+						local name = data:GetDisplayName(player)
+						local valueLabel = string.format("%s%s", value, data.Suffix or "")
+						if type(value) == "number" and value < 0 then
+							name = string.format(_NEGATIVE_FORMAT, name)
+							valueLabel = string.format(_NEGATIVE_FORMAT, valueLabel)
+						end
+
 						local entry = {
-							ID = data.GeneratedID,
-							DisplayName = data:GetDisplayName(player),
+							ID = data.ID,
+							GeneratedID = data.GeneratedID,
+							DisplayName = name,
 							Description = data:GetDescription(player),
-							Value = string.format("%s%s", value, data.Suffix or ""),
+							Value = valueLabel,
 							Delta = value - data.BaseValue,
 							CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),
 							CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
@@ -543,7 +569,8 @@ if isClient then
 							IconWidth = data.SheetIconWidth or 28,
 							IconHeight = data.SheetIconHeight or 28,
 							IconClipName = "",
-							IconDrawCallName = ""
+							IconDrawCallName = "",
+							Visible = true,
 						}
 						if not StringHelpers.IsNullOrEmpty(data.SheetIcon) then
 							entry.Frame = 99
