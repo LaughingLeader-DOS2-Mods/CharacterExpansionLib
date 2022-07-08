@@ -265,6 +265,10 @@ end
 
 ---@private
 function CustomStatSystem:UpdateStatMovieClips()
+	if SharedData.RegionData.State ~= REGIONSTATE.GAME or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
+		return
+	end
+	--TODO This returns nil if we try to get the character too early. It may also be the dummy.
 	local character = SheetManager.UI.CharacterSheet.GetCharacter()
 	---@type CharacterSheetMainTimeline
 	local this = SheetManager.UI.CharacterSheet.Root
