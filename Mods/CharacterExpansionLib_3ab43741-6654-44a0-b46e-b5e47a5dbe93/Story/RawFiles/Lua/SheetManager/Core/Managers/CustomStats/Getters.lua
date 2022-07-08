@@ -303,9 +303,13 @@ function CustomStatSystem:GetStatValueForCharacter(character, stat, ...)
 	end
 	if not self:GMStatsEnabled() then
 		return SheetManager.Save.GetEntryValue(character, stat)
-	else
-		return character:GetCustomStat(stat.UUID) or 0
+	elseif stat.UUID then
+		local b,value = pcall(character.GetCustomStat, character, stat.UUID)
+		if b then
+			return value or 0
+		end
 	end
+	return 0
 end
 
 ---@param id string|integer The category ID or GroupId.
