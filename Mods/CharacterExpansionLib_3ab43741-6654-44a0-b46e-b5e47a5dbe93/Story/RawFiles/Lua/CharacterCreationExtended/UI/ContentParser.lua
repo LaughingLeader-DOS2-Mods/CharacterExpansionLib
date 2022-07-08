@@ -136,8 +136,11 @@ end
 ---@param self CharacterCreationWrapper
 ---@param ui UIObject
 local function OnUpdateContent(self, ui, event)
-	local this = self:GetRoot()
-	if this then
+	if not SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
+		return
+	end
+	-- local this = self:GetRoot()
+	-- if this then
 		--Override success
 		--[[ if this.isExtended then
 			local content,count = ParseArray(this.contentArray)
@@ -156,7 +159,7 @@ local function OnUpdateContent(self, ui, event)
 				end
 			end
 		end ]]
-	end
+	--end
 end
 
 --[[
@@ -178,6 +181,9 @@ local activeCustomDraws = {}
 ---@param self CharacterCreationWrapper
 ---@param ui UIObject
 local function SetSkills(self, ui, event)
+	if not SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
+		return
+	end
 	local this = self:GetRoot()
 	if this then
 		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle))
@@ -185,44 +191,51 @@ local function SetSkills(self, ui, event)
 		local race = player.PlayerCustomData.Race
 
 		local skills = {}
-		for i=0,#this.racialSkills-1 do
-			if this.racialSkills[i] then
-				table.insert(skills, this.racialSkills[i])
-			end
-		end
+		activeCustomDraws = {}
 
-		local callbacks = Mods.CharacterExpansionLib.Listeners.SetCharacterCreationOriginSkills.Callbacks
-		if callbacks then
-			for i=1,#callbacks do
-				local callback = callbacks[i]
-				local b,result = xpcall(callback, debug.traceback, player, origin, race, skills)
-				if not b then
-					Ext.PrintError(result)
-				else
-					if type(result) == "table" then
-						skills = result
+		if not Vars.ControllerEnabled then
+			for i=0,#this.racialSkills-1 do
+				if this.racialSkills[i] then
+					table.insert(skills, this.racialSkills[i])
+				end
+			end
+	
+			local callbacks = Mods.CharacterExpansionLib.Listeners.SetCharacterCreationOriginSkills.Callbacks
+			if callbacks then
+				for i=1,#callbacks do
+					local callback = callbacks[i]
+					local b,result = xpcall(callback, debug.traceback, player, origin, race, skills)
+					if not b then
+						Ext.PrintError(result)
+					else
+						if type(result) == "table" then
+							skills = result
+						end
 					end
 				end
 			end
-		end
-
-		activeCustomDraws = {}
-
-		this.clearArray("racialSkills")
-		local i = 0
-		for _,v in pairs(skills) do
-			local icon = Ext.StatGetAttribute(v, "Icon")
-			if not StringHelpers.IsNullOrWhitespace(icon) then
-				local iconId = string.format("llcel_racial%i", i)
-				ui:SetCustomIcon(iconId, icon, this.iconSize, this.iconSize)
-				activeCustomDraws[#activeCustomDraws+1] = {
-					ID = iconId,
-					Icon = icon,
-					Size = this.iconSize
-				}
+	
+			if this.clearArray then
+				this.clearArray("racialSkills")
 			end
-			this.racialSkills[i] = v
-			i = i + 1
+
+			local i = 0
+			for _,v in ipairs(skills) do
+				local icon = Ext.StatGetAttribute(v, "Icon")
+				if not StringHelpers.IsNullOrWhitespace(icon) then
+					local iconId = string.format("llcel_racial%i", i)
+					ui:SetCustomIcon(iconId, icon, this.iconSize, this.iconSize)
+					activeCustomDraws[#activeCustomDraws+1] = {
+						ID = iconId,
+						Icon = icon,
+						Size = this.iconSize
+					}
+				end
+				this.racialSkills[i] = v
+				i = i + 1
+			end
+		else
+			--TODO
 		end
 	end
 end
