@@ -173,7 +173,7 @@ end
 function SessionManager:ClearSession(character, skipSync)
 	if not isClient then
 		character = GameHelpers.GetCharacter(character)
-		local characterId = GameHelpers.GetCharacterID(character)
+		local characterId = GameHelpers.GetObjectID(character)
 		SessionManager.Sessions[character.ReservedUserID] = nil
 		--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
 		if skipSync ~= true and not isClient then

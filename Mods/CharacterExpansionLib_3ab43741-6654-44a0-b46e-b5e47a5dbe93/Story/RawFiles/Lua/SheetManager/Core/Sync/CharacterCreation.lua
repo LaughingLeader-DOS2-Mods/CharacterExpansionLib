@@ -4,7 +4,7 @@ if SheetManager.Save == nil then SheetManager.Save = {} end
 
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 function SheetManager.IsInCharacterCreation(characterId)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
 		return true
 	end
@@ -17,7 +17,7 @@ function SheetManager.IsInCharacterCreation(characterId)
 		local ui = not Vars.ControllerEnabled and Ext.GetUIByType(Data.UIType.characterCreation) or Ext.GetUIByType(Data.UIType.characterCreation_c)
 		local player = GameHelpers.Client.GetCharacterCreationCharacter()
 		if player then
-			return GameHelpers.GetCharacterID(player) == characterId
+			return GameHelpers.GetObjectID(player) == characterId
 		end
 	elseif Ext.OsirisIsCallable() then
 		local db = Osi.DB_Illusionist:Get(nil,nil)

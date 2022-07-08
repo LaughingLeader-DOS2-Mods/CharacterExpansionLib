@@ -528,6 +528,9 @@ end
 
 ---@return EclCharacter
 function CharacterSheet.GetCharacter()
+	if Ext.GetGameState() ~= "Running" or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
+		return nil
+	end
 	local this = CharacterSheet.Root
 	if this then
 		local b,client = xpcall(TryGetSheetCharacter, debug.traceback, this)
@@ -883,7 +886,7 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 end
 
 SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
-	----fprint(LOGLEVEL.DEFAULT, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetCharacterID(character), lastValue, value, isClientSide)
+	----fprint(LOGLEVEL.DEFAULT, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetObjectID(character), lastValue, value, isClientSide)
 	CharacterSheet.UpdateEntry(entry, character, value)
 end)
 
@@ -990,9 +993,16 @@ if Vars.DebugMode then
 	RegisterListener("LuaReset", function()
 		local this = CharacterSheet.Root
 		if this then
-			this.clearAbilities(true)
-			this.clearTalents(true)
-			this.clearStats(true)
+			if not Vars.ControllerEnabled then
+				this.clearAbilities(true)
+				this.clearTalents(true)
+				this.clearStats(true)
+			else
+				-- this.removeAbilities()
+				-- this.removeTalents()
+				-- this.removeStatsTabs()
+				-- this.clearCustomStats()
+			end
 		end
 	end)
 end

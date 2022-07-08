@@ -180,7 +180,7 @@ end
 ---@param customStatPointsID CUSTOMSTATID|nil If pointType is "Custom", this is the point ID.
 ---@param isCharacterCreation ?boolean
 function SheetManager:GetAvailablePoints(characterId, pointType, customStatPointsID, isCharacterCreation)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 
 	if pointType == "Custom" then
 		if isClient then

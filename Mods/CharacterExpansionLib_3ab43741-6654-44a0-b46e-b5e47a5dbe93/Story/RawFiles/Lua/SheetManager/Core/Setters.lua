@@ -97,7 +97,7 @@ end
 ---@param skipSessionCheck ?boolean Used by the SessionManager to write changes directly when applying changes.
 function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
 	local last = stat:GetValue(characterId)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 	local character = GameHelpers.GetCharacter(characterId)
 	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(characterId)
 
@@ -185,7 +185,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 
 	local entryType = entry.StatType
 	local isCivil = entryType == "Ability" and entry.IsCivil
-	local characterId = GameHelpers.GetCharacterID(character)
+	local characterId = GameHelpers.GetObjectID(character)
 	
 	if characterId then
 		if availablePoints then

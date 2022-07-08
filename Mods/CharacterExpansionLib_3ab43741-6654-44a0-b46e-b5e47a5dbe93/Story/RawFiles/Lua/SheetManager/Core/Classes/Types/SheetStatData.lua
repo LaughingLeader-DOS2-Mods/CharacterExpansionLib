@@ -96,7 +96,7 @@ end
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return integer
 function SheetStatData:GetValue(character)
-	return SheetManager:GetValueByEntry(self, GameHelpers.GetCharacterID(character)) or 0
+	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character)) or 0
 end
 
 ---@param character EsvCharacter|EclCharacter|string|number

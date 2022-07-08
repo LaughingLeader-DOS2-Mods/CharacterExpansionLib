@@ -29,7 +29,7 @@ end
 ---@param characterId UUID|EsvCharacter|NETID|EclCharacter
 ---@return SheetManagerSaveData
 function SheetManager.Save.CreateCharacterData(characterId)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 	assert(type(characterId) == "string" or type(characterId) == "number", "Character ID (UUID or NetID) required.")
 	local data = self.CurrentValues[characterId]
 	if not data then
@@ -113,7 +113,7 @@ end
 ---@return integer|boolean
 ---@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
 function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 	local sessionData = SessionManager:GetSession(characterId)
 	local pendingValues = sessionData and sessionData.PendingChanges or nil
 	if pendingValues then
@@ -142,7 +142,7 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 		if entry.ValueType == "boolean" then
 			defaultValue = false
 		end
-		characterId = GameHelpers.GetCharacterID(characterId)
+		characterId = GameHelpers.GetObjectID(characterId)
 		local data = nil
 		local sessionData = SessionManager:GetSession(characterId)
 		if sessionData then
@@ -179,7 +179,7 @@ end
 ---@param skipSessionCheck ?boolean
 ---@return boolean
 function SheetManager.Save.SetEntryValue(characterId, entry, value, skipSessionCheck)
-	characterId = GameHelpers.GetCharacterID(characterId)
+	characterId = GameHelpers.GetObjectID(characterId)
 	local data = nil
 	if skipSessionCheck ~= true then
 		local sessionData = SessionManager:GetSession(characterId)
@@ -253,7 +253,7 @@ if isClient then
 	end)
 else
 	local function ProcessPointChange(character, statId, statMod, statType, value, isGameMaster, isInCharacterCreation, availablePoints)
-		local characterId = GameHelpers.GetCharacterID(character)
+		local characterId = GameHelpers.GetObjectID(character)
 		local stat = SheetManager:GetEntryByID(statId, statMod, statType)
 		if characterId and stat then
 			--TODO CustomStat support
@@ -450,7 +450,7 @@ if isClient then
 	RegisterNetListener("CEL_SheetManager_EntryValueChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			local characterId = GameHelpers.GetCharacterID(data.NetID)
+			local characterId = GameHelpers.GetObjectID(data.NetID)
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
 			if characterId and stat then
 				local skipInvoke = data.SkipInvoke

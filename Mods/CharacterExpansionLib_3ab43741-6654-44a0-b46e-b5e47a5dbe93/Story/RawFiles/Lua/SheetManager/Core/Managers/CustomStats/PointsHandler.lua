@@ -104,7 +104,7 @@ end
 ---@param amount integer
 ---@param skipSync boolean Skips syncing if true.
 function CustomStatSystem:SetAvailablePoints(character, statId, amount, skipSync)
-	local characterId = GameHelpers.GetCharacterID(character)
+	local characterId = GameHelpers.GetObjectID(character)
 	if CharacterIdIsValid(characterId) and type(amount) == "number" then
 		if self.PointsPool then
 			if not self.PointsPool[characterId] then

@@ -40,6 +40,14 @@ SheetCustomStatData.__index = function(tbl,k)
 	return SheetCustomStatData[k] or Classes.SheetCustomStatBase[k]
 end
 
+---@param tbl SheetCustomStatData|UnregisteredCustomStatData
+SheetCustomStatData.__tostring = function (tbl)
+	if tbl.UUID then
+		return tostring(tbl.UUID)
+	end
+	return tostring(tbl.ID)
+end
+
 SheetCustomStatData.PropertyMap = {
 	CREATE = {Name="Create", Type = "boolean"},
 	CATEGORY = {Name="Category", Type = "string"},
@@ -88,6 +96,8 @@ end
 
 local canUseRawFunctions = Ext.Version() >= 55
 
+---@class UnregisteredCustomStatData
+---@field UUID string
 Classes.UnregisteredCustomStatData = {
 	Type = "UnregisteredCustomStatData",
 	IsUnregistered = true,
@@ -176,7 +186,7 @@ end
 ---Sets the stat's last value for a character.
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
 function SheetCustomStatData:UpdateLastValue(character)
-	local characterId = GameHelpers.GetCharacterID(character)
+	local characterId = GameHelpers.GetObjectID(character)
 	local value = self:GetValue(characterId)
 	if value then
 		if Vars.DebugMode and Vars.Print.CustomStats then

@@ -51,7 +51,7 @@ end
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return boolean
 function SheetTalentData:GetValue(character)
-	return SheetManager:GetValueByEntry(self, GameHelpers.GetCharacterID(character))
+	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character))
 end
 
 ---@class TalentState
