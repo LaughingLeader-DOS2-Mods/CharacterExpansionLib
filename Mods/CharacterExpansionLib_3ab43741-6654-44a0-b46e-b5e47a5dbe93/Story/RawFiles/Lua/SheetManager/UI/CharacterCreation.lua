@@ -222,7 +222,7 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 	end
 	--this.clearArray("abilityArray")
 
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
 	local points = GetAvailablePoints().Attribute
 	this.availableAttributePoints = points
 

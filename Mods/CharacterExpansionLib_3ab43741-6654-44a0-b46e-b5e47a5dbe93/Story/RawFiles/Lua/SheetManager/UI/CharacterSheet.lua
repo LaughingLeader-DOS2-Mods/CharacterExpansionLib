@@ -583,7 +583,7 @@ function CharacterSheet.Update(ui, method, params)
 	if updateTargets.PrimaryStats or updateTargets.SecondaryStats then
 		--this.clearStats()
 		for stat in SheetManager.Stats.GetVisible(player, false, isGM) do
-			SheetManager:InvokeEntryUpdatingCallbacks(stat, player)
+			SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="Stat", Stat=stat, Character=player})
 			-- local arrayData = modChanges.Stats[stat.ID]
 			-- if arrayData then
 			-- 	if arrayData.Value ~= stat.Value then
@@ -625,7 +625,7 @@ function CharacterSheet.Update(ui, method, params)
 		--this.clearTalents()
 		--local points = this.stats_mc.pointsWarn[3].avPoints
 		for talent in SheetManager.Talents.GetVisible(player, false, isGM) do
-			SheetManager:InvokeEntryUpdatingCallbacks(talent, player)
+			SheetManager.Events.OnEntryUpdating:Invoke({ID=talent.ID, EntryType="Talent", Stat=talent, Character=player})
 			if talent.Visible then
 				if not Vars.ControllerEnabled then
 					this.stats_mc.addTalent(talent.DisplayName, talent.GeneratedID, talent.State, talent.CanAdd, talent.CanRemove, talent.IsCustom)
@@ -640,7 +640,7 @@ function CharacterSheet.Update(ui, method, params)
 	if updateTargets.Abilities then
 		--this.clearAbilities()
 		for ability in SheetManager.Abilities.GetVisible(player, updateTargets.Civil, false, isGM) do
-			SheetManager:InvokeEntryUpdatingCallbacks(ability, player)
+			SheetManager.Events.OnEntryUpdating:Invoke({ID=ability.ID, EntryType="Ability", Stat=ability, Character=player})
 			if ability.Visible then
 				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, ability.Value, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
 				if ability.IsCivil then

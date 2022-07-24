@@ -122,12 +122,16 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			CustomStatSystem:InvokeStatValueChangedListeners(stat, character, last, value)
 		end
 
-		for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[stat.ID], self.Listeners.OnEntryChanged.All) do
-			local b,err = xpcall(listener, debug.traceback, stat.ID, stat, character, last, value, isClient)
-			if not b then
-				--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:SetEntryValue] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", stat.ID, err)
-			end
-		end
+		self.Events.OnEntryChanged:Invoke({
+			EntryType = stat.Type,
+			Stat = stat,
+			ID = stat.ID,
+			LastValue = last,
+			Value = value,
+			Character = character,
+			IsClient = isClient,
+		})
+		
 		if not isClient then
 			if stat.StatType == "Ability" then
 				Osi.CharacterBaseAbilityChanged(character.MyGuid, stat.ID, last, value)

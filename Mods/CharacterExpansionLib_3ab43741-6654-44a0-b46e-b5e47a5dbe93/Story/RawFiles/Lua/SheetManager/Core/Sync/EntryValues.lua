@@ -385,12 +385,15 @@ else
 					if lastValues and lastValues[entryType] and lastValues[entryType][modid] and lastValues[entryType][modid][id] then
 						last = lastValues[entryType][modid][id]
 					end
-					for listener in self:GetListenerIterator(self.Listeners.OnEntryChanged[entry.ID], self.Listeners.OnEntryChanged.All) do
-						local b,err = xpcall(listener, debug.traceback, entry.ID, entry, character, last, value, isClient)
-						if not b then
-							--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:CustomStatSystem:OnStatPointAdded] Error calling OnAvailablePointsChanged listener for stat (%s):\n%s", entry.ID, err)
-						end
-					end
+					self.Events.OnEntryChanged:Invoke({
+						EntryType = entry.Type,
+						Stat = entry,
+						ID = entry.ID,
+						LastValue = last,
+						Value = value,
+						Character = character,
+						IsClient = isClient,
+					})
 				end
 			end
 		end

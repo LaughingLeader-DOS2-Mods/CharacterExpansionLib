@@ -9,9 +9,11 @@ end
 SheetManager.__index = SheetManager
 SheetManager.Loaded = false
 
----@alias SheetEntryType string|'"PrimaryStat"'|'"SecondaryStat"'|'"Ability"'|'"CivilAbility"'|'"Talent"'|'"Custom"'
+---@alias SheetEntryDataType "SheetAbilityData"|"SheetCustomStatData"|"SheetCustomStatCategoryData"|"SheetStatData"|"SheetTalentData"
 
----@class SheetStatType
+---@alias SheetEntryType string|"PrimaryStat"|"SecondaryStat"|"Ability"|"CivilAbility"|"Talent"|"Custom"
+
+---@enum SheetStatType
 SheetManager.StatType = {
 	---@type SheetEntryType
 	PrimaryStat = "PrimaryStat",
@@ -166,7 +168,7 @@ local function LoadData()
 	SheetManager.CustomStats.Initialize()
 
 	SheetManager.Loaded = true
-	InvokeListenerCallbacks(SheetManager.Listeners.Loaded, SheetManager)
+	SheetManager.Events.Loaded:Invoke({})
 
 	if isClient then
 		---Divine Talents

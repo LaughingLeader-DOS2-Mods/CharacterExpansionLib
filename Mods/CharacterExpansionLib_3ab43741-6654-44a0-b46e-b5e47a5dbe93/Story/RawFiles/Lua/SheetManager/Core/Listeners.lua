@@ -1,24 +1,9 @@
-SheetManager.Listeners = {
-	Loaded = {},
-	---@type table<string, OnSheetStatChangedCallback|OnSheetAbilityChangedCallback|OnSheetTalentChangedCallback[]>
-	OnEntryChanged = {All = {}},
-	---@type table<string, OnSheetCanAddStatCallback|OnSheetCanAddAbilityCallback|OnSheetCanAddTalentCallback[]>
-	CanAdd = {All = {}},
-	---@type table<string, OnSheetCanRemoveStatCallback|OnSheetCanRemoveAbilityCallback|OnSheetCanRemoveTalentCallback[]>
-	CanRemove = {All = {}},
-	---@type table<string, OnSheetEntryVisibilityCallback[]>
-	IsEntryVisible = {All = {}},
-	---Client-side listener invoked when a visible sheet entry is about to be added to the UI.
-	---@type table<string, OnSheetEntryUpdatingCallback[]>
-	EntryUpdating = {All = {}},
-}
-
 local self = SheetManager
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
----@alias OnSheetStatChangedCallback fun(id:string, stat:SheetStatData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean):void
----@alias OnSheetAbilityChangedCallback fun(id:string, stat:SheetAbilityData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean):void
----@alias OnSheetTalentChangedCallback fun(id:string, stat:SheetTalentData, character:EsvCharacter, lastValue:boolean, value:boolean, isClientSide:boolean):void
+---@alias OnSheetStatChangedCallback fun(id:string, stat:SheetStatData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean)
+---@alias OnSheetAbilityChangedCallback fun(id:string, stat:SheetAbilityData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean)
+---@alias OnSheetTalentChangedCallback fun(id:string, stat:SheetTalentData, character:EsvCharacter, lastValue:boolean, value:boolean, isClientSide:boolean)
 
 ---@alias OnSheetCanAddStatCallback fun(id:string, stat:SheetStatData, character:EclCharacter, currentValue:integer, canAdd:boolean):boolean
 ---@alias OnSheetCanAddAbilityCallback fun(id:string, stat:SheetAbilityData, character:EclCharacter, currentValue:integer, canAdd:boolean):boolean
@@ -30,129 +15,179 @@ local isClient = Ext.IsClient()
 
 ---@alias OnSheetEntryVisibilityCallback fun(id:string, stat:SheetStatData|SheetAbilityData|SheetTalentData, character:EclCharacter, currentValue:boolean, isVisible:boolean):boolean
 
----@alias OnSheetEntryUpdatingCallback fun(id:string, data:SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUITalentEntry, character:EclCharacter):void
+---@alias OnSheetEntryUpdatingCallback fun(id:string, data:SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUIEntry, character:EclCharacter)
 
----@private
----@vararg function[]
-function SheetManager:GetListenerIterator(...)
-	local tables = {...}
-	local totalCount = #tables
-	if totalCount == 0 then
-		return
-	end
-	local listeners = {}
-	for _,v in pairs(tables) do
-		local t = type(v)
-		if t == "table" then
-			for _,v2 in pairs(v) do
-				listeners[#listeners+1] = v2
-			end
-		elseif t == "function" then
-			listeners[#listeners+1] = v
-		end
-	end
-	local i = 0
-	return function ()
-		i = i + 1
-		if i <= totalCount then
-			return listeners[i]
-		end
-	end
-end
-
----@private
-function SheetManager:RegisterListener(tbl, callback, key)
-	if callback == nil then
-		return
-	end
-	local t = type(key)
-	if t == "table" then
-		for i=1,#key do
-			self:RegisterListener(tbl, callback, key[i])
-		end
-	elseif t == "number" or t == "string" then
-		if tbl[key] == nil then
-			tbl[key] = {}
-		end
-		table.insert(tbl[key], callback)
-	elseif key == nil then
-		table.insert(tbl, callback)
-	end
-end
-
----@param callback fun(self:SheetManager):void
+---@param callback fun(self:SheetManager)
 function SheetManager:RegisterLoadedListener(callback)
-	self:RegisterListener(self.Listeners.Loaded, callback)
+	self.Events.Loaded:Subscribe(callback)
 end
 
+---@deprecated
 ---Generic version for stat/ability/talent entries.
----@param id string|string[]|number|number[]
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetStatChangedCallback|OnSheetAbilityChangedCallback|OnSheetTalentChangedCallback
 function SheetManager:RegisterEntryChangedListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterEntryChangedListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end)
+		else
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id}})
+		end
 	end
-	self:RegisterListener(self.Listeners.OnEntryChanged, callback, id)
 end
 
+---@deprecated
 ---Called when a registered stat changes.
 ---Use this vs. RegisterEntryChangedListener for stat-related auto-completion.
----@param id string|string[]|number|number[]
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetStatChangedCallback
 function SheetManager:RegisterStatChangedListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterStatChangedListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={EntryType="SheetStatData"}})
+		else
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, EntryType="SheetStatData"}})
+		end
 	end
-	self:RegisterEntryChangedListener(id, callback)
 end
 
+---@deprecated
 ---Called when a registered ability changes.
 ---Use this vs. RegisterEntryChangedListener for ability-related auto-completion.
----@param id string|string[]|number|number[]
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetAbilityChangedCallback
 function SheetManager:RegisterAbilityChangedListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterAbilityChangedListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={EntryType="SheetAbilityData"}})
+		else
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, EntryType="SheetAbilityData"}})
+		end
 	end
-	self:RegisterEntryChangedListener(id, callback)
 end
 
+---@deprecated
 ---Called when a registered talent changes.
 ---Use this vs. RegisterEntryChangedListener for talent-related auto-completion.
----@param id string|string[]|number|number[]
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetTalentChangedCallback
 function SheetManager:RegisterTalentChangedListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterTalentChangedListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={EntryType="SheetTalentData"}})
+		else
+			self.Events.OnEntryChanged:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, EntryType="SheetTalentData"}})
+		end
 	end
-	self:RegisterEntryChangedListener(id, callback)
 end
 
----@param id string|string[]|number|number[]
+---@deprecated
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetCanAddStatCallback|OnSheetCanAddAbilityCallback|OnSheetCanAddStatCallback
 function SheetManager:RegisterCanAddListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterCanAddListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={Action="Add"}})
+		else
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, Action="Add"}})
+		end
 	end
-	self:RegisterListener(self.Listeners.CanAdd, callback, id)
 end
 
----@param id string|string[]|number|number[]
+---@deprecated
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetCanAddStatCallback|OnSheetCanAddAbilityCallback|OnSheetCanAddStatCallback
 function SheetManager:RegisterCanRemoveListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterCanRemoveListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={Action="Remove"}})
+		else
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, Action="Remove"}})
+		end
 	end
-	self:RegisterListener(self.Listeners.CanRemove, callback, id)
 end
 
----@param id string|string[]|number|number[]
+---@deprecated
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetEntryVisibilityCallback
 function SheetManager:RegisterVisibilityListener(id, callback)
-	if StringHelpers.Equals(id, "All", true) then
-		id = "All"
+	if type(id) == "table" then
+		for _,v in pairs(id) do
+			SheetManager:RegisterVisibilityListener(v, callback)
+		end
+	else
+		---@cast id string
+
+		if StringHelpers.Equals(id, "All", true) then
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={Action="Visibility"}})
+		else
+			self.Events.CanChangeEntry:Subscribe(function (e)
+				callback(e:Unpack())
+			end, {MatchArgs={ID=id, Action="Visibility"}})
+		end
 	end
-	self:RegisterListener(self.Listeners.IsEntryVisible, callback, id)
 end
 
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData
@@ -170,13 +205,18 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 		return false
 	end
 	local bResult = defaultValue
-	for listener in self:GetListenerIterator(self.Listeners.CanAdd[entry.ID], self.Listeners.CanAdd.All) do
-		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
-		if not b then
-			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsPlusVisible] Error calling CanAdd listener for entry (%s):\n%s", entry.ID, result)
-		elseif type(result) == "boolean" then
-			bResult = result
-		end
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		Stat = entry,
+		Result = bResult,
+		Action = "Add",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
 	end
 	return bResult
 end
@@ -196,13 +236,18 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 		return false
 	end
 	local bResult = defaultValue
-	for listener in self:GetListenerIterator(self.Listeners.CanRemove[entry.ID], self.Listeners.CanRemove.All) do
-		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
-		if not b then
-			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsMinusVisible] Error calling CanRemove listener for entry (%s):\n%s", entry.ID, result)
-		elseif type(result) == "boolean" then
-			bResult = result
-		end
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		Stat = entry,
+		Result = bResult,
+		Action = "Remove",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
 	end
 	return bResult
 end
@@ -217,46 +262,53 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 		entryValue = entry:GetValue(character)
 	end
 	if isGM == nil then
-		isGM = isClient and GameHelpers.Client.IsGameMaster()
+		isGM = _ISCLIENT and GameHelpers.Client.IsGameMaster()
 	end
 	local bResult = entry.Visible == true
 	--Default racial talents to not being visible
 	if entry.IsRacial then
 		bResult = isGM
 	end
-	for listener in self:GetListenerIterator(self.Listeners.IsEntryVisible[entry.ID], self.Listeners.IsEntryVisible.All) do
-		local b,result = xpcall(listener, debug.traceback, entry.ID, entry, character, entryValue, bResult)
-		if not b then
-			--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager:GetIsEntryVisible] Error calling IsEntryVisible listener for entry (%s):\n%s", entry.ID, result)
-		elseif type(result) == "boolean" then
-			bResult = result
-		end
+
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		Stat = entry,
+		Result = bResult,
+		Action = "Visibility",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
 	end
 	return bResult
 end
 
----@param id string|string[]|number|number[]
+---@deprecated
+---@param id AnyStatEntryIDType|AnyStatEntryIDType[]
 ---@param callback OnSheetEntryUpdatingCallback
 function SheetManager:RegisterEntryUpdatingListener(id, callback)
-	if isClient then
-		if StringHelpers.Equals(id, "All", true) then
-			id = "All"
-		end
-		self:RegisterListener(self.Listeners.EntryUpdating, callback, id)
-	else
-		error("SheetManager:RegisterEntryUpdatingListener is a client-side listener only.", 2)
-	end
-end
+	if _ISCLIENT then
+		if type(id) == "table" then
+			for _,v in pairs(id) do
+				SheetManager:RegisterEntryUpdatingListener(v, callback)
+			end
+		else
+			---@cast id string
 
----@param entry SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUITalentEntry
----@param player EclCharacter
-function SheetManager:InvokeEntryUpdatingCallbacks(entry, player)
-	if isClient then
-		for listener in self:GetListenerIterator(SheetManager.Listeners.EntryUpdating[entry.ID], SheetManager.Listeners.EntryUpdating.All) do
-			local b,err = xpcall(listener, debug.traceback, entry, player)
-			if not b then
-				fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager] Error calling InvokeEntryUpdatingCallbacks listener for entry (%s):\n%s", entry, err)
+			if StringHelpers.Equals(id, "All", true) then
+				self.Events.OnEntryUpdating:Subscribe(function (e)
+					callback(e:Unpack())
+				end)
+			else
+				self.Events.OnEntryUpdating:Subscribe(function (e)
+					callback(e:Unpack())
+				end, {MatchArgs={ID=id}})
 			end
 		end
+	else
+		error("SheetManager:RegisterEntryUpdatingListener is a client-side listener only.", 2)
 	end
 end

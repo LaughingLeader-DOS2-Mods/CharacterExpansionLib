@@ -750,7 +750,7 @@ function SheetManager.Talents.HideTalents(uiType)
 	end
 end
 
----@class SheetManager.TalentsUITalentEntry
+---@class SheetManager.TalentsUIEntry
 ---@field ID string
 ---@field GeneratedID integer
 ---@field Enum string
@@ -769,7 +769,7 @@ end
 ---@param isCharacterCreation boolean|nil
 ---@param isGM boolean|nil
 ---@param availablePoints ?integer
----@return fun():SheetManager.TalentsUITalentEntry
+---@return fun():SheetManager.TalentsUIEntry
 function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, availablePoints)
 	if isCharacterCreation == nil then
 		isCharacterCreation = false
@@ -797,7 +797,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 			local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == SheetManager.Talents.Data.TalentState.Selectable))
 			local canRemove = hasTalent and ((not isRacial and isCharacterCreation) or isGM)
 
-			---@type SheetManager.TalentsUITalentEntry
+			---@type SheetManager.TalentsUIEntry
 			local data = {
 				ID = talentId,
 				GeneratedID = Data.TalentEnum[talentId],
@@ -824,7 +824,7 @@ function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, avai
 				local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
 				local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or isGM
 				local canRemove = hasTalent and (isCharacterCreation or isGM)
-				---@type SheetManager.TalentsUITalentEntry
+				---@type SheetManager.TalentsUIEntry
 				local sheetData = {
 					ID = data.ID,
 					GeneratedID = data.GeneratedID,

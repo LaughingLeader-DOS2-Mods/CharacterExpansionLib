@@ -109,6 +109,15 @@ function CustomStatSystem.SortStats(a,b)
 	return name1 < name2
 end
 
+---@class SheetManager.CustomStatsUIEntry
+---@field ID string
+---@field GeneratedID integer
+---@field GroupID integer
+---@field DisplayName string
+---@field PlusVisible boolean
+---@field MinusVisible boolean
+---@field Value number
+
 ---@param this CharacterSheetMainTimeline
 function CustomStatSystem.Update(ui, method, this)
 	CustomStatSystem:SetupGroups(ui, method)
@@ -209,11 +218,18 @@ function CustomStatSystem.Update(ui, method, this)
 		for stat in CustomStatSystem:GetAllStats(false, true, true) do
 			local visible = CustomStatSystem:GetStatVisibility(ui, stat.GeneratedID, stat, client)
 			if visible then
-				local value = stat:GetValue(client)
-				local groupId = CustomStatSystem:GetCategoryGroupId(stat.Category, stat.Mod)
-				local plusVisible = self:GetCanAddPoints(ui, stat.GeneratedID)
-				local minusVisible = self:GetCanRemovePoints(ui, stat.GeneratedID)
-				this.stats_mc.customStats_mc.addCustomStat(stat.GeneratedID, stat:GetDisplayName(), tostring(value), groupId, plusVisible, minusVisible, true)
+				---@type SheetManager.CustomStatsUIEntry
+				local data = {
+					ID = stat.ID,
+					GeneratedID = stat.GeneratedID,
+					Value = stat:GetValue(client),
+					GroupID = CustomStatSystem:GetCategoryGroupId(stat.Category, stat.Mod),
+					PlusVisible = self:GetCanAddPoints(ui, stat.GeneratedID),
+					MinusVisible = self:GetCanRemovePoints(ui, stat.GeneratedID),
+					DisplayName = stat:GetDisplayName(),
+				}
+				SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="Custom", Stat=data, Character=client})
+				this.stats_mc.customStats_mc.addCustomStat(data.GeneratedID, data.DisplayName, tostring(data.Value), data.GroupID, data.PlusVisible == true, data.MinusVisible == true, true)
 			end
 		end
 	end
