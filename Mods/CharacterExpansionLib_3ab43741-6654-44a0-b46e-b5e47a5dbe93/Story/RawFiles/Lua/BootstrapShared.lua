@@ -30,8 +30,6 @@ end
 
 local isClient = Ext.IsClient()
 
----@alias SetCharacterCreationOriginSkillsCallback fun(player:EclCharacter, origin:string, race:string, skills:string[]):string[]
-
 if isClient then
 	listeners.SetCharacterCreationOriginSkills = {
 		---@private
