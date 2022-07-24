@@ -437,9 +437,13 @@ else
 			self.CurrentValues[data.NetID] = data.Values
 			--fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
 
-			local character = Ext.GetCharacter(data.NetID)
-			if character then
-				NotifyValueChanges(character, lastValues, self.CurrentValues[data.NetID])
+			if SheetManager.Loaded then
+				local character = Ext.GetCharacter(data.NetID)
+				if character then
+					NotifyValueChanges(character, lastValues, self.CurrentValues[data.NetID])
+				end
+			else
+				delayNotify = true
 			end
 		end
 	end)
