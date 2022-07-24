@@ -1,7 +1,5 @@
 local ts = Classes.TranslatedString
 
----@alias SheetAbilityGroupID string |"Weapons"|"Defense"|"Skills"|"Personality"|"Craftsmanship"|"NastyDeeds"
-
 ---@class AbilityManager
 SheetManager.Abilities = {
 	RegisteredAbilities = {},

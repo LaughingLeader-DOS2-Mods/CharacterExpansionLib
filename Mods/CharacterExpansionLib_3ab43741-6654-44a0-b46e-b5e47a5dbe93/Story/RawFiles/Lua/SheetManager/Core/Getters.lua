@@ -173,8 +173,6 @@ function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character, client
 	return 0
 end
 
----@alias AvailablePointsType string|"Attribute"|"Ability"|"Civil"|"Talent"|"Custom"
-
 ---@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
 ---@param pointType AvailablePointsType
 ---@param customStatPointsID CUSTOMSTATID|nil If pointType is "Custom", this is the point ID.

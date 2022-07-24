@@ -3,15 +3,8 @@ if SheetManager == nil then
 	SheetManager = {}
 end
 
----@alias SHEET_ENTRY_ID string
----@alias MOD_UUID string
-
 SheetManager.__index = SheetManager
 SheetManager.Loaded = false
-
----@alias SheetEntryDataType "SheetAbilityData"|"SheetCustomStatData"|"SheetCustomStatCategoryData"|"SheetStatData"|"SheetTalentData"
-
----@alias SheetEntryType string|"PrimaryStat"|"SecondaryStat"|"Ability"|"CivilAbility"|"Talent"|"Custom"
 
 ---@enum SheetStatType
 SheetManager.StatType = {
