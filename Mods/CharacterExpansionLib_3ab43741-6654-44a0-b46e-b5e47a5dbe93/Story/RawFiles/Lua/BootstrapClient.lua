@@ -9,9 +9,9 @@ Ext.Require("SheetManager/UI/CustomStatsUI.lua")
 
 Ext.Require("CharacterCreationExtended/Init.lua")
 
-if Ext.IsDeveloperMode() then
-    Ext.Require("SheetManager/UI/Debug/UILogger.lua")
-end
+-- if Ext.IsDeveloperMode() then
+--     Ext.Require("SheetManager/UI/Debug/UILogger.lua")
+-- end
 
 local overridePath = "Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/Overrides/"
 

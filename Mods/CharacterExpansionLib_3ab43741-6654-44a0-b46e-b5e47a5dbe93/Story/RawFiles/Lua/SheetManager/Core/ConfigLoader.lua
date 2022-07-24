@@ -233,16 +233,16 @@ local function LoadConfigFiles()
 		end
 	end
 
-	if Vars.DebugMode and Vars.LeaderDebugMode then
-		--local data = LoadConfig(ModuleUUID, Ext.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
-		local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
-		if dataStr then
-			local data = LoadConfig(ModuleUUID, Common.JsonParse(dataStr))
-			if data and data.Success then
-				entries[ModuleUUID] = data
-			end
-		end
-	end
+	-- if Vars.DebugMode and Vars.LeaderDebugMode then
+	-- 	--local data = LoadConfig(ModuleUUID, Ext.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
+	-- 	local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
+	-- 	if dataStr then
+	-- 		local data = LoadConfig(ModuleUUID, Common.JsonParse(dataStr))
+	-- 		if data and data.Success then
+	-- 			entries[ModuleUUID] = data
+	-- 		end
+	-- 	end
+	-- end
 	return entries
 end
 
