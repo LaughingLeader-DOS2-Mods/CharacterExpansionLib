@@ -22,7 +22,7 @@ package characterSheet_fla
 		
 		public function onMouseOver(e:MouseEvent) : *
 		{
-			if(this.tooltip != "")
+			if(this.tooltip != null && this.tooltip != "")
 			{
 				this.base.hasTooltip = true;
 				this.currentTooltip = this.tooltip;

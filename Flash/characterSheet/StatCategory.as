@@ -59,7 +59,7 @@ package
 		{
 			this.bg_mc.gotoAndStop(!!this.isOpen?5:2);
 
-			if(this.tooltip != "" && !this.base.hasTooltip)
+			if(this.tooltip != null && this.tooltip != "" && !this.base.hasTooltip)
 			{
 				this.base.hasTooltip = true;
 				this.currentTooltip = this.tooltip;

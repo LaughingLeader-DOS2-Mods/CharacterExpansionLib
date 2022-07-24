@@ -903,14 +903,14 @@ package characterSheet_fla
 			ability_mc.texts_mc.minus_mc.tooltip = minusTooltip;
 			ability_mc.texts_mc.plus_mc.visible = plusVisible;
 			ability_mc.texts_mc.minus_mc.visible = minusVisible;
-			if(ability_mc.texts_mc.plus_mc.currentTooltip != "" && ability_mc.texts_mc.plus_mc.currentTooltip != plusTooltip)
+			if(plusTooltip != null && plusTooltip != "" && ability_mc.texts_mc.plus_mc.currentTooltip != "" && ability_mc.texts_mc.plus_mc.currentTooltip != plusTooltip)
 			{
-				ExternalInterface.call("showTooltip",plusTooltip);
+				ExternalInterface.call("showTooltip", plusTooltip);
 				ability_mc.texts_mc.plus_mc.currentTooltip = plusTooltip;
 			}
-			if(ability_mc.texts_mc.minus_mc.currentTooltip != "" && ability_mc.texts_mc.minus_mc.currentTooltip != minusTooltip)
+			if(minusTooltip != null && minusTooltip != "" && ability_mc.texts_mc.minus_mc.currentTooltip != "" && ability_mc.texts_mc.minus_mc.currentTooltip != minusTooltip)
 			{
-				ExternalInterface.call("showTooltip",minusTooltip);
+				ExternalInterface.call("showTooltip", minusTooltip);
 				ability_mc.texts_mc.plus_mc.currentTooltip = minusTooltip;
 			}
 			ability_mc.texts_mc.label_txt.htmlText = labelText;
