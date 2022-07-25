@@ -22,6 +22,7 @@ SheetManager.StatType = {
 
 local isClient = Ext.IsClient()
 
+Ext.Require("SheetManager/Events.lua")
 Ext.Require("SheetManager/Core/Listeners.lua")
 Ext.Require("SheetManager/Core/Data/SheetDataValues.lua")
 Ext.Require("SheetManager/Core/Sync/Main.lua")
