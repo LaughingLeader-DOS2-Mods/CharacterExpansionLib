@@ -17,6 +17,7 @@ local _ISCLIENT = Ext.IsClient()
 
 ---@alias OnSheetEntryUpdatingCallback fun(id:string, data:SheetManager.StatsUIEntry|SheetManager.AbilitiesUIEntry|SheetManager.TalentsUIEntry, character:EclCharacter)
 
+---@deprecated
 ---@param callback fun(self:SheetManager)
 function SheetManager:RegisterLoadedListener(callback)
 	self.Events.Loaded:Subscribe(callback)

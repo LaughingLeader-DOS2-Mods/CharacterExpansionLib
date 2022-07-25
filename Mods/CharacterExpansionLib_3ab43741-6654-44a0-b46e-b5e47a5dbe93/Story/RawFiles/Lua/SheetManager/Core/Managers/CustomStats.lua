@@ -33,20 +33,6 @@ CustomStatSystem.Listeners = {
 	Loaded = {},
 }
 
----@param callback fun(self:CustomStatSystem):void
-function CustomStatSystem:RegisterLoadedListener(callback)
-	if callback == nil then
-		return
-	end
-	if type(callback) == "table" then
-		for i=1,#callback do
-			self:RegisterLoadedListener(callback[i])
-		end
-	else
-		table.insert(self.Listeners.Loaded, callback)
-	end
-end
-
 ---@class CustomStatTooltipType
 CustomStatSystem.TooltipType = {
 	Default = "Stat",

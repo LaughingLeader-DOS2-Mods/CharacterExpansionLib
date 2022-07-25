@@ -421,7 +421,7 @@ else
 		end
 	end)
 
-	SheetManager:RegisterLoadedListener(function ()
+	SheetManager.Events.Loaded:Subscribe(function (e)
 		if delayNotify then
 			delayNotify = false
 			local client = Client:GetCharacter()
