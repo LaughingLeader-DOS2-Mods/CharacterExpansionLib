@@ -96,10 +96,12 @@ end
 
 ---@param character EsvCharacter|EclCharacter|string|number
 ---@param amount integer
-function SheetAbilityData:ModifyValue(character, amount)
+---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
+---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
+function SheetAbilityData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
 	local nextValue = self:GetValue(character) + amount
 	if not isClient then
-		return SheetManager:SetEntryValue(character, self, nextValue)
+		return SheetManager:SetEntryValue(character, self, nextValue, skipListenerInvoke, skipSync)
 	else
 		SheetManager:RequestValueChange(self, character, nextValue)
 	end

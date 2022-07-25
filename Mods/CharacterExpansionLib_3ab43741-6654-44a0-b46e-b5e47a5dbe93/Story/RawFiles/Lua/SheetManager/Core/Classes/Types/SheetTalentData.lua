@@ -82,6 +82,8 @@ function SheetTalentData:SetValue(character, value, skipListenerInvoke, skipSync
 	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
 end
 
+SheetTalentData.ModifyValue = SheetTalentData.SetValue
+
 ---@param character EsvCharacter|EclCharacter|string|number
 function SheetTalentData:HasTalent(character)
 	return self:GetValue(character) == true

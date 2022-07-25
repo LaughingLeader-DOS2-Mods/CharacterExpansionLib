@@ -20,7 +20,7 @@ SheetManager.StatType = {
 	Custom = "Custom"
 }
 
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 Ext.Require("SheetManager/Events.lua")
 Ext.Require("SheetManager/Core/Listeners.lua")
@@ -114,7 +114,7 @@ local function LoadData()
 		Ext.PrintError(data)
 	end
 
-	if not isClient then
+	if not _ISCLIENT then
 		for uuid,data in pairs(PersistentVars.CharacterSheetValues) do
 			local characterCount = 0
 			for statType,modTable in pairs(data) do
@@ -155,7 +155,7 @@ local function LoadData()
 
 	SheetManager.Talents.LoadRequirements()
 
-	if not isClient then
+	if not _ISCLIENT then
 		--SheetManager.CustomStats.LoadUnregistered()
 	end
 
@@ -164,7 +164,7 @@ local function LoadData()
 	SheetManager.Loaded = true
 	SheetManager.Events.Loaded:Invoke({})
 
-	if isClient then
+	if _ISCLIENT then
 		---Divine Talents
 		if Ext.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") then
 			SheetManager.Talents.ToggleDivineTalents(true, "ca32a698-d63e-4d20-92a7-dd83cba7bc56")
@@ -179,13 +179,13 @@ local function LoadData()
 	end
 end
 
-RegisterListener("RegionChanged", function ()
+Events.RegionChanged:Subscribe(function(e)
 	if not SheetManager.Loaded then
 		LoadData()
 	end
 end)
 
-if isClient then
+if _ISCLIENT then
 	if SheetManager.UI == nil then
 		SheetManager.UI = {}
 	end
