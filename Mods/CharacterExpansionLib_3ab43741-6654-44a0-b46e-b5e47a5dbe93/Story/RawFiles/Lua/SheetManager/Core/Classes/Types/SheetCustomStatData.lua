@@ -12,6 +12,8 @@ local SheetCustomStatData = {
 	StatType = "Custom",
 	---If true, the custom stat is created automatically on the server, if GM custom stats are enabled.
 	Create = false,
+	---Whether this custom stat uses custom available points.
+	UsePoints = false,
 	---A category ID this stat belongs to, if any.
 	Category = "",
 	---An ID to use for a common pool of available points.
@@ -77,6 +79,7 @@ local defaults = {
 local ID_MAP = 0
 
 ---@protected
+---@param data SheetCustomStatData|table
 function SheetCustomStatData.SetDefaults(data)
 	Classes.SheetCustomStatBase.SetDefaults(data)
 	for k,v in pairs(defaults) do
@@ -92,9 +95,10 @@ function SheetCustomStatData.SetDefaults(data)
 		data.GeneratedID = ID_MAP
 		ID_MAP = ID_MAP + 1
 	end
+	if not StringHelpers.IsNullOrEmpty(data.PointID) then
+		data.UsePoints = true
+	end
 end
-
-local canUseRawFunctions = Ext.Version() >= 55
 
 ---@class UnregisteredCustomStatData
 ---@field UUID string
@@ -106,12 +110,10 @@ Classes.UnregisteredCustomStatData = {
 		if k == "Type" then
 			return "UnregisteredCustomStatData"
 		end
-		if canUseRawFunctions then
-			local v = rawget(Classes.UnregisteredCustomStatData, k)
-			if v then
-				tbl[k] = v
-				return v
-			end
+		local v = rawget(Classes.UnregisteredCustomStatData, k)
+		if v ~= nil then
+			tbl[k] = v
+			return v
 		end
 		return Classes.SheetCustomStatData[k] or Classes.SheetCustomStatBase[k]
 	end

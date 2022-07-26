@@ -3,7 +3,6 @@ local CustomStatsUI = {}
 SheetManager.CustomStats.UI = CustomStatsUI
 
 CustomStatsUI.Visible = false
-CustomStatsUI.Syncing = false
 CustomStatsUI.MaxVisibleValue = 999 -- Values greater than this are truncated visually in the UI
 
 function CustomStatsUI:GetNextCustomStatIconId()
@@ -332,18 +331,12 @@ Ext.RegisterUITypeCall(Data.UIType.characterSheet, "removeCustomStat", function(
 
 --Story mode changes so custom stats don't use the custom stats system, since they get added to every character apparently
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStatCustom", function(ui, call, statId)
-	if CustomStatsUI.Syncing == true then
-		return
-	end
 	local stat = SheetManager.CustomStats:GetStatByDouble(statId)
 	if stat then
 		stat:ModifyValue(Client:GetCharacter(), -1)
 	end
 end)
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStatCustom", function(ui, call, statId)
-	if CustomStatsUI.Syncing == true then
-		return
-	end
 	local stat = SheetManager.CustomStats:GetStatByDouble(statId)
 	if stat then
 		stat:ModifyValue(Client:GetCharacter(), 1)
@@ -424,14 +417,16 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.statsPanel_c, "selectStatsTab", fun
 end)
 
 Events.LuaReset:Subscribe(function(e)
-	local ui = Ext.UI.GetByType(Data.UIType.statsPanel_c)
-	if ui then
-		local tabBar_mc = ui:GetRoot().mainpanel_mc.stats_mc.tabBar_mc
-		for i=0,tabBar_mc.tabList.length do
-			local entry = tabBar_mc.tabList.content_array[i]
-			if entry and entry.id == 6 then
-				addedCustomTab = true
-				break
+	if Vars.ControllerEnabled then
+		local ui = Ext.UI.GetByType(Data.UIType.statsPanel_c)
+		if ui then
+			local tabBar_mc = ui:GetRoot().mainpanel_mc.stats_mc.tabBar_mc
+			for i=0,tabBar_mc.tabList.length do
+				local entry = tabBar_mc.tabList.content_array[i]
+				if entry and entry.id == 6 then
+					addedCustomTab = true
+					break
+				end
 			end
 		end
 	end

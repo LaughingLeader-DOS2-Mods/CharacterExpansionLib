@@ -6,7 +6,7 @@ local isClient = Ext.IsClient()
 ---@param id string
 ---@param mod string|nil
 ---@param statType SheetEntryType|nil Stat type.
----@return SheetAbilityData|SheetStatData|SheetTalentData
+---@return SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 function SheetManager:GetEntryByID(id, mod, statType)
 	local targetTable = nil
 	if statType then
