@@ -1,4 +1,5 @@
 local ts = Classes.TranslatedString
+local _ISCLIENT = Ext.IsClient()
 
 ---@class AbilityManager
 SheetManager.Abilities = {
@@ -75,7 +76,6 @@ SheetManager.Abilities = {
 		}
 	}
 }
-SheetManager.Abilities.__index = SheetManager.Abilities
 
 local missingAbilities = SheetManager.Abilities.Data.DOSAbilities
 for name,v in pairs(missingAbilities) do
@@ -139,7 +139,7 @@ function SheetManager.Abilities.DisableAbility(abilityName, modID)
 	end
 end
 
-if Ext.IsClient() then
+if _ISCLIENT then
 	function SheetManager.Abilities.CanAddAbility(id, player)
 		if SheetManager.Abilities.Data.Abilities[id] then
 			return true

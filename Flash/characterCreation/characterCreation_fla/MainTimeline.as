@@ -633,15 +633,16 @@ package characterCreation_fla
 
 		//CharacterExpansionLib
 		//Just a tweak so we can pass the id parameter to use.
-		public function showCustomTooltipForMC(mc:MovieClip, externalCall:String, id:*, align:String = "left") : *
+		public function showCustomTooltipForMC(mc:MovieClip, externalCall:String, id:*, overrideAlign:String = "") : *
 		{
-			var tWidth:Number = NaN;
-			var globalPos:Point = this.getGlobalPositionOfMC(mc);
-			this.hasTooltip = true;
-			var offsetY:Number = 0;
-			var offsetX:Number = 0;
 			if(mc)
 			{
+				var tWidth:Number = NaN;
+				var globalPos:Point = this.getGlobalPositionOfMC(mc);
+				this.hasTooltip = true;
+				var offsetY:Number = 0;
+				var offsetX:Number = 0;
+				var align:String = overrideAlign;
 				tWidth = mc.width;
 				if(mc.widthOverride)
 				{
@@ -655,7 +656,11 @@ package characterCreation_fla
 				{
 					offsetX = mc.mOffsetX;
 				}
-				ExternalInterface.call(externalCall, id, globalPos.x + offsetX,globalPos.y + offsetY,tWidth,mc.height,mc.tooltipAlign != null ? mc.tooltipAlign : align);
+				if(mc.tooltipAlign && (align == "" || align == null))
+				{
+					align = mc.tooltipAlign;
+				}
+				ExternalInterface.call(externalCall, id, globalPos.x + offsetX,globalPos.y + offsetY,tWidth,mc.height,align);
 			}
 		}
 		

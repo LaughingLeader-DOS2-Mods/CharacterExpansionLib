@@ -39,7 +39,7 @@ end
 ---Gets custom sheet data from a generated id.
 ---@param generatedId integer
 ---@param statType SheetEntryType|nil Optional stat type.
----@return SheetAbilityData|SheetStatData|SheetTalentData
+---@return AnyStatEntryDataType|nil
 function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	if statType then
 		if statType == "Stat" or statType == "PrimaryStat" or statType == "SecondaryStat" or statType == "InfoStat" then
@@ -48,6 +48,10 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 			return self.Data.ID_MAP.Abilities.Entries[generatedId]
 		elseif statType == "Talent" then
 			return self.Data.ID_MAP.Talents.Entries[generatedId]
+		elseif statType == "Custom" then
+			return self.Data.ID_MAP.CustomStats.Entries[generatedId]
+		elseif statType == "CustomCategory" then
+			return self.Data.ID_MAP.CustomStatCategories.Entries[generatedId]
 		end
 		return nil
 	end
@@ -63,6 +67,7 @@ end
 
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData
 ---@param characterId UUID|NETID
+---@return integer|boolean
 function SheetManager:GetValueByEntry(entry, characterId)
 	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
 	if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
@@ -114,6 +119,10 @@ function SheetManager:EntryHasValue(id, character, value, mod, statType)
 			targetTable = self.Data.Abilities
 		elseif statType == "Talent" then
 			targetTable = self.Data.Talents
+		elseif statType == "Custom" then
+			targetTable = self.Data.CustomStats
+		elseif statType == "CustomCategory" then
+			targetTable = self.Data.CustomStatCategories
 		end
 	end
 	if targetTable then
@@ -175,7 +184,7 @@ end
 
 ---@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
 ---@param pointType AvailablePointsType
----@param customStatPointsID CUSTOMSTATID|nil If pointType is "Custom", this is the point ID.
+---@param customStatPointsID string|nil If pointType is "Custom", this is the point ID.
 ---@param isCharacterCreation ?boolean
 function SheetManager:GetAvailablePoints(characterId, pointType, customStatPointsID, isCharacterCreation)
 	characterId = GameHelpers.GetObjectID(characterId)

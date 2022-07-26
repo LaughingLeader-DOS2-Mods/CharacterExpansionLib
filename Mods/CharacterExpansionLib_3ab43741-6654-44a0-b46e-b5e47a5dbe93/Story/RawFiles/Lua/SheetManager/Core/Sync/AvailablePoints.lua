@@ -1,5 +1,5 @@
 local self = SheetManager
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 if SheetManager.Sync == nil then SheetManager.Sync = {} end
 
@@ -7,7 +7,7 @@ if SheetManager.Sync == nil then SheetManager.Sync = {} end
 ---@private
 ---@type table<UUID|NETID,table<string,integer>>
 SheetManager.CustomAvailablePoints = {}
-if not isClient then
+if not _ISCLIENT then
 	setmetatable(SheetManager.CustomAvailablePoints, {
 		__index = function(tbl, k)
 			return PersistentVars.CustomStatAvailablePoints[k]
@@ -15,9 +15,9 @@ if not isClient then
 	})
 end
 
----@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
+---@param characterId CharacterParam|nil Leave nil to sync points for all players.
 function SheetManager.Sync.CustomAvailablePoints(characterId)
-	if not isClient then
+	if not _ISCLIENT then
 		if not characterId then
 			--Sync all
 			local allPoints = {}
@@ -39,7 +39,7 @@ function SheetManager.Sync.CustomAvailablePoints(characterId)
 	end
 end
 
-if not isClient then
+if not _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_RequestAvailablePoints", function(cmd, payload)
 		local netid = tonumber(payload)
 		if netid then
@@ -65,6 +65,21 @@ if not isClient then
 		end
 	end)
 
+	RegisterNetListener("CEL_SheetManager_RequestChangeAvailablePoints", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			local character = GameHelpers.GetCharacter(data.Target)
+			assert(character ~= nil, string.format("Failed to get character\n%s", payload))
+			assert(data.PointID ~= nil, string.format("PointID not specified\n%s", payload))
+			assert(type(data.Value) == "number", string.format("Value is not a number\n%s", payload))
+			if SheetManager.CustomAvailablePoints[character.MyGuid] == nil then
+				SheetManager.CustomAvailablePoints[character.MyGuid] = {}
+			end
+			SheetManager.CustomAvailablePoints[character.MyGuid][data.PointID] = data.Value
+			SheetManager.Sync.CustomAvailablePoints(character)
+		end
+	end)
+
 	-- local function BasePointsChanged(character)
 	-- 	character = StringHelpers.GetUUID(character)
 	-- 	local timerName = string.format("CEL_AggregateAvailablePoints%s", character)
@@ -75,7 +90,7 @@ if not isClient then
 
 	-- Ext.RegisterOsirisListener("CharacterBaseAbilityChanged", 4, "after", BasePointsChanged)
 else
-		---@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
+	---@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
 	function SheetManager.Sync.AvailablePointsWithDelay(characterId)
 		local netid = GameHelpers.GetNetID(characterId)
 		Ext.PostMessageToServer("CEL_SheetManager_RequestAvailablePointsWithDelay", tostring(netid))

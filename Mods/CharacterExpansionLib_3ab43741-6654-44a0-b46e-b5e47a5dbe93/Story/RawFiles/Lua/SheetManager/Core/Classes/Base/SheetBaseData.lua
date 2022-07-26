@@ -103,9 +103,14 @@ function SheetBaseData:GetDescription(character)
 	if self.Description then
 		local text = FormatText(self.Description, self.LoadStringKey, character)
 		if self.Mod then
-			local info = Ext.GetModInfo(self.Mod)
-			if info and not StringHelpers.IsNullOrWhitespace(info.Name) then
-				text = string.format("%s<br><font color='#2299FF' size='18'>%s</font>", text, info.Name)
+			local name = GameHelpers.GetModName(self.Mod, true)
+			if not StringHelpers.IsNullOrWhitespace(name) then
+				local titleColor = "#2299FF"
+				local settings = SettingsManager.GetMod(self.Mod, false, false)
+				if settings and not StringHelpers.IsNullOrWhitespace(settings.TitleColor) and not StringHelpers.Equals(settings.TitleColor, "#FFFFFF", true, true) then
+					titleColor = settings.TitleColor
+				end
+				text = string.format("%s<br><font color='%s' size='18'>%s</font>", text, titleColor, name)
 			end
 		end
 		return text

@@ -1,6 +1,6 @@
 local ts = Classes.TranslatedString
 
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---@class StatsManager
 SheetManager.Stats = {
@@ -411,9 +411,8 @@ SheetManager.Stats = {
 		}
 	}
 }
-SheetManager.Stats.__index = SheetManager.Stats
 
-if isClient then
+if _ISCLIENT then
 	---@class SheetManager.StatsUIEntry
 	---@field ID string
 	---@field GeneratedID integer

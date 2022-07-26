@@ -1,4 +1,4 @@
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---@class SheetAbilityData:SheetBaseData
 local SheetAbilityData = {
@@ -76,13 +76,12 @@ function SheetAbilityData:GetValue(character)
 	if not StringHelpers.IsNullOrWhitespace(self.BoostAttribute) then
 		return self:GetBoostValue(character, 0)
 	else
-		if not isClient then
+		if not _ISCLIENT then
 			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character)) or 0
 		else
 			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
 		end
 	end
-	return 0
 end
 
 ---[SERVER]
@@ -99,11 +98,5 @@ end
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
 function SheetAbilityData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
-	local nextValue = self:GetValue(character) + amount
-	if not isClient then
-		return SheetManager:SetEntryValue(character, self, nextValue, skipListenerInvoke, skipSync)
-	else
-		SheetManager:RequestValueChange(self, character, nextValue)
-	end
-	return false
+	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
 end

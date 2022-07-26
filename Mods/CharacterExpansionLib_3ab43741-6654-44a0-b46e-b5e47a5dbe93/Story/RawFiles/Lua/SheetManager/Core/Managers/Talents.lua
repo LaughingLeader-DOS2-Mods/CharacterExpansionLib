@@ -1,6 +1,6 @@
 local ts = Classes.TranslatedString
 
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---@alias TalentRequirementCheckCallback fun(talentId:string, player:EclCharacter):boolean
 
@@ -16,7 +16,6 @@ SheetManager.Talents = {
 	HiddenCount = {},
 	Data = {}
 }
-SheetManager.Talents.__index = SheetManager.Talents
 
 if not TalentManager then
 	TalentManager = SheetManager.Talents
@@ -662,8 +661,8 @@ function SheetManager.Talents.CanAddTalent(talentId, hasTalent)
 end
 
 if Vars.DebugMode then
-	if isClient then
-		RegisterListener("LuaReset", function()
+	if _ISCLIENT then
+		Events.LuaReset:Subscribe(function(e)
 			if not Vars.ControllerEnabled then
 
 			else
@@ -739,7 +738,7 @@ function SheetManager.Talents.LoadRequirements()
 	end
 end
 
-if isClient then
+if _ISCLIENT then
 
 ---@private
 function SheetManager.Talents.HideTalents(uiType)

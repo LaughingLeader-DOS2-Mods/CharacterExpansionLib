@@ -191,7 +191,7 @@ function SheetManager:RegisterVisibilityListener(id, callback)
 	end
 end
 
----@param entry SheetStatData|SheetAbilityData|SheetTalentData
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
 ---@param character EclCharacter
 ---@param defaultValue boolean
 ---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
@@ -222,7 +222,7 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 	return bResult
 end
 
----@param entry SheetStatData|SheetAbilityData|SheetTalentData
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
 ---@param character EclCharacter
 ---@param defaultValue boolean
 ---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
@@ -253,7 +253,7 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 	return bResult
 end
 
----@param entry SheetStatData|SheetAbilityData|SheetTalentData
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
 ---@param character EclCharacter
 ---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
 ---@param isCharacterCreation boolean|nil

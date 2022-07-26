@@ -1,7 +1,19 @@
 if SheetManager.Config == nil then
 	SheetManager.Config = {}
 end
-SheetManager.Config.Calls = {
+
+SheetManager.Config.CustomCallToTooltipType = {
+	showAbilityTooltipCustom = "Ability",
+	showTalentTooltipCustom = "Talent",
+	showStatTooltipCustom = "Stat",
+	showCustomStatTooltip = "Custom",
+	selectAbilityCustom = "Ability",
+	selectTalentCustom = "Talent",
+	selectStatCustom = "PrimaryStat",
+	selectSecStatCustom = "SecondaryStat",
+}
+
+local customCalls = {
 	Tooltip = {
 		Ability = "showAbilityTooltipCustom",
 		Talent = "showTalentTooltipCustom",
@@ -27,7 +39,9 @@ SheetManager.Config.Calls = {
 	}
 }
 
-SheetManager.Config.BaseCalls = {
+SheetManager.Config.Calls = customCalls
+
+local baseCalls = {
 	Tooltip = {
 		Ability = "showAbilityTooltip",
 		Talent = "showTalentTooltip",
@@ -53,7 +67,9 @@ SheetManager.Config.BaseCalls = {
 	}
 }
 
-SheetManager.Config.BaseCreationCalls = {
+SheetManager.Config.BaseCalls = baseCalls
+
+local baseCreationCalls = {
 	Tooltip = {
 		Ability = "showAbilityTooltip",
 		Talent = "showTalentTooltip",
@@ -76,3 +92,5 @@ SheetManager.Config.BaseCreationCalls = {
 		Stat = "plusAttribute",
 	}
 }
+
+SheetManager.Config.BaseCreationCalls = baseCreationCalls

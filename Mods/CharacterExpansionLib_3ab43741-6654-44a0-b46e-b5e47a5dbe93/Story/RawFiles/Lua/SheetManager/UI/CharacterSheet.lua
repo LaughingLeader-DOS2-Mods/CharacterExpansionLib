@@ -655,7 +655,7 @@ function CharacterSheet.Update(ui, method, params)
 	end
 
 	if updateTargets.CustomStats or this.stats_mc.currentOpenPanel == 8 then
-		CustomStatSystem.Update(ui, method, this)
+		SheetManager.CustomStats.UI(ui, method, this)
 		targetsUpdated.CustomStats = true
 	end
 end
@@ -764,13 +764,25 @@ local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
 					this.setupSecondaryStatsButtons(mc.statID,false,false,false)
 				end
 			end
+			if isCustom then
+				local stat = SheetManager:GetEntryByGeneratedID(statID, mc.Type)
+				if stat then
+					SheetManager.Events.OnEntryAddedToUI:Invoke({
+						ID = stat.ID,
+						EntryType = stat.Type,
+						Stat = stat,
+						MovieClip = mc,
+						Character = GameHelpers.Client.GetCharacterSheetCharacter(this),
+						UI = ui,
+						Root = this,
+						UIType = ui.Type,
+					})
+				end
+			end
 		end
 	end
 end
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
-
-Ext.RegisterUITypeCall(Data.UIType.characterSheet, "plusCustomStat", function(...) CustomStatSystem:OnStatPointAdded(...) end, "After")
-Ext.RegisterUITypeCall(Data.UIType.characterSheet, "minusCustomStat", function(...) CustomStatSystem:OnStatPointRemoved(...) end, "After")
 
 local function OnCharacterSelected(wrapper, ui, event, doubleHandle)
 	if doubleHandle and not GameHelpers.Math.IsNaN(doubleHandle) and doubleHandle ~= 0 then
@@ -803,9 +815,10 @@ end
 
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param character EclCharacter
-function CharacterSheet.UpdateEntry(entry, character, value, this)
+---@param value integer|boolean
+function CharacterSheet.UpdateEntry(entry, character, value)
 	---@type CharacterSheetMainTimeline
-	local this = this or CharacterSheet.Root
+	local this = CharacterSheet.Root
 	if this and this.isExtended then
 		character = character or CharacterSheet.GetCharacter()
 		value = value or entry:GetValue(character)
@@ -814,8 +827,7 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 		local defaultCanAdd = ((entry.UsePoints and points > 0) or isGM)
 		local defaultCanRemove = entry.UsePoints and isGM
 
-		this = this.stats_mc
-		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this)
+		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this.stats_mc)
 		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
 		if arr and mc then
 			local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
@@ -854,24 +866,31 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 				mc.bullet_mc.gotoAndStop(this.getTalentStateFrame(talentState))
 
 				if not Vars.ControllerEnabled then
-					this.talentHolder_mc.list.positionElements()
+					this.stats_mc.talentHolder_mc.list.positionElements()
 				else
-					this.mainpanel_mc.stats_mc.talents_mc.updateDone()
+					this.stats_mc.mainpanel_mc.stats_mc.talents_mc.updateDone()
 				end
 			elseif entry.StatType == SheetManager.StatType.Custom then
-				--TODO Refactor into general SheetManager functions
-				local ui = CharacterSheet.Instance
-				local visible = CustomStatSystem:GetStatVisibility(ui, entry.Double, entry, character)
+				local visible = true
+				--[[ ---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+				local invokeResult = SheetManager.Events.CanChangeEntry:Invoke({
+					EntryType = entry.Type,
+					ID = entry.ID,
+					Value = entry:GetValue(character),
+					Character = character,
+					Stat = entry,
+					Result = visible,
+					Action = "Visibility",
+				})
+				if invokeResult.ResultCode ~= "Error" then
+					visible = invokeResult.Args.Result ~= false
+				end ]]
 				if visible then
-					--local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
-					local plusVisible = CustomStatSystem:GetCanAddPoints(ui, entry.Double, character, entry)
-					local minusVisible = CustomStatSystem:GetCanRemovePoints(ui, entry.Double, character, entry)
-
 					mc.am = value
 
 					if entry.DisplayMode == "Percentage" then
 						mc.setTextValue(string.format("%s%%%s", math.floor(value), entry.Suffix or ""))
-					elseif value > CustomStatSystem.MaxVisibleValue then
+					elseif value > 999 then -- Values greater than this are truncated visually in the UI
 						mc.setTextValue(string.format("%s%s", StringHelpers.GetShortNumberString(value), entry.Suffix or ""))
 					end
 
@@ -885,9 +904,10 @@ function CharacterSheet.UpdateEntry(entry, character, value, this)
 	end
 end
 
-SheetManager:RegisterEntryChangedListener("All", function(id, entry, character, lastValue, value, isClientSide)
-	----fprint(LOGLEVEL.DEFAULT, "[SheetManager:EntryValueChanged] id(%s) entry(%s) character(%s) last(%s) current(%s) isClientSide(%s)", id, entry, GameHelpers.GetObjectID(character), lastValue, value, isClientSide)
-	CharacterSheet.UpdateEntry(entry, character, value)
+SheetManager.Events.OnEntryChanged:Subscribe(function (e)
+	if CharacterSheet.Visible then
+		CharacterSheet.UpdateEntry(e.Stat, e.Character, e.Value)
+	end
 end)
 
 function CharacterSheet.UpdateAllEntries()
@@ -954,28 +974,22 @@ function CharacterSheet.UpdateAllEntries()
 					else
 						this.mainpanel_mc.stats_mc.talents_mc.updateDone()
 					end
-				elseif entry.StatType == SheetManager.StatType.Custom then
-					--TODO Refactor into general SheetManager functions
-					local ui = CharacterSheet.Instance
-					local visible = CustomStatSystem:GetStatVisibility(ui, entry.Double, entry, character)
-					if visible then
-						local groupId = CustomStatSystem:GetCategoryGroupId(entry.Category, entry.Mod)
-						local plusVisible = CustomStatSystem:GetCanAddPoints(ui, entry.Double, character, entry)
-						local minusVisible = CustomStatSystem:GetCanRemovePoints(ui, entry.Double, character, entry)
+				elseif entry.StatType == "Custom" then
+					--local groupId = SheetManager.CustomStats:GetCategoryGroupId(entry.Category, entry.Mod)
+					---@cast value integer
 
-						mc.setValue(value)
+					mc.setValue(value)
 
-						if entry.DisplayMode == "Percentage" then
-							mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
-						elseif value > CustomStatSystem.MaxVisibleValue then
-							mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
-						end
-
-						mc.plus_mc.visible = plusVisible
-						mc.minus_mc.visible = minusVisible
-						mc.edit_mc.visible = not mc.isCustom and isGM
-						mc.delete_mc.visible = not mc.isCustom and isGM
+					if entry.DisplayMode == "Percentage" then
+						mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
+					elseif value > 999 then
+						mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
 					end
+
+					mc.plus_mc.visible = plusVisible
+					mc.minus_mc.visible = minusVisible
+					mc.edit_mc.visible = not mc.isCustom and isGM
+					mc.delete_mc.visible = not mc.isCustom and isGM
 				end
 			end
 		end
@@ -983,14 +997,17 @@ function CharacterSheet.UpdateAllEntries()
 end
 
 if Vars.DebugMode then
-	RegisterListener("BeforeLuaReset", function()
-		local ui = CharacterSheet.Instance
-		if ui then
-			CharacterSheet.Instance:ExternalInterfaceCall("closeCharacterUIs")
-			CharacterSheet.Instance:ExternalInterfaceCall("hideUI")
+	Events.BeforeLuaReset:Subscribe(function(e)
+		if CharacterSheet.Visible then
+			local ui = CharacterSheet.Instance
+			if ui then
+				ui:ExternalInterfaceCall("closeCharacterUIs")
+				ui:ExternalInterfaceCall("hideUI")
+			end
 		end
 	end)
-	RegisterListener("LuaReset", function()
+
+	Events.LuaReset:Subscribe(function(e)
 		local this = CharacterSheet.Root
 		if this then
 			if not Vars.ControllerEnabled then
@@ -1026,19 +1043,18 @@ Input.RegisterListener("ToggleCraft", function(event, pressed, id, keys, control
 		if not this then
 			return
 		end
-		Ext.Print("Toggling GM mode in character sheet: ", not this.isGameMasterChar)
 		if this.isGameMasterChar then
+			local character = Client:GetCharacter()
 			this.setGameMasterMode(false, false, false)
 			CharacterSheet.UpdateAllEntries()
 			Ext.PostMessageToServer("LeaderLib_RefreshCharacterSheet", Client.Character.UUID)
 
-			this.setAvailableStatPoints(Client.Character.Points.Attribute)
-			this.setAvailableCombatAbilityPoints(Client.Character.Points.Ability)
-			this.setAvailableCivilAbilityPoints(Client.Character.Points.Civil)
-			this.setAvailableTalentPoints(Client.Character.Points.Talent)
-			if Mods.CharacterExpansionLib then
-				this.setAvailableCustomStatPoints(Mods.CharacterExpansionLib.CustomStatSystem:GetTotalAvailablePoints())
-			end
+			local points = Client.Character.Points
+			this.setAvailableStatPoints(points.Attribute)
+			this.setAvailableCombatAbilityPoints(points.Ability)
+			this.setAvailableCivilAbilityPoints(points.Civil)
+			this.setAvailableTalentPoints(points.Talent)
+			this.setAvailableCustomStatPoints(SheetManager.CustomStats:GetTotalAvailablePoints(character))
 		else
 			this.setGameMasterMode(true, true, false)
 			CharacterSheet.UpdateAllEntries()

@@ -28,9 +28,9 @@ function Import(targetModTable)
 	Mods.LeaderLib.Import(targetModTable, Mods.CharacterExpansionLib)
 end
 
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
-if isClient then
+if _ISCLIENT then
 	listeners.SetCharacterCreationOriginSkills = {
 		---@private
 		---@type SetCharacterCreationOriginSkillsCallback[]
@@ -126,7 +126,7 @@ local function CheckOsiToolsConfig()
 	end
 end
 
-RegisterListener("LuaReset", function()
+Events.LuaReset:Subscribe(function(e)
 	--Mods.LeaderLib.Vars.Print.UI = true
 	--CheckOsiToolsConfig()
 end)

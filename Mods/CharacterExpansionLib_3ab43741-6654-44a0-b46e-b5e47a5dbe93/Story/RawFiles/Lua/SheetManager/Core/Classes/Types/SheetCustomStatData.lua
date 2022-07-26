@@ -88,7 +88,7 @@ function SheetCustomStatData.SetDefaults(data)
 			end
 		end
 	end
-	if not CustomStatSystem:GMStatsEnabled() then
+	if not SheetManager.CustomStats:GMStatsEnabled() then
 		data.GeneratedID = ID_MAP
 		ID_MAP = ID_MAP + 1
 	end
@@ -120,15 +120,7 @@ Classes.UnregisteredCustomStatData = {
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
 ---@return integer
 function SheetCustomStatData:GetValue(character)
-	if type(character) == "userdata" then
-		return CustomStatSystem:GetStatValueForCharacter(character, self) or 0
-	else
-		character = Ext.GetCharacter(character)
-		if character then
-			return CustomStatSystem:GetStatValueForCharacter(character, self) or 0
-		end
-	end
-	return 0
+	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character)) or 0
 end
 
 ---@param character UUID|NETID|EsvCharacter|EclCharacter
@@ -148,19 +140,23 @@ local STAT_VALUE_MAX = 2147483647
 ---[SERVER]
 ---@param character EsvCharacter|string|number
 ---@param value integer
-function SheetCustomStatData:SetValue(character, value)
+---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
+---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
+function SheetCustomStatData:SetValue(character, value, skipListenerInvoke, skipSync)
 	if value > STAT_VALUE_MAX then
 		value = STAT_VALUE_MAX
 	end
-	return CustomStatSystem:SetStat(character, self, value)
+	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
 end
 
 ---[SERVER]
 ---Adds an amount to the value. Can be negative.
 ---@param character EsvCharacter|string|number
 ---@param amount integer
-function SheetCustomStatData:ModifyValue(character, amount)
-	return self:SetValue(character, self:GetValue(character) + amount)
+---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
+---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
+function SheetCustomStatData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
+	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
 end
 
 ---[SERVER]
@@ -168,18 +164,24 @@ end
 ---@param amount integer
 function SheetCustomStatData:AddAvailablePoints(character, amount)
 	assert(isClient == false, string.format("[SheetCustomStatData:AddAvailablePoints(%s, %s, %s)] [WARNING] - This function is server-side only!", self.ID, character, amount))
-	return SheetManager.CustomStats:AddAvailablePoints(character, self, amount)
+	return SheetManager:ModifyAvailablePointsForEntry(self, character, amount)
+end
+
+---Get the PointID for this stat.  
+---@return string
+function SheetCustomStatData:GetAvailablePointsID()
+	if not StringHelpers.IsNullOrWhitespace(self.PointID) then
+		return self.PointID
+	else
+		return self.ID
+	end
 end
 
 ---Get the amount of available points for this stat's PointID or ID for a specific character.
 ---@param character EsvCharacter|EclCharacter|UUID|NETID
 ---@return integer
 function SheetCustomStatData:GetAvailablePoints(character)
-	if not StringHelpers.IsNullOrWhitespace(self.PointID) then
-		return SheetManager:GetAvailablePoints(character, SheetManager.StatType.Custom, self.PointID)
-	else
-		return SheetManager:GetAvailablePoints(character, SheetManager.StatType.Custom, self.ID)
-	end
+	return SheetManager:GetAvailablePoints(character, SheetManager.StatType.Custom, self:GetAvailablePointsID())
 end
 
 ---@protected

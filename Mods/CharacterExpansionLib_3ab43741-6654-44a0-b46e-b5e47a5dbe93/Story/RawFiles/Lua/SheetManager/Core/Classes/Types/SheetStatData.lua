@@ -1,4 +1,4 @@
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---@class SheetStatData:SheetBaseData
 local SheetStatData = {
@@ -109,13 +109,7 @@ end
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
 function SheetStatData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
-	local nextValue = self:GetValue(character) + amount
-	if not isClient then
-		return SheetManager:SetEntryValue(self, character, nextValue, skipListenerInvoke, skipSync)
-	else
-		SheetManager:RequestValueChange(self, character, nextValue)
-	end
-	return false
+	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
 end
 
 Classes.SheetStatData = SheetStatData

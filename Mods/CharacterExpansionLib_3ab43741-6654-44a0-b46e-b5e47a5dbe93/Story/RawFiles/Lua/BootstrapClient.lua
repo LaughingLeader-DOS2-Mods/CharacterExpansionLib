@@ -63,7 +63,7 @@ Ext.RegisterConsoleCommand("contextRollTest", function()
             end
         end)
         
-        UI.ContextMenu.Register.OpeningListener(function(contextMenu, x, y)
+        --[[ UI.ContextMenu.Register.OpeningListener(function(contextMenu, x, y)
             if Game.Tooltip.RequestTypeEquals("CustomStat") and Game.Tooltip.IsOpen() then
                 ---@type TooltipCustomStatRequest
                 local request = Game.Tooltip.GetCurrentOrLastRequest()
@@ -78,7 +78,7 @@ Ext.RegisterConsoleCommand("contextRollTest", function()
                     CustomStatSystem:RequestStatChange(statId, characterId, Ext.Random(1,10), modId)
                 end, "<font color='#33AA33'>Roll</font>")
             end
-        end)
+        end) ]]
         
         UI.ContextMenu.Register.EntryClickedListener(function(...)
             --fprint(LOGLEVEL.DEFAULT, "[ContextMenu.EntryClickedListener] %s", Lib.inspect({...}))

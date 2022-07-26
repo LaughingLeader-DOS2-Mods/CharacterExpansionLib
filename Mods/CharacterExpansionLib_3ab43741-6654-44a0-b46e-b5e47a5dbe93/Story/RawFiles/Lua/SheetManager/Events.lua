@@ -47,6 +47,21 @@ _EVENTS.OnEntryChanged = Classes.SubscribableEvent:Create("SheetManager.OnEntryC
 	ArgsKeyOrder = {"ID", "Stat", "Character", "LastValue", "Value", "IsClient"}
 })
 
+---@class SheetManagerOnAvailablePointsChangedEventArgs
+---@field EntryType SheetEntryDataType
+---@field ID string
+---@field Stat AnyStatEntryDataType
+---@field Character EclCharacter
+---@field LastValue integer
+---@field Value integer
+
+---Called available points change.  
+---🔨🔧**Server/Client**🔧🔨   
+---@type LeaderLibSubscribableEvent<SheetManagerOnAvailablePointsChangedEventArgs>
+_EVENTS.OnAvailablePointsChanged = Classes.SubscribableEvent:Create("SheetManager.OnAvailablePointsChanged", {
+	ArgsKeyOrder = {"ID", "Stat", "Character", "LastValue", "Value"}
+})
+
 if _ISCLIENT then
 	---@class SheetManagerCanChangeEntryBaseEventArgs
 	---@field ID string
@@ -110,6 +125,23 @@ if _ISCLIENT then
 	---@type LeaderLibSubscribableEvent<SheetManagerOnEntryUpdatingAnyTypeEventArgs>
 	_EVENTS.OnEntryUpdating = Classes.SubscribableEvent:Create("SheetManager.OnEntryUpdating", {
 		ArgsKeyOrder = {"ID", "Stat", "Character"}
+	})
+
+	---@class SheetManagerOnEntryAddedToUIEventArgs
+	---@field EntryType SheetEntryDataType
+	---@field ID string
+	---@field Stat AnyStatEntryDataType
+	---@field Character EclCharacter
+	---@field MovieClip FlashMovieClip
+	---@field UI UIObject
+	---@field Root FlashMainTimeline
+	---@field UIType integer
+
+	---Called when a visible sheet entry is added to the UI.  
+	---🔧**Client-Only**🔧  
+	---@type LeaderLibSubscribableEvent<SheetManagerOnEntryAddedToUIEventArgs>
+	_EVENTS.OnEntryAddedToUI = Classes.SubscribableEvent:Create("SheetManager.OnEntryAddedToUI", {
+		ArgsKeyOrder = {"ID", "Stat", "Character", "MovieClip"}
 	})
 end
 
