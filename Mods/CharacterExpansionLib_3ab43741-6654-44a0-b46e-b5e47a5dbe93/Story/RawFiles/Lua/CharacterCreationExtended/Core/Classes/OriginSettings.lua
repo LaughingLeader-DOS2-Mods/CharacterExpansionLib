@@ -52,7 +52,7 @@ function OriginSettings.SetDefaults(data)
 	end
 end
 
----@param character EsvCharacter|EclCharacter
+---@param character CharacterParam
 function OriginSettings:ApplySettings(character)
 	local isInCC = SheetManager.IsInCharacterCreation(character)
 	if self.SkillSets then

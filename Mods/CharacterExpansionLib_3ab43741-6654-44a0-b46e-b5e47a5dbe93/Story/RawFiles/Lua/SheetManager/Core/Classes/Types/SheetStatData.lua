@@ -90,13 +90,13 @@ function SheetStatData.SetDefaults(data)
 	end
 end
 
----@param character UUID|NETID|EsvCharacter|EclCharacter
+---@param character CharacterParam
 ---@return integer
 function SheetStatData:GetValue(character)
 	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character)) or 0
 end
 
----@param character EsvCharacter|EclCharacter|string|number
+---@param character CharacterParam
 ---@param value integer
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
@@ -104,7 +104,7 @@ function SheetStatData:SetValue(character, value, skipListenerInvoke, skipSync)
 	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
 end
 
----@param character EsvCharacter|EclCharacter|string|number
+---@param character CharacterParam
 ---@param amount integer
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.

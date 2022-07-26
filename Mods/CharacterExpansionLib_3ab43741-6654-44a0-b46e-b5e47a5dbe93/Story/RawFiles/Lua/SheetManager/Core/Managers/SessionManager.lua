@@ -27,7 +27,7 @@ local function ErrorMessage(prefix, txt, ...)
 end
 
 if not isClient then
-	---@param character EsvCharacter|EclCharacter|UUID|NETID
+	---@param character CharacterParam
 	---@param respec boolean
 	---@param skipSync boolean|nil
 	function SessionManager:CreateSession(character, respec, skipSync)
@@ -168,7 +168,7 @@ else
 	end)
 end
 
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@param skipSync ?boolean
 function SessionManager:ClearSession(character, skipSync)
 	if not isClient then
@@ -184,7 +184,7 @@ function SessionManager:ClearSession(character, skipSync)
 end
 
 ---For reseting session data, such as when the preset changes.
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@param skipSync ?boolean
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
@@ -217,7 +217,7 @@ if not isClient then
 	end)
 end
 
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
 	if isClient then
@@ -263,7 +263,7 @@ function SessionManager:ApplySession(character)
 	SessionManager:ClearSession(character)
 end
 
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@return CharacterCreationSessionData
 function SessionManager:GetSession(character)
 	character = GameHelpers.GetCharacter(character)
@@ -280,7 +280,7 @@ SessionManager.CharacterCreationWizard = CharacterCreationWizard
 
 ---Creates a table that can be used to get a current value of a session, that falls back to the character's Stats otherwise.
 ---This is mainly used when the UI builds the list of entries, for the character sheet or character creation UIs.
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@return StatCharacter
 function SessionManager:CreateCharacterSessionMetaTable(character)
 	local character = GameHelpers.GetCharacter(character)

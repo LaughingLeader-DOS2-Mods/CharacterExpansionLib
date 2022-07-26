@@ -119,13 +119,13 @@ Classes.UnregisteredCustomStatData = {
 	end
 }
 
----@param character UUID|NETID|EsvCharacter|EclCharacter
+---@param character CharacterParam
 ---@return integer
 function SheetCustomStatData:GetValue(character)
 	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character)) or 0
 end
 
----@param character UUID|NETID|EsvCharacter|EclCharacter
+---@param character CharacterParam
 ---@return integer|boolean Returns false if it's never been set.
 function SheetCustomStatData:GetLastValue(character)
 	local characterId = character
@@ -180,7 +180,7 @@ function SheetCustomStatData:GetAvailablePointsID()
 end
 
 ---Get the amount of available points for this stat's PointID or ID for a specific character.
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@return integer
 function SheetCustomStatData:GetAvailablePoints(character)
 	return SheetManager:GetAvailablePoints(character, SheetManager.StatType.Custom, self:GetAvailablePointsID())
@@ -188,7 +188,7 @@ end
 
 ---@protected
 ---Sets the stat's last value for a character.
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 function SheetCustomStatData:UpdateLastValue(character)
 	local characterId = GameHelpers.GetObjectID(character)
 	local value = self:GetValue(characterId)

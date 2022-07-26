@@ -105,7 +105,7 @@ end
 
 ---Checks if an entry with the provided ID has the provided value.
 ---@param id string
----@param character EsvCharacter|EclCharacter|UUID|NETID
+---@param character CharacterParam
 ---@param value integer|boolean
 ---@param mod string|nil
 ---@param statType SheetEntryType|nil Optional stat type.
@@ -145,12 +145,23 @@ function SheetManager:EntryHasValue(id, character, value, mod, statType)
 end
 
 ---Gets the builtin available points for a stat.
----@param entry SheetStatData|SheetAbilityData|SheetTalentData
----@param character EsvCharacter|EclCharacter|UUID|NETID
----@param clientCharacterCreationPoints ?table If in CC, pass this from Ext.UI.GetCharacterCreationWizard
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
+---@param character CharacterParam
+---@param clientCharacterCreationPoints table|nil If in CC, pass this from Ext.UI.GetCharacterCreationWizard
 ---@return integer
 function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character, clientCharacterCreationPoints)
 	local entryType = entry.StatType
+
+	local characterId = GameHelpers.GetObjectID(character)
+
+	if entryType == "Custom" then
+		if SheetManager.CustomAvailablePoints[characterId] then
+			local pointID = entry:GetAvailablePointsID()
+			return SheetManager.CustomAvailablePoints[characterId][pointID] or 0
+		end
+		return 0
+	end
+
 	local isCivil = entryType == "Ability" and entry.IsCivil
 
 	if not clientCharacterCreationPoints then
@@ -182,7 +193,7 @@ function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character, client
 	return 0
 end
 
----@param characterId EsvCharacter|EclCharacter|UUID|NETID|ObjectHandle
+---@param characterId CharacterParam
 ---@param pointType AvailablePointsType
 ---@param customStatPointsID string|nil If pointType is "Custom", this is the point ID.
 ---@param isCharacterCreation ?boolean

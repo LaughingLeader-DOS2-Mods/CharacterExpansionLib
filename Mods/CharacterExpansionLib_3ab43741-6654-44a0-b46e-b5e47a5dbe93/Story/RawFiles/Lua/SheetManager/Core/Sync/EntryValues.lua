@@ -268,13 +268,8 @@ else
 					modifyPointsBy = stat:GetValue(characterId) ~= true and -1 or 1
 				end
 				if modifyPointsBy ~= 0 then
-					local points = 0
-					if stat.StatType ~= "Custom" then
-						points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId, availablePoints)
-					else
-						points = SheetManager:GetAvailablePoints(characterId, "Custom", stat:GetAvailablePointsID())
-					end
 					if modifyPointsBy < 0 then
+						local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, characterId, availablePoints)
 						if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy, availablePoints) then
 							SheetManager:SetEntryValue(stat, characterId, value, isInCharacterCreation, true)
 							return true,availablePoints

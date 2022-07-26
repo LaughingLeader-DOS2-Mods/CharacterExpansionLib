@@ -2,7 +2,7 @@ local isClient = Ext.IsClient()
 
 if SheetManager.Save == nil then SheetManager.Save = {} end
 
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 function SheetManager.IsInCharacterCreation(characterId)
 	characterId = GameHelpers.GetObjectID(characterId)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
@@ -39,7 +39,7 @@ function SheetManager.IsInCharacterCreation(characterId)
 end
 
 ---Callback for when a character exits character creation, for applying pending changes, if any.
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 ---@param applyChanges boolean
 function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	local player = GameHelpers.GetCharacter(characterId)

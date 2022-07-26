@@ -82,7 +82,7 @@ end
 
 ---@param txt string
 ---@param forceCheckForStringKey boolean|nil
----@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+---@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 local function FormatText(txt, forceCheckForStringKey, character)
 	if forceCheckForStringKey or string.find(txt, "_", 1, true) then
 		txt = GameHelpers.GetStringKeyText(txt)
@@ -90,7 +90,7 @@ local function FormatText(txt, forceCheckForStringKey, character)
 	return GameHelpers.Tooltip.ReplacePlaceholders(txt, character)
 end
 
----@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+---@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 function SheetBaseData:GetDisplayName(character)
 	if self.DisplayName then
 		return FormatText(self.DisplayName, self.LoadStringKey, character)
@@ -98,7 +98,7 @@ function SheetBaseData:GetDisplayName(character)
 	return self.ID
 end
 
----@param character EsvCharacter|EclCharacter|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+---@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 function SheetBaseData:GetDescription(character)
 	if self.Description then
 		local text = FormatText(self.Description, self.LoadStringKey, character)
@@ -118,7 +118,7 @@ function SheetBaseData:GetDescription(character)
 	return ""
 end
 
----@param character EsvCharacter|EclCharacter
+---@param character CharacterParam
 ---@param fallback integer|boolean
 function SheetBaseData:GetBoostValue(character, fallback)
 	local character = GameHelpers.GetCharacter(character)
