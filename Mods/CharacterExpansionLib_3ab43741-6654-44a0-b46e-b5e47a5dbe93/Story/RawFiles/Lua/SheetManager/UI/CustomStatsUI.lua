@@ -54,7 +54,7 @@ function CustomStatsUI.Update(ui, method, this)
 	local isGM = GameHelpers.Client.IsGameMaster()
 	local defaultCanRemove = isGM
 	
-	if CustomStatsUI:GMStatsEnabled() then
+	if SheetManager.CustomStats:GMStatsEnabled() then
 		if client then
 			local changedStats = {NetID=client.NetID,Stats={}}
 			for stat in CustomStatsUI:GetAllStats(false,false,true) do
@@ -152,7 +152,7 @@ function CustomStatsUI.Update(ui, method, this)
 					ID = stat.ID,
 					GeneratedID = stat.GeneratedID,
 					Value = value,
-					GroupID = CustomStatsUI:GetCategoryGroupId(stat.Category, stat.Mod),
+					GroupID = SheetManager.CustomStats:GetCategoryGroupId(stat.Category, stat.Mod),
 					PlusVisible = plusVisible,
 					MinusVisible = minusVisible,
 					DisplayName = stat:GetDisplayName(),
@@ -187,7 +187,7 @@ function CustomStatsUI:SetupGroups(ui, call)
 	end
 	local miscIsVisible = SheetManager.CustomStats:GetTotalStatsInCategory(nil, true) > 0 or not SheetManager.CustomStats:HasCategories()
 	-- Group for stats without an assigned category
-	this.addGroup(CustomStatsUI.MISC_CATEGORY, miscGroupDisplayName.Value, false, miscIsVisible)
+	this.addGroup(SheetManager.CustomStats.MISC_CATEGORY, miscGroupDisplayName.Value, false, miscIsVisible)
 	for category in SheetManager.CustomStats:GetAllCategories() do
 		local isVisible = isGM or category.ShowAlways or SheetManager.CustomStats:GetTotalStatsInCategory(category.ID, true) > 0
 		this.addGroup(category.GroupId, category:GetDisplayName(), false, isVisible)
@@ -429,12 +429,6 @@ Events.LuaReset:Subscribe(function(e)
 				end
 			end
 		end
-	end
-end)
-
-Input.RegisterListener("ToggleCharacterPane", function(event, pressed, id, inputMap, controllerEnabled)
-	if not pressed then
-		CustomStatsUI:OnToggleCharacterPane()
 	end
 end)
 

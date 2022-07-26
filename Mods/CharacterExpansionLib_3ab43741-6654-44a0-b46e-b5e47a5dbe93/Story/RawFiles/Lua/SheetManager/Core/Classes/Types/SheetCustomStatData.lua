@@ -14,8 +14,8 @@ local SheetCustomStatData = {
 	Create = false,
 	---Whether this custom stat uses custom available points.
 	UsePoints = false,
-	---A category ID this stat belongs to, if any.
-	Category = "",
+	---A category ID this stat belongs to, if any. Defaults to the Miscellaneous category.
+	Category = "MISC",
 	---An ID to use for a common pool of available points.
 	PointID = "",
 	---@private
@@ -66,7 +66,7 @@ TableHelpers.AddOrUpdate(SheetCustomStatData.PropertyMap, Classes.SheetCustomSta
 
 local defaults = {
 	Create = SheetCustomStatData.Create,
-	Category = SheetCustomStatData.Category,
+	--Category = SheetCustomStatData.Category,
 	GeneratedID = SheetCustomStatData.GeneratedID,
 	PointID = SheetCustomStatData.PointID,
 	LastValue = {},
@@ -90,6 +90,9 @@ function SheetCustomStatData.SetDefaults(data)
 				data[k] = v
 			end
 		end
+	end
+	if StringHelpers.IsNullOrWhitespace(data.Category) then
+		data.Category = nil
 	end
 	if not SheetManager.CustomStats:GMStatsEnabled() then
 		data.GeneratedID = ID_MAP

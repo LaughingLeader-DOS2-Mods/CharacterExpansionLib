@@ -139,7 +139,7 @@ end
 ---@param groupId integer
 ---@return SheetCustomStatCategoryData|nil
 function CustomStats:GetCategoryByGroupId(groupId)
-	for uuid,categories in pairs(self.Categories) do
+	for uuid,categories in pairs(SheetManager.Data.CustomStatCategories) do
 		for id,category in pairs(categories) do
 			if category.GroupId == groupId then
 				return category
@@ -155,20 +155,24 @@ end
 ---@return integer
 function CustomStats:GetTotalStatsInCategory(categoryId, visibleOnly)
 	local total = 0
-	local isUnsortedCategory = StringHelpers.IsNullOrWhitespace(categoryId)
+	if StringHelpers.IsNullOrWhitespace(categoryId) then
+		categoryId = "MISC"
+	end
+	local character = _ISCLIENT and Client:GetCharacter() or GameHelpers.GetCharacter(CharacterGetHostCharacter())
 	for mod,stats in pairs(SheetManager.Data.CustomStats) do
 		for id,stat in pairs(stats) do
-			local isRegistered = not self:GMStatsEnabled() or not StringHelpers.IsNullOrWhitespace(stat.UUID)
-			local statIsVisible = isRegistered and self:GetStatVisibility(nil, stat.Double, stat) == true
-			if (not visibleOnly or (visibleOnly == true and statIsVisible))
-			and ((isUnsortedCategory and StringHelpers.IsNullOrWhitespace(stat.Category)) 
-			or stat.Category == categoryId)
-			then
+			local isRegistered = not SheetManager.CustomStats:GMStatsEnabled() or not StringHelpers.IsNullOrWhitespace(stat.UUID)
+			local visible = isRegistered
+			if visibleOnly and visible then
+				visible = SheetManager:IsEntryVisible(stat, character) == true
+			end
+			if visible and stat.Category == categoryId then
+				Ext.PrintError(categoryId, stat.ID, total)
 				total = total + 1
 			end
 		end
 	end
-	if isUnsortedCategory then
+	if categoryId == "MISC" then
 		for uuid,stat in pairs(self.UnregisteredStats) do
 			total = total + 1
 		end

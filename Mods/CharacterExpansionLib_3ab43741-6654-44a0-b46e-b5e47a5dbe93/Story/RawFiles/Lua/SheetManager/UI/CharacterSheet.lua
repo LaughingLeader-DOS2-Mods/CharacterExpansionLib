@@ -655,7 +655,7 @@ function CharacterSheet.Update(ui, method, params)
 	end
 
 	if updateTargets.CustomStats or this.stats_mc.currentOpenPanel == 8 then
-		SheetManager.CustomStats.UI(ui, method, this)
+		SheetManager.CustomStats.UI.Update(ui, method, this)
 		targetsUpdated.CustomStats = true
 	end
 end

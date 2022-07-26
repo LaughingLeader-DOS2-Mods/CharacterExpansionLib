@@ -250,7 +250,7 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 		Ext.Events.UICall:Subscribe(function (e)
 			if e.When == "Before" then
 				if blockNextPropagation and e.Function == blockNextPropagation then
-					Ext.PrintError("Blocking propagation for", blockNextPropagation)
+					--Ext.PrintError("Blocking propagation for", blockNextPropagation)
 					e:StopPropagation()
 					blockNextPropagation = nil
 					return
@@ -281,7 +281,6 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 
 		Ext.Events.UIInvoke:Subscribe(function (e)
 			if _nextTooltip and e.When == "Before" and e.UI.Type == 44 and e.Function == "addFormattedTooltip" then
-				Ext.PrintError("Creating tooltip for", Ext.DumpExport(_nextTooltip))
 				CreateTooltip(e.UI, e.Function)
 			end
 		end, {Priority=9999})

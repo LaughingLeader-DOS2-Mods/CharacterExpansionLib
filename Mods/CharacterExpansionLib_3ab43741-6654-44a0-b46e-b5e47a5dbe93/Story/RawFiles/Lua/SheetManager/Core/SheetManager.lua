@@ -159,7 +159,7 @@ local function LoadData()
 		--SheetManager.CustomStats.LoadUnregistered()
 	end
 
-	SheetManager.CustomStats.Initialize()
+	SheetManager.CustomStats._Internal.Initialize()
 
 	SheetManager.Loaded = true
 	SheetManager.Events.Loaded:Invoke({})

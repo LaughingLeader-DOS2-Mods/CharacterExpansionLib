@@ -110,7 +110,6 @@ package
 			this.text_txt.width = 64; // Wider for larger text like 33.3M
 			this.text_txt.y = 0;
 			this.text_txt.height = 24;
-			trace(this.label_txt.htmlText, tf.align);
 		}
 
 		//CharacterExpansionLib
