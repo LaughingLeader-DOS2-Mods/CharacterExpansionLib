@@ -3,7 +3,6 @@ local SheetCustomStatCategoryData = {
 	Type="SheetCustomStatCategoryData",
 	ShowAlways = false,
 	HideTotalPoints = false,
-	TooltipType = "Stat",
 	GroupId = nil,
 	Index = -1,
 }

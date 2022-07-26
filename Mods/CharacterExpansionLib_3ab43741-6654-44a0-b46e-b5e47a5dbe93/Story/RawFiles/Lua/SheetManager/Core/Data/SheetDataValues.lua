@@ -2,15 +2,15 @@ if SheetManager.Config == nil then
 	SheetManager.Config = {}
 end
 
-SheetManager.Config.CustomCallToTooltipType = {
+SheetManager.Config.CustomCallToTooltipRequestType = {
 	showAbilityTooltipCustom = "Ability",
 	showTalentTooltipCustom = "Talent",
 	showStatTooltipCustom = "Stat",
-	showCustomStatTooltip = "Custom",
+	showCustomStatTooltip = "CustomStat",
 	selectAbilityCustom = "Ability",
 	selectTalentCustom = "Talent",
-	selectStatCustom = "PrimaryStat",
-	selectSecStatCustom = "SecondaryStat",
+	selectStatCustom = "Stat",
+	selectSecStatCustom = "Stat",
 }
 
 local customCalls = {
@@ -45,13 +45,15 @@ local baseCalls = {
 	Tooltip = {
 		Ability = "showAbilityTooltip",
 		Talent = "showTalentTooltip",
-		Stat = "showStatTooltip"
+		Stat = "showStatTooltip",
+		CustomStat = "showCustomStatTooltip"
 	},
 	TooltipController = {
 		Ability = "selectAbility",
 		Talent = "selectTalent",
 		PrimaryStat = "selectStat",
 		SecondaryStat = "selectSecStat",
+		CustomStat = "selectCustomStat",
 	},
 	PointRemoved = {
 		Ability = "minusAbility",

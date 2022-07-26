@@ -44,18 +44,18 @@ end, "After")
 
 local _nextTooltip = nil
 
-local function CheckCreateTooltip(tooltipType, requestedUI, call, idOrCharacter, idOrOther, y, width, height, side)
+local function CheckCreateTooltip(requestType, requestedUI, call, idOrCharacter, idOrOther, y, width, height, side)
 	local id = idOrCharacter
 	local requestedUIType = requestedUI.Type
 	if requestedUIType == Data.UIType.characterCreation or requestedUIType == Data.UIType.characterCreation_c then
 		id = idOrOther
 	end
-	local data = SheetManager:GetEntryByGeneratedID(id, tooltipType)
+	local data = SheetManager:GetEntryByGeneratedID(id, requestType)
 	if data then
 		if not Vars.ControllerEnabled then
 			_nextTooltip = {
 				ID = id,
-				TooltipType = tooltipType,
+				RequestType = requestType,
 				UIType = requestedUI.Type,
 				X = idOrOther,
 				Y = y,
@@ -66,7 +66,7 @@ local function CheckCreateTooltip(tooltipType, requestedUI, call, idOrCharacter,
 		else
 			_nextTooltip = {
 				ID = id,
-				TooltipType = tooltipType,
+				RequestType = requestType,
 				UIType = requestedUI.Type
 			}
 		end
@@ -81,7 +81,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 		return
 	end
 	local id = _nextTooltip.ID
-	local tooltipType = _nextTooltip.TooltipType
+	local requestType = _nextTooltip.RequestType
 	local requestingUIType = _nextTooltip.UIType
 	_nextTooltip = nil
 
@@ -91,15 +91,16 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 	this.addStatusTooltip() -- Clear tooltip_array
 	this.isStatusTT = false
 
-	local data = SheetManager:GetEntryByGeneratedID(id, tooltipType)
+	local data = SheetManager:GetEntryByGeneratedID(id, requestType)
 	if this and this.tooltip_array and data then
 		local request = Game.Tooltip.RequestProcessor.CreateRequest()
 		local character = GameHelpers.Client.GetCharacterSheetCharacter(this)
-		request.Type = data.TooltipType
-		request.CharacterNetID = character.NetID
+		local tooltipType = data.TooltipType
+		request.Type = requestType
+		request.ObjectHandleDouble = Ext.UI.HandleToDouble(character.Handle)
 
 		local resolved = false
-		if tooltipType == "Ability" then
+		if requestType == "Ability" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 			this.tooltip_array[1] = data:GetDisplayName()
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.AbilityDescription
@@ -115,7 +116,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 				Game.Tooltip.PrepareIcon(ui, string.format("tt_ability_%i", data.GeneratedID), data.Icon, data.IconWidth or 128, data.IconHeight or 128)
 			end
 			resolved = true
-		elseif tooltipType == "Talent" then
+		elseif requestType == "Talent" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 			this.tooltip_array[1] = data:GetDisplayName()
 			--TalentDescription = {{"TalentId", "number"}, {"Description", "string"}, {"Requirement", "string"}, {"IncompatibleWith", "string"}, {"Selectable", "boolean"}, {"Unknown", "boolean"}},
@@ -133,7 +134,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 				Game.Tooltip.PrepareIcon(ui, string.format("tt_talent_%i", data.GeneratedID), data.Icon, data.IconWidth or 128, data.IconHeight or 128)
 			end
 			resolved = true
-		elseif tooltipType == "Stat" or tooltipType == "PrimaryStat" or tooltipType == "SecondaryStat" then
+		elseif requestType == "Stat" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 			this.tooltip_array[1] = data:GetDisplayName()
 
@@ -152,7 +153,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 
 			request.Stat = data.ID
 			resolved = true
-		elseif tooltipType == "Custom" then
+		elseif requestType == "CustomStat" then
 			---@cast data SheetCustomStatData
 			---@cast data +UnregisteredCustomStatData
 
@@ -250,12 +251,11 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 		Ext.Events.UICall:Subscribe(function (e)
 			if e.When == "Before" then
 				if blockNextPropagation and e.Function == blockNextPropagation then
-					--Ext.PrintError("Blocking propagation for", blockNextPropagation)
 					e:StopPropagation()
 					blockNextPropagation = nil
 					return
 				end
-				local t = SheetManager.Config.CustomCallToTooltipType[e.Function]
+				local t = SheetManager.Config.CustomCallToTooltipRequestType[e.Function]
 				if t then
 					local id = e.Args[1]
 					local x = e.Args[2] or 0
@@ -266,7 +266,7 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 					if CheckCreateTooltip(t, e.UI, e.Function, id,x,y,width,height,side) then
 						e:StopPropagation()
 						blockNextPropagation = SheetManager.Config.BaseCalls.Tooltip[t]
-						if t == "Custom" then
+						if t == "CustomStat" then
 							blockNextPropagation = SheetManager.Config.BaseCalls.Tooltip.Stat
 						end
 						if side then

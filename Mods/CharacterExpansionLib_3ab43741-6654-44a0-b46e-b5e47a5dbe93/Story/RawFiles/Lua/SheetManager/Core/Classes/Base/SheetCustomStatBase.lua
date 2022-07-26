@@ -3,7 +3,6 @@ local isClient = Ext.IsClient()
 ---@class SheetCustomStatBase
 local SheetCustomStatBase = {
 	Type="SheetCustomStatBase",
-	---@type TooltipType
 	TooltipType = "Stat",
 	ID = "",
 	---@type MOD_UUID

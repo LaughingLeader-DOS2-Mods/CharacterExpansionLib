@@ -47,7 +47,7 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 			return self.Data.ID_MAP.Abilities.Entries[generatedId]
 		elseif statType == "Talent" then
 			return self.Data.ID_MAP.Talents.Entries[generatedId]
-		elseif statType == "Custom" then
+		elseif statType == "Custom" or statType == "CustomStat" then
 			return self.Data.ID_MAP.CustomStats.Entries[generatedId]
 		elseif statType == "CustomCategory" then
 			return self.Data.ID_MAP.CustomStatCategories.Entries[generatedId]
