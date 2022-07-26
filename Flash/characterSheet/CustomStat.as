@@ -110,6 +110,12 @@ package
 			this.text_txt.width = 64; // Wider for larger text like 33.3M
 			this.text_txt.y = 0;
 			this.text_txt.height = 24;
+
+			//this.delete_mc.x = this.text_txt.x - 44
+			//this.minus_mc.x = this.text_txt.x - 19;
+			//this.plus_mc.x = this.text_txt.x + 33;
+			//this.minus_mc.x = this.text_txt.x - this.minus_mc.width;
+			//this.plus_mc.x = this.text_txt.x + this.text_txt.width;
 		}
 
 		//CharacterExpansionLib

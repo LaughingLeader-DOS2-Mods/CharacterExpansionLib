@@ -976,15 +976,7 @@ function CharacterSheet.UpdateAllEntries()
 					end
 				elseif entry.StatType == "Custom" then
 					--local groupId = SheetManager.CustomStats:GetCategoryGroupId(entry.Category, entry.Mod)
-					---@cast value integer
-
-					mc.setValue(value)
-
-					if entry.DisplayMode == "Percentage" then
-						mc.text_txt.htmlText = string.format("%s%%", math.floor(value))
-					elseif value > 999 then
-						mc.text_txt.htmlText = StringHelpers.GetShortNumberString(value)
-					end
+					SheetManager.CustomStats.UI:UpdateStatValue(mc, entry, character)
 
 					mc.plus_mc.visible = plusVisible
 					mc.minus_mc.visible = minusVisible

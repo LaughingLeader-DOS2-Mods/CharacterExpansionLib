@@ -239,34 +239,56 @@ function CustomStatsUI:OnUpdateDone(ui, call)
 	end
 end
 
+function CustomStatsUI:UpdateStatValue(stat_mc, stat, character)
+	local value = stat:GetValue(character)
+	stat_mc.am = value
+	--[[
+		Stat values greater than a certain amount have issues fitting into the UI, 
+		so display a small version and use the tooltip to display the full value.
+	]]
+	if stat.DisplayMode == "Percentage" then
+		stat_mc.setTextValue(string.format("%s%%", math.floor(value)))
+	else
+		if stat_mc.am > CustomStatsUI.MaxVisibleValue then
+			stat_mc.setTextValue(StringHelpers.GetShortNumberString(value))
+		else
+			stat_mc.setTextValue(tostring(value))
+		end
+	end
+
+	stat_mc.minus_mc.x = math.floor(stat_mc.text_txt.x - 26)
+	stat_mc.plus_mc.x = math.floor(stat_mc.text_txt.x + 33)
+
+	stat_mc.label_txt.htmlText = stat:GetDisplayName()
+end
+
 function CustomStatsUI:UpdateStatMovieClips()
+	if Vars.ControllerEnabled then
+		return
+	end
 	if SharedData.RegionData.State ~= REGIONSTATE.GAME or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
 		return
 	end
-	--TODO This returns nil if we try to get the character too early. It may also be the dummy.
-	local character = SheetManager.UI.CharacterSheet.GetCharacter()
+	local ui = SheetManager.UI.CharacterSheet.Instance
+	if not ui then
+		return
+	end
 	---@type CharacterSheetMainTimeline
-	local this = SheetManager.UI.CharacterSheet.Root
+	local this = ui:GetRoot()
 	if not this or this.isExtended ~= true then
 		return
 	end
 	if this then
-		if not Vars.ControllerEnabled then
-			local arr = this.stats_mc.customStats_mc.stats_array
-			for i=0,#arr-1 do
-				local cstat_mc = arr[i]
-				if cstat_mc then
-					local stat = SheetManager.CustomStats:GetStatByDouble(cstat_mc.statID)
-					if stat then
-						local value = stat:GetValue(character)
-						if value then
-							cstat_mc.setValue(value)
-						end
-					end
+		local character = Client:GetCharacter()
+		local arr = this.stats_mc.customStats_mc.stats_array
+		for i=0,#arr-1 do
+			local cstat_mc = arr[i]
+			if cstat_mc then
+				local stat = SheetManager.CustomStats:GetStatByDouble(cstat_mc.statID)
+				if stat then
+					self:UpdateStatValue(cstat_mc, stat, character)
 				end
 			end
-		else
-	
 		end
 	end
 end
@@ -365,28 +387,15 @@ function CustomStatsUI:OnStatAdded(ui, call, doubleHandle, index)
 
 	local stat_mc = this.stats_mc.customStats_mc.stats_array[index]
 	local stat = SheetManager.CustomStats:GetStatByDouble(doubleHandle)
-
 	if stat then
-		--[[
-			Stat values greater than a certain amount have issues fitting into the UI, 
-			so display a small version and use the tooltip to display the full value.
-		]]
-		if stat.DisplayMode == "Percentage" then
-			stat_mc.setTextValue(string.format("%s%%", math.floor(stat_mc.am)))
-		else
-			if stat_mc.am > self.MaxVisibleValue then
-				stat_mc.setTextValue(StringHelpers.GetShortNumberString(stat_mc.am))
-			end
-		end
-
-		stat_mc.label_txt.htmlText = stat:GetDisplayName()
-
+		local character = Client:GetCharacter()
+		self:UpdateStatValue(stat_mc, stat, character)
 		SheetManager.Events.OnEntryAddedToUI:Invoke({
 			ID = stat.ID,
 			EntryType = "SheetCustomStatData",
 			Stat = stat,
 			MovieClip = stat_mc,
-			Character = GameHelpers.Client.GetCharacterSheetCharacter(this),
+			Character = character,
 			UI = ui,
 			Root = this,
 			UIType = ui.Type,

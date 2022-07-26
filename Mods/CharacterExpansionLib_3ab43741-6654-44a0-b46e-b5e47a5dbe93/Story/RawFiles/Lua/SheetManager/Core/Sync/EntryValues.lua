@@ -287,7 +287,6 @@ else
 	end
 
 	RegisterNetListener("CEL_SheetManager_RequestValueChange", function(cmd, payload)
-		Ext.PrintError(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
 			if ProcessPointChange(data.NetID, data.ID, data.Mod, data.StatType, data.Value, data.IsGameMaster, data.IsInCharacterCreation, data.AvailablePoints) then

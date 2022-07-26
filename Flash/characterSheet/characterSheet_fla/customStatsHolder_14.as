@@ -234,9 +234,9 @@ package characterSheet_fla
 			cstat_mc.label_txt.width = 180.75;
 			cstat_mc.label_txt.height = 22.05;
 
-			cstat_mc.minus_mc.x = 183.1;
+			//cstat_mc.minus_mc.x = 183.1;
+			//cstat_mc.plus_mc.x = 235;
 			cstat_mc.minus_mc.y = 3.95;
-			cstat_mc.plus_mc.x = 235;
 			cstat_mc.plus_mc.y = 4;
 
 			cstat_mc.delete_mc.x = 136;//-58.5
