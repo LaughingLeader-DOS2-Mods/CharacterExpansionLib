@@ -252,7 +252,6 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 				end
 				local t = SheetManager.Config.CustomCallToTooltipRequestType[e.Function]
 				if t then
-					Ext.Dump(e.Args)
 					local args = {table.unpack(e.Args)}
 					local characterDouble = nil
 					if e.UI.Type == Data.UIType.characterCreation then
