@@ -2,9 +2,10 @@
 local function ActuallySetCharacterHandle(ui, call)
 	local player = Client:GetCharacter()
 	if player then
-		local doubleHandle = Ext.HandleToDouble(player.Handle)
-		ui:SetValue("characterHandle", doubleHandle)
-		ui:SetValue("charHandle", doubleHandle)
+		local doubleHandle = Ext.UI.HandleToDouble(player.Handle)
+		local this = ui:GetRoot()
+		this.characterHandle = doubleHandle
+		this.charHandle = doubleHandle
 	end
 end
 
@@ -31,12 +32,4 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.hotBar, "setPlayerHandle", UpdateSh
 Ext.RegisterUITypeInvokeListener(Data.UIType.bottomBar_c, "setPlayerHandle", UpdateSheetHandlesAfterHotbar)
 Ext.RegisterUITypeInvokeListener(Data.UIType.GMPanelHUD, "showTargetBar", function(ui, event, enabled, doubleHandle, posBtnEnabled)
 	UpdateSheetHandlesAfterHotbar(ui, event, doubleHandle)
-end)
-
-RegisterNetListener("CEL_CCStarted", function(cmd, netid)
-	-- local ui = Ext.GetUIByType(Data.UIType.characterCreation)
-	-- if ui then
-	-- 	ui:CaptureExternalInterfaceCalls()
-	-- 	ui:CaptureInvokes()
-	-- end
 end)

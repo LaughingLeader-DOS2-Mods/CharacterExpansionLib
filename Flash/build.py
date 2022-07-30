@@ -30,7 +30,7 @@ OUTPUT = DOS2DE_PUBLIC.joinpath("CharacterExpansionLib_3ab43741-6654-44a0-b46e-b
 
 targets = [
     "characterCreation",
-    "characterSheet",
+    #"characterSheet",
     # "statsPanel_c",
     # "characterCreation_c",
 ]

@@ -252,10 +252,12 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 				end
 				local t = SheetManager.Config.CustomCallToTooltipRequestType[e.Function]
 				if t then
+					Ext.Dump(e.Args)
 					local args = {table.unpack(e.Args)}
-					local requestedUIType = e.UI.Type
-					if requestedUIType == Data.UIType.characterCreation or requestedUIType == Data.UIType.characterCreation_c then
+					local characterDouble = nil
+					if e.UI.Type == Data.UIType.characterCreation then
 						--Pop the characterHandle arg so we don't go crazy
+						characterDouble = args[1]
 						table.remove(args, 1)
 					end
 					local id = args[1] or 0
@@ -270,7 +272,12 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 						if t == "CustomStat" then
 							blockNextPropagation = SheetManager.Config.BaseCalls.Tooltip.Stat
 						end
-						e.UI:ExternalInterfaceCall(blockNextPropagation, 0, x, y, width, height, side)
+						if not characterDouble then
+							e.UI:ExternalInterfaceCall(blockNextPropagation, 0, x, y, width, height, side)
+						else
+							_nextTooltip.CharacterDouble = characterDouble
+							e.UI:ExternalInterfaceCall(blockNextPropagation, characterDouble, 0, x, y, width, height, side)
+						end
 					end
 				end
 			end
@@ -283,18 +290,3 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 		end, {Priority=9999})
 	end
 end, {Priority=0})
-
--- for t,v in pairs(SheetManager.Config.Calls.Tooltip) do
--- 	local func = function(...)
--- 		CreateTooltip(t, ...)
--- 	end
--- 	Ext.RegisterUITypeCall(Data.UIType.characterSheet, v, func, "Before")
--- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation, v, func, "Before")
--- end
--- for t,v in pairs(SheetManager.Config.Calls.TooltipController) do
--- 	local func = function(...)
--- 		CreateTooltip(t, ...)
--- 	end
--- 	Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, v, func, "Before")
--- 	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
--- end

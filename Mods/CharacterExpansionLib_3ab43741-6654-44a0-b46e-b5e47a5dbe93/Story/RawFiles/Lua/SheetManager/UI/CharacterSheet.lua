@@ -1002,6 +1002,12 @@ if Vars.DebugMode then
 	Events.LuaReset:Subscribe(function(e)
 		local this = CharacterSheet.Root
 		if this then
+			local player = Client:GetCharacter()
+			if player then
+				local doubleHandle = Ext.UI.HandleToDouble(player.Handle)
+				this.characterHandle = doubleHandle
+				this.charHandle = doubleHandle
+			end
 			if not Vars.ControllerEnabled then
 				this.clearAbilities(true)
 				this.clearTalents(true)

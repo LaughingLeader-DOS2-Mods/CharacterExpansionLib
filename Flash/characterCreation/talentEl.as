@@ -72,10 +72,10 @@ package
 			}
 		}
 		
-		public function onInit(param1:MovieClip, param2:Boolean) : *
+		public function onInit(mainTimeline:MovieClip, bIsRacial:Boolean) : *
 		{
-			this.root_mc = param1;
-			this.isRacial = param2;
+			this.root_mc = mainTimeline;
+			this.isRacial = bIsRacial;
 			this.min_mc.visible = false;
 			this.plus_mc.visible = false;
 			this.text_txt.wordWrap = this.text_txt.multiline = false;

@@ -88,6 +88,7 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 	end
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	---@cast player EclCharacter
 
 	local engineValues = {}
 
@@ -120,7 +121,7 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 		if engineValues[talent.ID] ~= nil then
 			talent.HasTalent = engineValues[talent.ID]
 		end
-		talentsMC.addTalentElement(talent.ID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
+		talentsMC.addTalentElement(talent.GeneratedID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
 	end
 
 	if not Vars.ControllerEnabled then
@@ -144,6 +145,7 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 	--this.clearArray("abilityArray")
 
 	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	---@cast player EclCharacter
 	local engineValues = {}
 
 	local points = GetAvailablePoints()
@@ -179,11 +181,11 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 			ability.Value = updateData.Value
 			ability.Delta = updateData.Delta
 		end
-		abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.ID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
+		abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 
 		if updateClassContent and ability.Delta > 0 then
 			abilitiesWithDelta[#abilitiesWithDelta+1] = {
-				ID = ability.ID,
+				ID = ability.GeneratedID,
 				DisplayName = ability.DisplayName,
 				Delta = ability.Delta
 			}
@@ -223,6 +225,7 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 	--this.clearArray("abilityArray")
 
 	local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
+	---@cast player EclCharacter
 	local points = GetAvailablePoints().Attribute
 	this.availableAttributePoints = points
 
@@ -256,10 +259,10 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 			stat.Value = updateData.Value
 			stat.Delta = updateData.Delta
 		end
-		attributes_mc.addAttribute(stat.ID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
+		attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
 		if updateClassContent and stat.Delta > 0 then
 			attributesWithDelta[#attributesWithDelta+1] = {
-				ID = stat.ID,
+				ID = stat.GeneratedID,
 				DisplayName = stat.DisplayName,
 				Delta = stat.Delta
 			}
@@ -362,26 +365,17 @@ end)
 
 SheetManager.UI.CharacterCreation = CharacterCreation
 
--- RegisterListener("RegionChanged", function (region, state, levelType)
--- 	if levelType == LEVELTYPE.CHARACTER_CREATION then
--- 		local this = CharacterCreation.Root
--- 		if this then
--- 			if state ~= REGIONSTATE.ENDED then
--- 				if this.isExtended then this.isExtended = false end
--- 			else
--- 				if this.isExtended == false then this.isExtended = true end
--- 			end
--- 		end
--- 	else
--- 		CharacterCreation.IsOpen = false
--- 	end
--- end)
-
-RegisterListener("LuaReset", function ()
-	CharacterCreation.IsOpen = CharacterCreation.Root ~= nil
+Events.LuaReset:Subscribe(function (e)
+	local this = CharacterCreation.Root
+	CharacterCreation.IsOpen = this ~= nil
 	if CharacterCreation.IsOpen then
 		CharacterCreation.UpdateAvailablePoints()
-		--Ext.Dump(SessionManager.CharacterCreationWizard.GetStatsAsTable())
+		local player = Client:GetCharacter()
+		if player then
+			local doubleHandle = Ext.UI.HandleToDouble(player.Handle)
+			this.characterHandle = doubleHandle
+			this.charHandle = doubleHandle
+		end
 	end
 end)
 
