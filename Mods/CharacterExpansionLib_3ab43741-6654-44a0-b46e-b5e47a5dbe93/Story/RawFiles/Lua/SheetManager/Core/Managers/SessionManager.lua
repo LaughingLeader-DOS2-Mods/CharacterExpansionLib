@@ -296,9 +296,15 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 						return stats[k]
 					end
 				end
+				if k == "Stats" then
+					return character.Stats
+				end
 				return character.Stats[k]
 			end,
 			__newindex = function(_, k, v)
+				if k == "Stats" then
+					return
+				end
 				character.Stats[k] = v
 			end
 		})

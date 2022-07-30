@@ -44,20 +44,15 @@ end, "After")
 
 local _nextTooltip = nil
 
-local function CheckCreateTooltip(requestType, requestedUI, call, idOrCharacter, idOrOther, y, width, height, side)
-	local id = idOrCharacter
-	local requestedUIType = requestedUI.Type
-	if requestedUIType == Data.UIType.characterCreation or requestedUIType == Data.UIType.characterCreation_c then
-		id = idOrOther
-	end
+local function CheckCreateTooltip(requestType, requestedUI, call, id, x, y, width, height, side)
 	local data = SheetManager:GetEntryByGeneratedID(id, requestType)
 	if data then
 		if not Vars.ControllerEnabled then
 			_nextTooltip = {
-				ID = id,
 				RequestType = requestType,
 				UIType = requestedUI.Type,
-				X = idOrOther,
+				ID = id,
+				X = x,
 				Y = y,
 				Width = width,
 				Height = height,
@@ -65,9 +60,9 @@ local function CheckCreateTooltip(requestType, requestedUI, call, idOrCharacter,
 			}
 		else
 			_nextTooltip = {
-				ID = id,
 				RequestType = requestType,
-				UIType = requestedUI.Type
+				UIType = requestedUI.Type,
+				ID = id,
 			}
 		end
 
@@ -257,23 +252,25 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 				end
 				local t = SheetManager.Config.CustomCallToTooltipRequestType[e.Function]
 				if t then
-					local id = e.Args[1]
-					local x = e.Args[2] or 0
-					local y = e.Args[3] or 0
-					local width = e.Args[4] or 0
-					local height = e.Args[5] or 0
-					local side = e.Args[6]
-					if CheckCreateTooltip(t, e.UI, e.Function, id,x,y,width,height,side) then
+					local args = {table.unpack(e.Args)}
+					local requestedUIType = e.UI.Type
+					if requestedUIType == Data.UIType.characterCreation or requestedUIType == Data.UIType.characterCreation_c then
+						--Pop the characterHandle arg so we don't go crazy
+						table.remove(args, 1)
+					end
+					local id = args[1] or 0
+					local x = args[2] or 0
+					local y = args[3] or 0
+					local width = args[4] or 0
+					local height = args[5] or 0
+					local side = args[6] or "left"
+					if CheckCreateTooltip(t, e.UI, e.Function, id, x, y, width, height, side) then
 						e:StopPropagation()
 						blockNextPropagation = SheetManager.Config.BaseCalls.Tooltip[t]
 						if t == "CustomStat" then
 							blockNextPropagation = SheetManager.Config.BaseCalls.Tooltip.Stat
 						end
-						if side then
-							e.UI:ExternalInterfaceCall(blockNextPropagation, 0, x, y, width, height, side)
-						else
-							e.UI:ExternalInterfaceCall(blockNextPropagation, 0, x, y, width, height)
-						end
+						e.UI:ExternalInterfaceCall(blockNextPropagation, 0, x, y, width, height, side)
 					end
 				end
 			end
