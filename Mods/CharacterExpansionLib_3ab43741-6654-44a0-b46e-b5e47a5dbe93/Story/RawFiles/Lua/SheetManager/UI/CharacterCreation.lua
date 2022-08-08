@@ -121,7 +121,10 @@ function CharacterCreation.UpdateTalents(self, ui, method)
 		if engineValues[talent.ID] ~= nil then
 			talent.HasTalent = engineValues[talent.ID]
 		end
-		talentsMC.addTalentElement(talent.GeneratedID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=talent.ID, EntryType="SheetTalentData", Stat=talent, Character=player})
+		if talent.Visible then
+			talentsMC.addTalentElement(talent.GeneratedID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
+		end
 	end
 
 	if not Vars.ControllerEnabled then
@@ -181,14 +184,16 @@ function CharacterCreation.UpdateAbilities(self, ui, method)
 			ability.Value = updateData.Value
 			ability.Delta = updateData.Delta
 		end
-		abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
-
-		if updateClassContent and ability.Delta > 0 then
-			abilitiesWithDelta[#abilitiesWithDelta+1] = {
-				ID = ability.GeneratedID,
-				DisplayName = ability.DisplayName,
-				Delta = ability.Delta
-			}
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player})
+		if ability.Visible then
+			abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
+			if updateClassContent and ability.Delta > 0 then
+				abilitiesWithDelta[#abilitiesWithDelta+1] = {
+					ID = ability.GeneratedID,
+					DisplayName = ability.DisplayName,
+					Delta = ability.Delta
+				}
+			end
 		end
 	end
 
@@ -259,16 +264,19 @@ function CharacterCreation.UpdateAttributes(self, ui, method)
 			stat.Value = updateData.Value
 			stat.Delta = updateData.Delta
 		end
-		attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
-		if updateClassContent and stat.Delta > 0 then
-			attributesWithDelta[#attributesWithDelta+1] = {
-				ID = stat.GeneratedID,
-				DisplayName = stat.DisplayName,
-				Delta = stat.Delta
-			}
-		end
-		if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
-			self.Instance:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="SheetStatData", Stat=stat, Character=player})
+		if stat.Visible then
+			attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
+			if updateClassContent and stat.Delta > 0 then
+				attributesWithDelta[#attributesWithDelta+1] = {
+					ID = stat.GeneratedID,
+					DisplayName = stat.DisplayName,
+					Delta = stat.Delta
+				}
+			end
+			if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
+				self.Instance:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
+			end
 		end
 	end
 

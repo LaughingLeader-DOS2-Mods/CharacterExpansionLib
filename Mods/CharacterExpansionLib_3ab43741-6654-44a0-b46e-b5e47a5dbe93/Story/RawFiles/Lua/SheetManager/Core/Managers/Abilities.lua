@@ -252,7 +252,7 @@ if _ISCLIENT then
 						groupName = ""
 					end
 
-					---@type TalentManagerUITalentEntry
+					---@type SheetManager.AbilitiesUIEntry
 					local data = {
 						ID = id,
 						GeneratedID = Data.AbilityEnum[id],
@@ -292,7 +292,7 @@ if _ISCLIENT then
 						groupName = ""
 					end
 
-					---@type TalentManagerUITalentEntry
+					---@type SheetManager.AbilitiesUIEntry
 					local data = {
 						ID = data.ID,
 						GeneratedID = data.GeneratedID,
