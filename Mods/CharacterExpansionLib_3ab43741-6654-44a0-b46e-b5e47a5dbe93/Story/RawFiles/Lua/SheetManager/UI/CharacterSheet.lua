@@ -784,7 +784,7 @@ local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
 end
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 
-local function OnCharacterSelected(wrapper, ui, event, doubleHandle)
+local function OnCharacterSelected(wrapper, e, ui, event, doubleHandle)
 	if doubleHandle and not GameHelpers.Math.IsNaN(doubleHandle) and doubleHandle ~= 0 then
 		local handle = Ext.DoubleToHandle(doubleHandle)
 		if handle then

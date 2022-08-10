@@ -81,7 +81,7 @@ end
 
 ---@private
 ---@param ui UIObject
-function CharacterCreation.UpdateTalents(self, ui, method)
+function CharacterCreation.UpdateTalents(self, e, ui, method)
 	local this = self.Root
 	if not this or not this.isExtended then
 		return
@@ -140,7 +140,7 @@ CharacterCreation:RegisterInvokeListener("updateTalents", CharacterCreation.Upda
 
 ---@private
 ---@param ui UIObject
-function CharacterCreation.UpdateAbilities(self, ui, method)
+function CharacterCreation.UpdateAbilities(self, e, ui, method)
 	local this = self.Root
 	if not this or not this.isExtended then
 		return
@@ -222,7 +222,7 @@ CharacterCreation:RegisterInvokeListener("updateAbilities", CharacterCreation.Up
 
 ---@private
 ---@param ui UIObject
-function CharacterCreation.UpdateAttributes(self, ui, method)
+function CharacterCreation.UpdateAttributes(self, e, ui, method)
 	local this = CharacterCreation.Root
 	if not this or not this.isExtended then
 		return
@@ -301,7 +301,7 @@ end
 
 CharacterCreation:RegisterInvokeListener("updateAttributes", CharacterCreation.UpdateAttributes, "Before", "All")
 
-function CharacterCreation.Started(self, ui, call)
+function CharacterCreation.Started(self, e, ui, call)
 	CharacterCreation.IsOpen = true
 	if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
 		local this = self.Root
@@ -331,7 +331,7 @@ function CharacterCreation.CreationDone(self, ui, method, startText, backText, v
 end
 --CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "After", "All")
 
-CharacterCreation:RegisterCallListener("selectOption", function(self, ui, call)
+CharacterCreation:RegisterCallListener("selectOption", function(self, e, ui, call)
 	local this = ui:GetRoot()
 	if not this then
 		return
