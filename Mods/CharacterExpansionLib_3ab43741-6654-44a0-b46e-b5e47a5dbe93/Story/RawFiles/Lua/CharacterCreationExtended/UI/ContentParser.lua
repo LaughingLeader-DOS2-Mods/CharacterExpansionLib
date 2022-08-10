@@ -135,7 +135,7 @@ end
 
 ---@param self CharacterCreationWrapper
 ---@param ui UIObject
-local function OnUpdateContent(self, ui, event)
+local function OnUpdateContent(self, e, ui, event)
 	if not SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
 		return
 	end
@@ -180,7 +180,7 @@ local activeCustomDraws = {}
 
 ---@param self CharacterCreationWrapper
 ---@param ui UIObject
-local function SetSkills(self, ui, event)
+local function SetSkills(self, e, ui, event)
 	if not SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
 		return
 	end

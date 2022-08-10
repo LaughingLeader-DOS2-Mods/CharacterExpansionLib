@@ -68,7 +68,7 @@ local function GetAvailablePoints()
 	return Ext.UI.GetCharacterCreationWizard().AvailablePoints
 end
 
--- CharacterCreation.Register:Call("toggleTalent", function (self, ui, call, statID)
+-- CharacterCreation.Register:Call("toggleTalent", function (self, e, ui, call, statID)
 -- 	local this = ui:GetRoot()
 -- 	if this and this.isExtended then
 -- 		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
@@ -313,7 +313,7 @@ end
 
 CharacterCreation.Register:Call("characterCreationStarted", CharacterCreation.Started, "Before", "All")
 
-function CharacterCreation.CreationDone(self, ui, method, startText, backText, visible)
+function CharacterCreation.CreationDone(self, e, ui, method, startText, backText, visible)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
 		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
 	end
