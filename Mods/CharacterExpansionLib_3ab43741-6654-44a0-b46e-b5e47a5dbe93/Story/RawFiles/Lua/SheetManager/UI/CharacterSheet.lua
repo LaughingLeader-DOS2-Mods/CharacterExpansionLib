@@ -796,8 +796,8 @@ local function OnCharacterSelected(wrapper, e, ui, event, doubleHandle)
 	end
 end
 
-CharacterSheet:RegisterInvokeListener("selectCharacter", OnCharacterSelected, "After", "Keyboard")
-CharacterSheet:RegisterInvokeListener("setPlayer", OnCharacterSelected, "After", "Controller")
+CharacterSheet.Register:Invoke("selectCharacter", OnCharacterSelected, "After", "Keyboard")
+CharacterSheet.Register:Invoke("setPlayer", OnCharacterSelected, "After", "Controller")
 
 local function getTalentStateFrame(talentState)
 	if talentState == 0 then

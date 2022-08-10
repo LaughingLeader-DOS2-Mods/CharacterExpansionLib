@@ -68,7 +68,7 @@ local function GetAvailablePoints()
 	return Ext.UI.GetCharacterCreationWizard().AvailablePoints
 end
 
--- CharacterCreation:RegisterCallListener("toggleTalent", function (self, ui, call, statID)
+-- CharacterCreation.Register:Call("toggleTalent", function (self, ui, call, statID)
 -- 	local this = ui:GetRoot()
 -- 	if this and this.isExtended then
 -- 		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
@@ -136,7 +136,7 @@ function CharacterCreation.UpdateTalents(self, e, ui, method)
 	this.CCPanel_mc.talents_mc.availablePoints_txt.htmlText = string.format("%s %i", Text.AvailableTalentPoints.Value, this.availableTalentPoints)
 end
 
-CharacterCreation:RegisterInvokeListener("updateTalents", CharacterCreation.UpdateTalents, "Before", "All")
+CharacterCreation.Register:Invoke("updateTalents", CharacterCreation.UpdateTalents, "Before", "All")
 
 ---@private
 ---@param ui UIObject
@@ -218,7 +218,7 @@ function CharacterCreation.UpdateAbilities(self, e, ui, method)
 	end
 end
 
-CharacterCreation:RegisterInvokeListener("updateAbilities", CharacterCreation.UpdateAbilities, "Before", "All")
+CharacterCreation.Register:Invoke("updateAbilities", CharacterCreation.UpdateAbilities, "Before", "All")
 
 ---@private
 ---@param ui UIObject
@@ -299,7 +299,7 @@ function CharacterCreation.UpdateAttributes(self, e, ui, method)
 	attributes_mc.freePoints_txt.htmlText = string.format("%s %i", Text.AvailableAttributePoints.Value, this.availableAttributePoints)
 end
 
-CharacterCreation:RegisterInvokeListener("updateAttributes", CharacterCreation.UpdateAttributes, "Before", "All")
+CharacterCreation.Register:Invoke("updateAttributes", CharacterCreation.UpdateAttributes, "Before", "All")
 
 function CharacterCreation.Started(self, e, ui, call)
 	CharacterCreation.IsOpen = true
@@ -311,7 +311,7 @@ function CharacterCreation.Started(self, e, ui, call)
 	end
 end
 
-CharacterCreation:RegisterCallListener("characterCreationStarted", CharacterCreation.Started, "Before", "All")
+CharacterCreation.Register:Call("characterCreationStarted", CharacterCreation.Started, "Before", "All")
 
 function CharacterCreation.CreationDone(self, ui, method, startText, backText, visible)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
@@ -329,9 +329,9 @@ function CharacterCreation.CreationDone(self, ui, method, startText, backText, v
 	-- 	end
 	-- end
 end
---CharacterCreation:RegisterInvokeListener("creationDone", CharacterCreation.CreationDone, "After", "All")
+--CharacterCreation.Register:Invoke("creationDone", CharacterCreation.CreationDone, "After", "All")
 
-CharacterCreation:RegisterCallListener("selectOption", function(self, e, ui, call)
+CharacterCreation.Register:Call("selectOption", function(self, e, ui, call)
 	local this = ui:GetRoot()
 	if not this then
 		return
@@ -349,7 +349,7 @@ CharacterCreation:RegisterCallListener("selectOption", function(self, e, ui, cal
 end, "Before", "All")
 
 --Ext.SaveFile("CC_UI_Dump.json", Ext.DumpExport(Ext.UI.GetCharacterCreationWizard()))
--- CharacterCreation:RegisterInvokeListener("updatePortraits", function(self, ui, call)
+-- CharacterCreation.Register:Invoke("updatePortraits", function(self, ui, call)
 -- 	local wiz = Ext.UI.GetCharacterCreationWizard()
 -- 	if wiz then
 -- 		local raceData = wiz.CharacterCreationManager.Customizations[0].State

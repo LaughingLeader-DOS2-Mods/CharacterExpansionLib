@@ -267,5 +267,5 @@ if Ext.IsDeveloperMode() then
 	end)
 end
 
-SheetManager.UI.CharacterCreation:RegisterInvokeListener("updateContent", OnUpdateContent, "Before", "All")
-SheetManager.UI.CharacterCreation:RegisterInvokeListener("updateSkills", SetSkills, "After", "All")
+SheetManager.UI.CharacterCreation.Register:Invoke("updateContent", OnUpdateContent, "Before", "All")
+SheetManager.UI.CharacterCreation.Register:Invoke("updateSkills", SetSkills, "After", "All")
