@@ -41,17 +41,19 @@ for t,v in pairs(SheetManager.Config.Calls.PointRemoved) do
 	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
 end
 
+---@return string|nil statID
+---@return string statType
 local function GetBaseStatID(id, statType)
 	if statType == "PrimaryStat" then
 		return SheetManager.Stats.Data.Builtin.ID[id],"Attribute"
 	elseif statType == "SecondaryStat" or statType == "Stat" then
 		return SheetManager.Stats.Data.Builtin.ID[id],"Stat"
 	elseif statType == "Ability" then
-		return Ext.EnumIndexToLabel("AbilityType", id),"Ability"
+		return Ext.Stats.EnumIndexToLabel("AbilityType", id),"Ability"
 	elseif statType == "Talent" then
-		return Ext.EnumIndexToLabel("TalentType", id),"Talent"
+		return Ext.Stats.EnumIndexToLabel("TalentType", id),"Talent"
 	end
-	return nil
+	return nil,"None"
 end
 
 --region Fix for base stats not being adjustable when the sheet is in GM mode in campaign mode
@@ -71,18 +73,17 @@ local function RequestBaseValueChange(statType, id, modifyBy, skipPointsCheck)
 						modifyBy = modifyBy > 0
 					end
 					local netid = GameHelpers.GetNetID(character)
-					Ext.PostMessageToServer("CEL_SheetManager_RequestBaseValueChange", Ext.JsonStringify({
+					GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestBaseValueChange", {
 						ID = stat,
 						NetID = netid,
 						ModifyBy = modifyBy,
-						StatType = entryType,
-						IsGameMaster = true
-					}))
+						StatType = entryType
+					})
+					SheetManager.Sync.AvailablePointsWithDelay(character)
 				end
 			end
 		end
 	end
-	SheetManager.Sync.AvailablePointsWithDelay(character)
 end
 
 local function OnBasePointsAdded(statType, ui, event, id)
@@ -107,6 +108,23 @@ for t,v in pairs(SheetManager.Config.BaseCalls.PointRemoved) do
 	Ext.RegisterUITypeCall(Data.UIType.characterSheet, v, func, "Before")
 	Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, v, func, "Before")
 end
+
+--[[ for t,v in pairs(SheetManager.Config.BaseCreationCalls.PointAdded) do
+	local func = function(...)
+		Ext.Utils.PrintError(t, ...)
+	end
+	Ext.RegisterUITypeCall(Data.UIType.characterCreation, v, func, "Before")
+	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
+end
+for t,v in pairs(SheetManager.Config.BaseCreationCalls.PointRemoved) do
+	local func = function(...)
+		Ext.Utils.PrintError(t, ...)
+	end
+	Ext.RegisterUITypeCall(Data.UIType.characterCreation, v, func, "Before")
+	Ext.RegisterUITypeCall(Data.UIType.characterCreation_c, v, func, "Before")
+end ]]
+
+
 -- for t,v in pairs(SheetManager.Config.BaseCreationCalls.PointAdded) do
 -- 	local func = function(...)
 -- 		OnBasePointsAdded(t, ...)

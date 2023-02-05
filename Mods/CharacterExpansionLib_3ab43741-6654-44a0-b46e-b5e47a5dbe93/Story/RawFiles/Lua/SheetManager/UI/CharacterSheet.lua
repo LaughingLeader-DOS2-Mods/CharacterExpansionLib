@@ -598,7 +598,7 @@ function CharacterSheet.Update(ui, method, params)
 				if not Vars.ControllerEnabled then
 					if stat.StatType == SheetManager.Stats.Data.StatType.PrimaryStat then
 						targetsUpdated.PrimaryStats = true
-						this.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value, stat.GeneratedID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame, stat.IconClipName)
+						this.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value, stat.GeneratedID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame or -1, stat.IconClipName or "")
 						if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 							ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
 						end
