@@ -453,6 +453,7 @@ if _ISCLIENT then
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 		local points = availablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, isCharacterCreation)
+		local maxAttribute = GameHelpers.GetExtraData("AttributeSoftCap", 40)
 		
 		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
 
@@ -482,7 +483,7 @@ if _ISCLIENT then
 					end
 					if value ~= nil then
 						--TODO Make sure add/remove works for info stats
-						local canAdd = (data.Type == "PrimaryStat" and points > 0) or isGM
+						local canAdd = (data.Type == "PrimaryStat" and points > 0 and value < maxAttribute) or isGM
 						local canRemove = defaultCanRemove
 						if data.Type == "PrimaryStat" and not canRemove then
 							canRemove = isCharacterCreation and value > Ext.ExtraData.AttributeBaseValue
