@@ -9,7 +9,7 @@ local defaultPersistentVars = {
 	CharacterSheetValues = {},
 }
 
-Ext.Require("BootstrapShared.lua")
+Ext.Require("Shared.lua")
 Ext.Require("CharacterCreationExtended/Init.lua")
 
 ---@type CharacterExpansionLibPersistentVars

@@ -187,11 +187,11 @@ function SessionManager:ResetSession(character, skipSync, respec, isInCharacterC
 		-- 	GameHelpers.Net.PostToUser(character, "CEL_CharacterCreation_UpdateEntries")
 		-- end
 	else
-		Ext.PostMessageToServer("CEL_SessionManager_ResetCharacterData", Common.JsonStringify({
+		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ResetCharacterData", {
 			NetID = character.NetID,
 			SkipSync = skipSync,
 			Respec = respec
-		}))
+		})
 	end
 end
 
@@ -208,7 +208,7 @@ end
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
 	if isClient then
-		Ext.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
+		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
 	else
 		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self:GetSession(character)

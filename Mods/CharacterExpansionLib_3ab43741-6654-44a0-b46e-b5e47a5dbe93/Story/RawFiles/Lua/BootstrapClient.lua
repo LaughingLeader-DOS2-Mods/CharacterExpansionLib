@@ -1,4 +1,4 @@
-Ext.Require("BootstrapShared.lua")
+Ext.Require("Shared.lua")
 
 Ext.Require("SheetManager/UI/CharacterCreation.lua")
 Ext.Require("SheetManager/UI/CharacterSheet.lua")

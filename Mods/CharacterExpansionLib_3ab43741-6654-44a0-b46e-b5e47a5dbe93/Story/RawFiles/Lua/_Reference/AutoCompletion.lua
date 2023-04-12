@@ -2,11 +2,15 @@
 
 --For auto-completion
 if Mods == nil then Mods = {} end
-if Mods.CharacterExpansionLib == nil then
-	---@class CharacterExpansionLib
-	---@field SheetManager SheetManager
-	Mods.CharacterExpansionLib = {}
-end
+
+---@class CharacterExpansionLib
+---@field SheetManager SheetManager
+---@field PersistentVars CharacterExpansionLibPersistentVars
+Mods.CharacterExpansionLib = {
+	Import = Import,
+	UIOverrides = UIOverrides,
+}
+
 
 ---@alias SheetEntryId string
 ---@alias ModGuid string

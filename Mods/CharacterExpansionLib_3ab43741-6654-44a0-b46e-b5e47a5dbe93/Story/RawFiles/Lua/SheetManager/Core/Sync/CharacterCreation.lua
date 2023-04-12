@@ -51,10 +51,10 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 		end
 		SheetManager:SyncData()
 	else
-		Ext.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", Ext.JsonStringify({
+		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", {
 			UserId = Client.Character.ID,
 			ApplyChanges = applyChanges
-		}))
+		})
 	end
 end
 

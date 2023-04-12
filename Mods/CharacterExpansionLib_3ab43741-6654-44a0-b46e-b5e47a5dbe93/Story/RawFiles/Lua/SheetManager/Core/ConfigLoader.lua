@@ -61,7 +61,7 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 								elseif (propData.Type == "any" or t == propData.Type) then
 									data[propData.Name] = value
 								elseif t == "number" and propData.Type == "integer" then
-									data[propData.Name] = Ext.Round(value)
+									data[propData.Name] = Ext.Utils.Round(value)
 								end
 							else
 								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
@@ -176,11 +176,11 @@ end
 ---@return table<string, table<string, SheetCustomStatBase>>
 local function LoadConfigFiles()
 	local entries = {}
-	local order = Ext.GetModLoadOrder()
+	local order = Ext.Mod.GetLoadOrder()
 	for i=1,#order do
 		local uuid = order[i]
 		if IgnoredMods[uuid] ~= true then
-			local info = Ext.GetModInfo(uuid)
+			local info = Ext.Mod.GetModInfo(uuid)
 			if info ~= nil then
 				local b,result = xpcall(TryFindConfig, debug.traceback, info)
 				if not b then

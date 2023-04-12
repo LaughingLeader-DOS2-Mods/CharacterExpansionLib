@@ -35,7 +35,7 @@ function SheetManager.Sync.CustomAvailablePoints(characterId)
 		end
 	else
 		local netid = GameHelpers.GetNetID(characterId)
-		Ext.PostMessageToServer("CEL_SheetManager_RequestAvailablePoints", tostring(netid))
+		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestAvailablePoints", tostring(netid))
 	end
 end
 
@@ -93,7 +93,7 @@ else
 	---@param characterId Guid|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
 	function SheetManager.Sync.AvailablePointsWithDelay(characterId)
 		local netid = GameHelpers.GetNetID(characterId)
-		Ext.PostMessageToServer("CEL_SheetManager_RequestAvailablePointsWithDelay", tostring(netid))
+		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestAvailablePointsWithDelay", tostring(netid))
 	end
 
 	RegisterNetListener("CEL_SheetManager_LoadAvailablePointsForCharacter", function(cmd, payload)
