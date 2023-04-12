@@ -107,7 +107,7 @@ SheetManager.Stats = {
 					DisplayName = LocalizedText.CharacterSheet.Damage,
 					Type = "SecondaryStat",
 					Frame = 14,
-					---@param character StatCharacter
+					---@param character CDivinityStatsCharacter
 					Attribute = function(character)
 						local mainWeapon = character.MainWeapon
 						local offHandWeapon = character.OffHandWeapon
