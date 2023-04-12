@@ -5,7 +5,7 @@ if SheetManager.Sync == nil then SheetManager.Sync = {} end
 
 ---Get points via SheetManager:GetAvailablePoints
 ---@private
----@type table<UUID|NETID,table<string,integer>>
+---@type table<Guid|NETID,table<string,integer>>
 SheetManager.CustomAvailablePoints = {}
 if not _ISCLIENT then
 	setmetatable(SheetManager.CustomAvailablePoints, {
@@ -88,9 +88,9 @@ if not _ISCLIENT then
 	-- 	end)
 	-- end
 
-	-- Ext.RegisterOsirisListener("CharacterBaseAbilityChanged", 4, "after", BasePointsChanged)
+	-- Ext.Osiris.RegisterListener("CharacterBaseAbilityChanged", 4, "after", BasePointsChanged)
 else
-	---@param characterId UUID|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
+	---@param characterId Guid|EsvCharacter|NETID|EclCharacter|nil Leave nil to sync points for all players.
 	function SheetManager.Sync.AvailablePointsWithDelay(characterId)
 		local netid = GameHelpers.GetNetID(characterId)
 		Ext.PostMessageToServer("CEL_SheetManager_RequestAvailablePointsWithDelay", tostring(netid))

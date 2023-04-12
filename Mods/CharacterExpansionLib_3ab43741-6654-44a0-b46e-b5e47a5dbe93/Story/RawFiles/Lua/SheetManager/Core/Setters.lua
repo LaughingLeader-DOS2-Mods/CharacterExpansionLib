@@ -100,7 +100,7 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 end
 
 ---@param stat SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
----@param characterId UUID|NETID
+---@param characterId Guid|NETID
 ---@param value integer|boolean
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
@@ -251,7 +251,7 @@ end
 
 ---Changes available points by a value, such as adding -1 to attribute points.
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
----@param character EsvCharacter|UUID|NETID
+---@param character EsvCharacter|Guid|NETID
 ---@param amount integer
 ---@param availablePoints table|nil
 ---@return boolean

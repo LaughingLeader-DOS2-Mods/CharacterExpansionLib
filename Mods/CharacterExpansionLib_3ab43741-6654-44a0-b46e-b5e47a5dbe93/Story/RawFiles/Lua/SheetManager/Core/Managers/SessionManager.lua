@@ -85,46 +85,33 @@ if not isClient then
 		SessionManager:CreateSession(StringHelpers.GetUUID(character), respec)
 	end
 
-	---@param region string
-	---@param state REGIONSTATE
-	---@param levelType LEVELTYPE
-	RegisterListener("RegionChanged", function (region, state, levelType)
-		if levelType == LEVELTYPE.CHARACTER_CREATION and state == REGIONSTATE.GAME then
+	Events.RegionChanged:Subscribe(function(e)
+		if e.LevelType == LEVELTYPE.CHARACTER_CREATION and e.State == REGIONSTATE.GAME then
+			--[[ for player in GameHelpers.Character.GetPlayers(false) do
+				SessionManager:CreateSession(player, false)
+			end ]]
+		elseif e.LevelType == LEVELTYPE.GAME and e.State == REGIONSTATE.GAME and SessionManager.HasSessionData then
 			for player in GameHelpers.Character.GetPlayers(false) do
-				if state == REGIONSTATE.GAME then
-					--fprint(LOGLEVEL.WARNING, "[CC:PlayerCheck] Name(%s) IsPlayer(%s) CharacterCreationFinished(%s) PlayerCustomData(%s) CharacterControl(%s)", player.DisplayName, player.IsPlayer, player.CharacterCreationFinished, player.PlayerCustomData ~= nil, player.CharacterControl)
-					SessionManager:CreateSession(player, false)
-				elseif state == REGIONSTATE.ENDED then
-					SessionManager:ApplySession(player)
-				end
-			end
-		elseif levelType == LEVELTYPE.GAME and state == REGIONSTATE.GAME and SessionManager.HasSessionData then
-			for userId,data in pairs(SessionManager.Sessions) do
-				for player in GameHelpers.Character.GetPlayers(false) do
-					if player.ReservedUserID == userId then
-						SessionManager:ApplySession(player)
-						break
-					end
-				end
+				SessionManager:ApplySession(player)
 			end
 			SessionManager.HasSessionData = false
 		end
 	end)
 
-	Ext.RegisterOsirisListener("CharacterAddToCharacterCreation", 3, "after", function(character, respec, success)
+	Ext.Osiris.RegisterListener("CharacterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
 			OnCharacterCreationStarted(character, respec == 2, true)
 		end
 	end)
 
-	Ext.RegisterOsirisListener("GameMasterAddToCharacterCreation", 3, "after", function(character, respec, success)
+	Ext.Osiris.RegisterListener("GameMasterAddToCharacterCreation", 3, "after", function(character, respec, success)
 		if success == 1 then
 			OnCharacterCreationStarted(character, respec == 2, true)
 		end
 	end)
 
 	--Fallback in case none of the UI listeners notify the server that CC is done
-	-- Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
+	-- Ext.Osiris.RegisterListener("CharacterCreationFinished", 1, "after", function(character)
 	-- 	if not StringHelpers.IsNullOrEmpty(character) then
 	-- 		Timer.StartOneshot("", 900, function()
 	-- 			SheetManager.Save.CharacterCreationDone(character, true)
@@ -136,7 +123,7 @@ if not isClient then
 	-- 	end
 	-- end)
 
-	--[[ Ext.RegisterOsirisListener("CharacterCreationFinished", 1, "after", function(character)
+	--[[ Ext.Osiris.RegisterListener("CharacterCreationFinished", 1, "after", function(character)
 		if character ~= StringHelpers.NULL_UUID then
 
 		else

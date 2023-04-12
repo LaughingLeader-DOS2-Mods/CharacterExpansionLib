@@ -4,13 +4,13 @@ local isClient = Ext.IsClient()
 if SheetManager.Save == nil then SheetManager.Save = {} end
 
 ---@class SheetManagerSaveData:table
----@field Stats table<MOD_UUID, table<SHEET_ENTRY_ID, integer>>
----@field Abilities table<MOD_UUID, table<SHEET_ENTRY_ID, integer>>
----@field Talents table<MOD_UUID, table<SHEET_ENTRY_ID, boolean>>
----@field Custom table<MOD_UUID, table<SHEET_ENTRY_ID, integer>>
+---@field Stats table<ModGuid, table<SheetEntryId, integer>>
+---@field Abilities table<ModGuid, table<SheetEntryId, integer>>
+---@field Talents table<ModGuid, table<SheetEntryId, boolean>>
+---@field Custom table<ModGuid, table<SheetEntryId, integer>>
 
 ---SheetManager entry values for specific characters. Saved to PersistentVars.
----@type table<UUID|NETID, SheetManagerSaveData>
+---@type table<Guid|NETID, SheetManagerSaveData>
 SheetManager.CurrentValues = {}
 
 if not isClient then
@@ -26,7 +26,7 @@ if not isClient then
 end
 
 ---@private
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId Guid|EsvCharacter|NETID|EclCharacter
 ---@return SheetManagerSaveData
 function SheetManager.Save.CreateCharacterData(characterId)
 	characterId = GameHelpers.GetObjectID(characterId)
@@ -45,7 +45,7 @@ function SheetManager.Save.CreateCharacterData(characterId)
 end
 
 ---@param statType SheetEntryType
----@return integer|boolean
+---@return PersistentVarsStatTypeTableName|nil
 function SheetManager.Save.GetTableNameForType(statType)
 	if statType == self.StatType.PrimaryStat or statType == self.StatType.SecondaryStat then
 		return "Stats"
@@ -58,7 +58,7 @@ function SheetManager.Save.GetTableNameForType(statType)
 	end
 end
 
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId Guid|EsvCharacter|NETID|EclCharacter
 ---@param statType SheetStatType|nil
 ---@param mod string|nil
 ---@param entryId string|nil
@@ -108,10 +108,10 @@ end
 --region Get/Set Values
 
 ---Get the pending value from character creation, if any.
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId Guid|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean
----@return table<SHEET_ENTRY_ID, integer> The mod data table containing all stats.
+---@return table<SheetEntryId, integer> The mod data table containing all stats.
 function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	characterId = GameHelpers.GetObjectID(characterId)
 	local sessionData = SessionManager:GetSession(characterId)
@@ -131,7 +131,7 @@ function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	return nil
 end
 
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId Guid|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean
 function SheetManager.Save.GetEntryValue(characterId, entry)
@@ -173,7 +173,7 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 	return nil
 end
 
----@param characterId UUID|EsvCharacter|NETID|EclCharacter
+---@param characterId Guid|EsvCharacter|NETID|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param value integer|boolean
 ---@param skipSessionCheck ?boolean
@@ -327,11 +327,11 @@ end
 --region Value Syncing
 if not isClient then
 	---@protected
-	---@param character UUID|EsvCharacter
+	---@param character Guid|EsvCharacter
 	---@param user number|string|nil Optional client to sync to if character is nil.
 	function SheetManager.Sync.EntryValues(character, user)
+		character = GameHelpers.GetCharacter(character, "EsvCharacter")
 		if character then
-			local character = GameHelpers.GetCharacter(character)
 			local data = {
 				NetID = character.NetID,
 				Values = {}
@@ -376,8 +376,8 @@ else
 				for id,value in pairs(entries) do
 					local entry = SheetManager:GetEntryByID(id, modid, entryType)
 					if entry == nil then
-						Ext.PrintWarning(entryType, SheetManager.Loaded, Ext.DumpExport(entries))
-						Ext.PrintWarning(SheetManager.Data.CustomStats[modid])
+						Ext.Utils.PrintWarning(entryType, SheetManager.Loaded, Ext.DumpExport(entries))
+						Ext.Utils.PrintWarning(SheetManager.Data.CustomStats[modid])
 					end
 					assert(entry ~= nil, string.format("Failed to get sheet entry from id(%s) mod(%s) entryType(%s)", id, modid, entryType))
 					local last = entryType == "Talents" and false or 0

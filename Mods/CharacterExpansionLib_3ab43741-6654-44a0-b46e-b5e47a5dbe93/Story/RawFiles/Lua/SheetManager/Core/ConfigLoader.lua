@@ -184,7 +184,7 @@ local function LoadConfigFiles()
 			if info ~= nil then
 				local b,result = xpcall(TryFindConfig, debug.traceback, info)
 				if not b then
-					Ext.PrintError(result)
+					Ext.Utils.PrintError(result)
 				elseif result ~= nil and result ~= "" then
 					local config = Common.JsonParse(result)
 					if config then
@@ -196,7 +196,7 @@ local function LoadConfigFiles()
 				end
 				local b,result = xpcall(TryFindOldCustomStatsConfig, debug.traceback, info)
 				if not b then
-					Ext.PrintError(result)
+					Ext.Utils.PrintError(result)
 				elseif result ~= nil and result ~= "" then
 					local config = Common.JsonParse(result)
 					if config then
@@ -234,7 +234,7 @@ local function LoadConfigFiles()
 	end
 
 	-- if Vars.DebugMode and Vars.LeaderDebugMode then
-	-- 	--local data = LoadConfig(ModuleUUID, Ext.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
+	-- 	--local data = LoadConfig(ModuleUUID, Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
 	-- 	local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
 	-- 	if dataStr then
 	-- 		local data = LoadConfig(ModuleUUID, Common.JsonParse(dataStr))

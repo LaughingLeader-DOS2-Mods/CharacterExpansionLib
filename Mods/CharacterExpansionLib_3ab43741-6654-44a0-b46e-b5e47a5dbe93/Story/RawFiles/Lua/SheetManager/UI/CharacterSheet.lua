@@ -242,11 +242,11 @@ local function debugExportStatArrays(this)
 			table.insert(saveData.Default.Order, this.secStat_array[i+2])
 		end
 	end
-	Ext.SaveFile("StatsArrayContents.lua", Lib.serpent.raw(saveData, {indent = '\t', sortkeys = false, comment = false}))
+	Ext.IO.SaveFile("StatsArrayContents.lua", Lib.serpent.raw(saveData, {indent = '\t', sortkeys = false, comment = false}))
 end
 
---local triggers = {}; for _,uuid in pairs(Ext.GetAllTriggers()) do local trigger = Ext.GetTrigger(uuid); triggers[#triggers+1] = trigger; end; Ext.SaveFile("Triggers.json", inspect(triggers))
---local triggers = {}; for _,uuid in pairs(Ext.GetAllTriggers()) do local trigger = Ext.GetTrigger(uuid); triggers[#triggers+1] = trigger; end; Ext.SaveFile("Triggers.lua", Mods.CharacterExpansionLib:Lib.serpent.block(triggers))
+--local triggers = {}; for _,uuid in pairs(Ext.GetAllTriggers()) do local trigger = Ext.GetTrigger(uuid); triggers[#triggers+1] = trigger; end; Ext.IO.SaveFile("Triggers.json", inspect(triggers))
+--local triggers = {}; for _,uuid in pairs(Ext.GetAllTriggers()) do local trigger = Ext.GetTrigger(uuid); triggers[#triggers+1] = trigger; end; Ext.IO.SaveFile("Triggers.lua", Mods.CharacterExpansionLib:Lib.serpent.block(triggers))
 
 local updating = false
 local requestedClear = {}

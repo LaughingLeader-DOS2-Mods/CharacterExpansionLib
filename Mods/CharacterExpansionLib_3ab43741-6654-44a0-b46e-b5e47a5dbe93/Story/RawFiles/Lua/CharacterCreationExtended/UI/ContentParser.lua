@@ -85,6 +85,7 @@ local ElementTypeNames = {
 ---@field Elements string|integer|boolean[]
 
 ---@return ContentParserElement[]
+---@return integer
 local function ParseArray(arr)
 	local content = {}
 	local count = 0
@@ -118,7 +119,7 @@ local function ParseArray(arr)
 			content[count] = data
 		end
 	end
-	Ext.SaveFile("ConsoleDebug/ContentParser_ArrayToTableDump.lua", TableHelpers.ToString(content))
+	Ext.IO.SaveFile("ConsoleDebug/ContentParser_ArrayToTableDump.lua", TableHelpers.ToString(content))
 	return content,count
 end
 
@@ -186,7 +187,7 @@ local function SetSkills(self, e, ui, event)
 	end
 	local this = self:GetRoot()
 	if this then
-		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle))
+		local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
 		local origin = player.PlayerCustomData.OriginName
 		local race = player.PlayerCustomData.Race
 
@@ -206,7 +207,7 @@ local function SetSkills(self, e, ui, event)
 					local callback = callbacks[i]
 					local b,result = xpcall(callback, debug.traceback, player, origin, race, skills)
 					if not b then
-						Ext.PrintError(result)
+						Ext.Utils.PrintError(result)
 					else
 						if type(result) == "table" then
 							skills = result
@@ -221,7 +222,7 @@ local function SetSkills(self, e, ui, event)
 
 			local i = 0
 			for _,v in ipairs(skills) do
-				local icon = Ext.StatGetAttribute(v, "Icon")
+				local icon = GameHelpers.Stats.GetAttribute(v, "Icon", "")
 				if not StringHelpers.IsNullOrWhitespace(icon) then
 					local iconId = string.format("llcel_racial%i", i)
 					ui:SetCustomIcon(iconId, icon, this.iconSize, this.iconSize)
@@ -240,13 +241,13 @@ local function SetSkills(self, e, ui, event)
 	end
 end
 
-if Ext.IsDeveloperMode() then
-	RegisterListener("BeforeLuaReset", function ()
-		Ext.SaveFile("CEL_Debug_CCDrawIcons.json", Common.JsonStringify(activeCustomDraws))
+if Ext.Debug.IsDeveloperMode() then
+	Events.BeforeLuaReset:Subscribe(function (e)
+		Ext.IO.SaveFile("CEL_Debug_CCDrawIcons.json", Common.JsonStringify(activeCustomDraws))
 	end)
-	
-	RegisterListener("LuaReset", function ()
-		local f = Ext.LoadFile("CEL_Debug_CCDrawIcons.json")
+
+	Events.LuaReset:Subscribe(function (e)
+		local f = Ext.IO.LoadFile("CEL_Debug_CCDrawIcons.json")
 		if f then
 			local data = Common.JsonParse(f)
 			if data then

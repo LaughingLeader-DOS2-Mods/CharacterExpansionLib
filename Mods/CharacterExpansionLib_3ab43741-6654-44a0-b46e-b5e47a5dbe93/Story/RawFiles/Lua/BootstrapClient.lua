@@ -9,7 +9,7 @@ Ext.Require("SheetManager/UI/CustomStatsUI.lua")
 
 Ext.Require("CharacterCreationExtended/Init.lua")
 
--- if Ext.IsDeveloperMode() then
+-- if Ext.Debug.IsDeveloperMode() then
 --     Ext.Require("SheetManager/UI/Debug/UILogger.lua")
 -- end
 
@@ -29,20 +29,20 @@ UIOverrides = {
 				Ext.IO.AddPathOverride(v.Source, v.Replacement)
             --The currentPath may be the full path including the drive letter, so string.find helps with checking that.
 			elseif currentPath ~= v.Replacement and not string.find(currentPath, v.Replacement, 1, true) then
-				Ext.PrintError(string.format("[CharacterExpansionLib] UI file (%s) is already being overwritten! Mod conflict! The replacement path is (%s).", k, currentPath))
+				Ext.Utils.PrintError(string.format("[CharacterExpansionLib] UI file (%s) is already being overwritten! Mod conflict! The replacement path is (%s).", k, currentPath))
 			end
 		end
 	end
 }
 
-UIOverrides.Enable(Ext.IsDeveloperMode())
+UIOverrides.Enable(Ext.Debug.IsDeveloperMode())
 
 -- Ext.RegisterListener("SessionLoading", function ()
---  UIOverrides.Enable(Ext.IsDeveloperMode())
+--  UIOverrides.Enable(Ext.Debug.IsDeveloperMode())
 -- end)
 
 -- RegisterListener("LuaReset", function ()
---     UIOverrides.Enable(Ext.IsDeveloperMode())
+--     UIOverrides.Enable(Ext.Debug.IsDeveloperMode())
 -- end)
 
 
@@ -57,12 +57,12 @@ end)
 local registeredContextListeners = false
 Ext.RegisterConsoleCommand("contextRollTest", function()
     if not registeredContextListeners then
-        UI.ContextMenu.Register.ShouldOpenListener(function(contextMenu, x, y)
+        Events.ShouldOpenContextMenu:Subscribe(function (e)
             if Game.Tooltip.RequestTypeEquals("CustomStat") then
-                return true
+                e.ShouldOpen = true
             end
         end)
-        
+
         --[[ UI.ContextMenu.Register.OpeningListener(function(contextMenu, x, y)
             if Game.Tooltip.RequestTypeEquals("CustomStat") and Game.Tooltip.IsOpen() then
                 ---@type TooltipCustomStatRequest
@@ -80,9 +80,9 @@ Ext.RegisterConsoleCommand("contextRollTest", function()
             end
         end) ]]
         
-        UI.ContextMenu.Register.EntryClickedListener(function(...)
-            --fprint(LOGLEVEL.DEFAULT, "[ContextMenu.EntryClickedListener] %s", Lib.inspect({...}))
-        end)
+        -- UI.ContextMenu.Register.EntryClickedListener(function(...)
+        --     --fprint(LOGLEVEL.DEFAULT, "[ContextMenu.EntryClickedListener] %s", Lib.inspect({...}))
+        -- end)
 
         registeredContextListeners = true
     end

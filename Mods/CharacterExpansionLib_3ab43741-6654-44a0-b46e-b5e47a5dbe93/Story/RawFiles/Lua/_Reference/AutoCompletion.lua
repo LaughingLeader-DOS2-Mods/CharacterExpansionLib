@@ -8,8 +8,8 @@ if Mods.CharacterExpansionLib == nil then
 	Mods.CharacterExpansionLib = {}
 end
 
----@alias SHEET_ENTRY_ID string
----@alias MOD_UUID string
+---@alias SheetEntryId string
+---@alias ModGuid string
 
 ---@alias AnyStatEntryIDType string|integer
 ---@alias AnyStatEntryDataType SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData|SheetCustomStatCategoryData
@@ -20,3 +20,4 @@ end
 ---@alias SheetEntryType "PrimaryStat"|"SecondaryStat"|"Ability"|"CivilAbility"|"Talent"|"Custom"|"CustomCategory"
 ---@alias StatSheetSecondaryStatType "Info"|"Normal"|"Resistance"
 ---@alias StatSheetStatType "PrimaryStat"|"SecondaryStat"|"Spacing"
+---@alias PersistentVarsStatTypeTableName "Stats"|"Abilities"|"Talents"|"CustomStats"

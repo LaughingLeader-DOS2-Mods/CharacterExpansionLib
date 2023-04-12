@@ -393,7 +393,7 @@ end
 
 ---@param player EclCharacter|EsvCharacter
 ---@param talentId string Builtin talent ID or a custom talent ID.
----@param mod UUID|nil The mod UUID, if any (for custom talents).
+---@param mod Guid|nil The mod UUID, if any (for custom talents).
 ---@return boolean
 function SheetManager.Talents.HasTalent(player, talentId, mod)
 	if Data.TalentEnum[talentId] then
@@ -535,7 +535,7 @@ function SheetManager.Talents.HasRequirements(player, id)
 				end
 			else
 				--fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:SheetManager.Talents.HasRequirements] Error invoking requirement handler for talent [%s] modid[%s]", id, modid)
-				Ext.PrintError(result)
+				Ext.Utils.PrintError(result)
 			end
 		end
 	end
@@ -676,7 +676,7 @@ if Vars.DebugMode then
 end
 
 ---@param enabled boolean
----@param modId UUID|nil Mod UUID
+---@param modId Guid|nil Mod UUID
 function SheetManager.Talents.ToggleDivineTalents(enabled, modId)
 	if enabled then
 		for talent,id in pairs(SheetManager.Talents.Data.VisibleDivineTalents) do
@@ -717,7 +717,7 @@ function SheetManager.Talents.LoadRequirements()
 	for _,uuid in pairs(Ext.GetModLoadOrder()) do
 		local modInfo = Ext.GetModInfo(uuid)
 		if modInfo and modInfo.Directory then
-			local talentRequirementsText = Ext.LoadFile("Public/"..modInfo.Directory.."/Stats/Generated/Data/Requirements.txt", "data")
+			local talentRequirementsText = Ext.IO.LoadFile("Public/"..modInfo.Directory.."/Stats/Generated/Data/Requirements.txt", "data")
 			if not StringHelpers.IsNullOrEmpty(talentRequirementsText) then
 				for line in StringHelpers.GetLines(talentRequirementsText) do
 					local talent,requirementText = string.match(line, 'requirement.*"(.+)",.*"(.*)"')

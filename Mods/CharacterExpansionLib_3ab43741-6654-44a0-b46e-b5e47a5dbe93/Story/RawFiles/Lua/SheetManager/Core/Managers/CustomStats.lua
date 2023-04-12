@@ -19,7 +19,7 @@ SheetManager.CustomStats = CustomStats
 
 local self = SheetManager.CustomStats
 
----@type table<UUID|NETID, table<string, integer>>
+---@type table<Guid|NETID, table<string, integer>>
 CustomStats.PointsPool = {}
 if not _ISCLIENT then
 	local PointsPoolHandler = {
@@ -167,7 +167,7 @@ function CustomStats:GetTotalStatsInCategory(categoryId, visibleOnly)
 				visible = SheetManager:IsEntryVisible(stat, character) == true
 			end
 			if visible and stat.Category == categoryId then
-				Ext.PrintError(categoryId, stat.ID, total)
+				Ext.Utils.PrintError(categoryId, stat.ID, total)
 				total = total + 1
 			end
 		end
@@ -264,7 +264,7 @@ end
 
 if _ISCLIENT then
 	---@param double number
-	---@return UUID
+	---@return Guid
 	function _INTERNAL.RemoveStatByDouble(double)
 		local removedId = nil
 		for mod,stats in pairs(SheetManager.Data.CustomStats) do
@@ -413,7 +413,7 @@ function CustomStats:GetTotalAvailablePoints(character)
 end
 
 ---@param double number
----@return UUID
+---@return Guid
 function _INTERNAL.RemoveStatByDouble(double)
 	local removedId = nil
 	for mod,stats in pairs(SheetManager.Data.CustomStats) do

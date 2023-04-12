@@ -57,7 +57,7 @@ function OriginSettings:ApplySettings(character)
 	local isInCC = SheetManager.IsInCharacterCreation(character)
 	if self.SkillSets then
 		for i=1,#self.SkillSets do
-			local skillset = Ext.GetSkillSet(self.SkillSets[i])
+			local skillset = Ext.Stats.SkillSet.GetLegacy(self.SkillSets[i])
 			if skillset then
 				for j=1,#skillset.Skills do
 					if not isClient then

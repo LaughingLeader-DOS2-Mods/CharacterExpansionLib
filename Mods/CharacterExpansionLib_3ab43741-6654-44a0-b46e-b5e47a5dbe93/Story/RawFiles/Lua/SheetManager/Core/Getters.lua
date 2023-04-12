@@ -65,7 +65,7 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 end
 
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData
----@param characterId UUID|NETID
+---@param characterId Guid|NETID
 ---@return integer|boolean
 function SheetManager:GetValueByEntry(entry, characterId)
 	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)

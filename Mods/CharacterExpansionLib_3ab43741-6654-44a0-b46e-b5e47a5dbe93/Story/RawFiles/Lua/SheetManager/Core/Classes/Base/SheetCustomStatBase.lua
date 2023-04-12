@@ -5,7 +5,7 @@ local SheetCustomStatBase = {
 	Type="SheetCustomStatBase",
 	TooltipType = "Stat",
 	ID = "",
-	---@type MOD_UUID
+	---@type ModGuid
 	Mod = "",
 	DisplayName = "",
 	Description = "",

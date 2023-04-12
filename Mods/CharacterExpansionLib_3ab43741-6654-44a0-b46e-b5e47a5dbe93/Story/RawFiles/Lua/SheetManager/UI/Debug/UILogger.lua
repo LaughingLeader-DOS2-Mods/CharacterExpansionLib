@@ -5,9 +5,9 @@ local logLines = {
 }
 
 local function SaveLogs()
-	Ext.SaveFile("Logs/UI_characterCreation_EventLog.log", StringHelpers.Join("\n", logLines.cc))
-	Ext.SaveFile("Logs/UI_partyInventory_EventLog.log", StringHelpers.Join("\n", logLines.inventory))
-	Ext.SaveFile("Logs/UI_tutorialBox_EventLog.log", StringHelpers.Join("\n", logLines.tutorialBox))
+	Ext.IO.SaveFile("Logs/UI_characterCreation_EventLog.log", StringHelpers.Join("\n", logLines.cc))
+	Ext.IO.SaveFile("Logs/UI_partyInventory_EventLog.log", StringHelpers.Join("\n", logLines.inventory))
+	Ext.IO.SaveFile("Logs/UI_tutorialBox_EventLog.log", StringHelpers.Join("\n", logLines.tutorialBox))
 end
 
 ---@param ui UIObject

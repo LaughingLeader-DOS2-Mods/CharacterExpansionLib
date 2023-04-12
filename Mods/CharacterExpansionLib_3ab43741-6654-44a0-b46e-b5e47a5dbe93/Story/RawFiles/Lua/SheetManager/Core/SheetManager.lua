@@ -34,15 +34,15 @@ Ext.Require("SheetManager/Core/Getters.lua")
 Ext.Require("SheetManager/Core/Setters.lua")
 
 SheetManager.Data = {
-	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetAbilityData>>
+	---@type table<ModGuid, table<SheetEntryId, SheetAbilityData>>
 	Abilities = {},
-	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetTalentData>>
+	---@type table<ModGuid, table<SheetEntryId, SheetTalentData>>
 	Talents = {},
-	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetStatData>>
+	---@type table<ModGuid, table<SheetEntryId, SheetStatData>>
 	Stats = {},
-	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetCustomStatData>>
+	---@type table<ModGuid, table<SheetEntryId, SheetCustomStatData>>
 	CustomStats = {},
-	---@type table<MOD_UUID, table<SHEET_ENTRY_ID, SheetCustomStatCategoryData>>
+	---@type table<ModGuid, table<SheetEntryId, SheetCustomStatCategoryData>>
 	CustomStatCategories = {},
 	ID_MAP = {
 		Abilities = {
@@ -111,13 +111,13 @@ local function LoadData()
 			end
 		end
 	else
-		Ext.PrintError(data)
+		Ext.Utils.PrintError(data)
 	end
 
 	if not _ISCLIENT then
-		for uuid,data in pairs(PersistentVars.CharacterSheetValues) do
+		for uuid,entry in pairs(PersistentVars.CharacterSheetValues) do
 			local characterCount = 0
-			for statType,modTable in pairs(data) do
+			for statType,modTable in pairs(entry) do
 				local statTypeCount = 0
 				for modId,entries in pairs(modTable) do
 					local entryCount = 0
@@ -166,11 +166,11 @@ local function LoadData()
 
 	if _ISCLIENT then
 		---Divine Talents
-		if Ext.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") then
+		if Ext.Mod.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") then
 			SheetManager.Talents.ToggleDivineTalents(true, "ca32a698-d63e-4d20-92a7-dd83cba7bc56")
 		elseif Mods.LeaderLib then
-			local gameSettings = Mods.LeaderLib.GameSettings
-			if gameSettings.Settings.Client.DivineTalentsEnabled then
+			local gameSettings = GameSettingsManager.GetSettings()
+			if gameSettings.Client.DivineTalentsEnabled then
 				SheetManager.Talents.ToggleDivineTalents(true, Mods.LeaderLib.ModuleUUID)
 			end
 		end
@@ -198,9 +198,9 @@ else
 			return stat:GetValue(StringHelpers.GetUUID(uuid))
 		end
 	end
-	Ext.RegisterOsirisListener("CharacterGetAttribute", 3, "after", Query_GetAttribute)
-	Ext.RegisterOsirisListener("CharacterGetBaseAttribute", 3, "after", Query_GetAttribute)
-	Ext.RegisterOsirisListener("NRD_ItemGetPermanentBoostInt", 3, "after", function(uuid,id,val) 
+	Ext.Osiris.RegisterListener("CharacterGetAttribute", 3, "after", Query_GetAttribute)
+	Ext.Osiris.RegisterListener("CharacterGetBaseAttribute", 3, "after", Query_GetAttribute)
+	Ext.Osiris.RegisterListener("NRD_ItemGetPermanentBoostInt", 3, "after", function(uuid,id,val)
 		return Query_GetAttribute(uuid,id,val,true,"Stat")
 	end)
 
@@ -210,9 +210,9 @@ else
 			return stat:GetValue(StringHelpers.GetUUID(uuid))
 		end
 	end
-	Ext.RegisterOsirisListener("CharacterGetAbility", 3, "after", Query_GetAbility)
-	Ext.RegisterOsirisListener("CharacterGetBaseAbility", 3, "after", Query_GetAbility)
-	Ext.RegisterOsirisListener("NRD_ItemGetPermanentBoostAbility", 3, "after", function(uuid,id,bool) 
+	Ext.Osiris.RegisterListener("CharacterGetAbility", 3, "after", Query_GetAbility)
+	Ext.Osiris.RegisterListener("CharacterGetBaseAbility", 3, "after", Query_GetAbility)
+	Ext.Osiris.RegisterListener("NRD_ItemGetPermanentBoostAbility", 3, "after", function(uuid,id,bool) 
 		return Query_GetAbility(uuid,id,bool,true) 
 	end)
 
@@ -224,8 +224,8 @@ else
 			end
 		end
 	end
-	Ext.RegisterOsirisListener("CharacterHasTalent", 3, "after", Query_HasTalent)
-	Ext.RegisterOsirisListener("NRD_ItemGetPermanentBoostTalent", 3, "after", function(uuid,id,bool) 
+	Ext.Osiris.RegisterListener("CharacterHasTalent", 3, "after", Query_HasTalent)
+	Ext.Osiris.RegisterListener("NRD_ItemGetPermanentBoostTalent", 3, "after", function(uuid,id,bool) 
 		return Query_HasTalent(uuid,id,bool,true) 
 	end)
 end

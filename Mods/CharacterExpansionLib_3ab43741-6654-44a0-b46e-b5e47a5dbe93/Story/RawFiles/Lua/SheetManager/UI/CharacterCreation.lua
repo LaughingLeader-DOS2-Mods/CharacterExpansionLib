@@ -236,7 +236,7 @@ function CharacterCreation.UpdateAttributes(self, e, ui, method)
 
 	local engineValues = {}
 	for i=0,#this.attributeArray-1,5 do
-		--Ext.PrintWarning(i, this.attributeArray[i], this.attributeArray[i+1], this.attributeArray[i+3], this.attributeArray[i+4])
+		--Ext.Utils.PrintWarning(i, this.attributeArray[i], this.attributeArray[i+1], this.attributeArray[i+3], this.attributeArray[i+4])
 		local statID = this.attributeArray[i]
 		-- local label = this.abilityArray[i+1]
 		-- local attributeInfo = this.abilityArray[i+2]
@@ -348,7 +348,7 @@ CharacterCreation.Register:Call("selectOption", function(self, e, ui, call)
 	-- end
 end, "Before", "All")
 
---Ext.SaveFile("Dumps/CC_UI_Dump.json", Ext.DumpExport(Ext.UI.GetCharacterCreationWizard()))
+--Ext.IO.SaveFile("Dumps/CC_UI_Dump.json", Ext.DumpExport(Ext.UI.GetCharacterCreationWizard()))
 -- CharacterCreation.Register:Invoke("updatePortraits", function(self, ui, call)
 -- 	local wiz = Ext.UI.GetCharacterCreationWizard()
 -- 	if wiz then
