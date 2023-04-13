@@ -1,6 +1,6 @@
-local isClient = Ext.IsClient()
-
 ---@class SheetBaseData
+---@field DisplayName TranslatedString|string
+---@field Description TranslatedString|string
 local SheetBaseData = {
 	Type="SheetBaseData",
 	TooltipType = "Stat",
@@ -33,8 +33,8 @@ local SheetBaseData = {
 }
 
 SheetBaseData.PropertyMap = {
-	DISPLAYNAME = {Name="DisplayName", Type = "string"},
-	DESCRIPTION = {Name="Description", Type = "string"},
+	DISPLAYNAME = {Name="DisplayName", Type = "TranslatedString"},
+	DESCRIPTION = {Name="Description", Type = "TranslatedString"},
 	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
 	BASEVALUE = {Name="BaseValue", Type = "number"},
 	VISIBLE = {Name="Visible", Type = "boolean"},
@@ -79,29 +79,15 @@ function SheetBaseData.SetDefaults(data)
 		end
 	end
 end
-
----@param txt string
----@param forceCheckForStringKey boolean|nil
----@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
-local function FormatText(txt, forceCheckForStringKey, character)
-	if forceCheckForStringKey or string.find(txt, "_", 1, true) then
-		txt = GameHelpers.GetStringKeyText(txt)
-	end
-	return GameHelpers.Tooltip.ReplacePlaceholders(txt, character)
-end
-
 ---@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 function SheetBaseData:GetDisplayName(character)
-	if self.DisplayName then
-		return FormatText(self.DisplayName, self.LoadStringKey, character)
-	end
-	return self.ID
+	return GameHelpers.Tooltip.ReplacePlaceholders(self.DisplayName, character)
 end
 
 ---@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 function SheetBaseData:GetDescription(character)
 	if self.Description then
-		local text = FormatText(self.Description, self.LoadStringKey, character)
+		local text = GameHelpers.Tooltip.ReplacePlaceholders(self.Description, character)
 		if self.Mod then
 			local name = GameHelpers.GetModName(self.Mod, true)
 			if not StringHelpers.IsNullOrWhitespace(name) then

@@ -37,7 +37,25 @@ Format:
 }
 ]]
 
-local isClient = Ext.IsClient()
+---@param t string
+---@param value any
+local function _GetTranslatedString(t, value)
+	if t == "table" then
+		local key,fallback = table.unpack(value)
+		if string.find(key, "_") then
+			return Classes.TranslatedString:CreateFromKey(key, fallback)
+		else
+			return Classes.TranslatedString:Create(key, fallback)
+		end
+	else
+		if string.find(value, "_") then
+			return Classes.TranslatedString:CreateFromKey(value)
+		elseif string.sub(value, 1, 1) == "h" then
+			return Classes.TranslatedString:Create(value, value)
+		end
+	end
+	return value
+end
 
 local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 	local tableData = nil
@@ -56,7 +74,9 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 							local propData = propertyMap[propKey]
 							local t = type(value)
 							if propData then
-								if propData.Type == "enum" then
+								if propData.Type == "TranslatedString" then
+									data[propData.Name] = _GetTranslatedString(t, value)
+								elseif propData.Type == "enum" then
 									data[propData.Name] = propData.Parse(value,t)
 								elseif (propData.Type == "any" or t == propData.Type) then
 									data[propData.Name] = value
@@ -75,13 +95,15 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 						local propData = propertyMap[propKey]
 						local t = type(value)
 						if propData then
-							if propData.Type == "enum" then
+							if propData.Type == "TranslatedString" then
+								data[propData.Name] = _GetTranslatedString(t, value)
+							elseif propData.Type == "enum" then
 								data[propData.Name] = propData.Parse(value,t)
 							elseif (propData.Type == "any" or t == propData.Type) then
 								data[propData.Name] = value
 							end
 						else
-							--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
+							fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
 						end
 					end
 				end
