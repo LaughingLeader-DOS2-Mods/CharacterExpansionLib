@@ -62,6 +62,8 @@ function SheetTalentData:IsUnlockable(character)
 	local canUnlock = false
 	if self.Requirements then
 		canUnlock = GameHelpers.Stats.CharacterHasRequirements(character, self.Requirements)
+	else
+		canUnlock = true
 	end
 
 	---@type SubscribableEventInvokeResult<SheetManagerCanUnlockTalentEventArgs>

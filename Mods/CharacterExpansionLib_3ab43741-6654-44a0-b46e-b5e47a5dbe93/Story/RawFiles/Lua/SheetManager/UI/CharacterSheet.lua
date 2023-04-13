@@ -806,10 +806,6 @@ local function getTalentStateFrame(talentState)
 		return 2
 	elseif talentState == 1 then
 		return 3
-	elseif talentState == 2 then
-		return 1
-	elseif talentState == 3 then
-		return 1
 	else
 		return 1
 	end
@@ -865,7 +861,7 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 				end
 				mc.label = name
 				mc.talentState = talentState
-				mc.bullet_mc.gotoAndStop(this.getTalentStateFrame(talentState))
+				mc.bullet_mc.gotoAndStop(getTalentStateFrame(talentState))
 
 				if not Vars.ControllerEnabled then
 					this.stats_mc.talentHolder_mc.list.positionElements()
@@ -969,7 +965,7 @@ function CharacterSheet.UpdateAllEntries()
 					end
 					mc.label = name
 					mc.talentState = talentState
-					mc.bullet_mc.gotoAndStop(this.getTalentStateFrame(talentState))
+					mc.bullet_mc.gotoAndStop(getTalentStateFrame(talentState))
 
 					if not Vars.ControllerEnabled then
 						this.talentHolder_mc.list.positionElements()
