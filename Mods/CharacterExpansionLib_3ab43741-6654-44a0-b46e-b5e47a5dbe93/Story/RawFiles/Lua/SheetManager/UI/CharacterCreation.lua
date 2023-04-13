@@ -121,7 +121,7 @@ function CharacterCreation.UpdateTalents(self, e, ui, method)
 		if engineValues[talent.ID] ~= nil then
 			talent.HasTalent = engineValues[talent.ID]
 		end
-		SheetManager.Events.OnEntryUpdating:Invoke({ID=talent.ID, EntryType="SheetTalentData", Stat=talent, Character=player})
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=talent.ID, EntryType="SheetTalentData", Stat=talent, Character=player, CharacterID=player.NetID})
 		if talent.Visible then
 			talentsMC.addTalentElement(talent.GeneratedID, talent.DisplayName, talent.HasTalent, talent.IsChoosable, talent.IsRacial, talent.IsCustom)
 		end
@@ -184,7 +184,7 @@ function CharacterCreation.UpdateAbilities(self, e, ui, method)
 			ability.Value = updateData.Value
 			ability.Delta = updateData.Delta
 		end
-		SheetManager.Events.OnEntryUpdating:Invoke({ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player})
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 		if ability.Visible then
 			abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 			if updateClassContent and ability.Delta > 0 then
@@ -264,7 +264,7 @@ function CharacterCreation.UpdateAttributes(self, e, ui, method)
 			stat.Value = updateData.Value
 			stat.Delta = updateData.Delta
 		end
-		SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="SheetStatData", Stat=stat, Character=player})
+		SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="SheetStatData", Stat=stat, Character=player, CharacterID=player.NetID})
 		if stat.Visible then
 			attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
 			if updateClassContent and stat.Delta > 0 then

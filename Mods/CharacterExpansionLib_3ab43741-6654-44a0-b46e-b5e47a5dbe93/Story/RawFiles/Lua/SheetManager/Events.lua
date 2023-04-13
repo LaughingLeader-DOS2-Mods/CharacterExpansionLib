@@ -12,6 +12,7 @@ _EVENTS.Loaded = Classes.SubscribableEvent:Create("SheetManager.Loaded")
 ---@class SheetManagerOnEntryChangedBaseEventArgs
 ---@field ID string
 ---@field Character EsvCharacter|EclCharacter
+---@field CharacterID Guid|NetId Guid on the server-side, NetId on the client-side.
 ---@field IsClient boolean
 
 ---@class SheetManagerOnEntryChangedStatEventArgs:SheetManagerOnEntryChangedBaseEventArgs
@@ -52,6 +53,7 @@ _EVENTS.OnEntryChanged = Classes.SubscribableEvent:Create("SheetManager.OnEntryC
 ---@field ID string
 ---@field Stat AnyStatEntryDataType
 ---@field Character EclCharacter
+---@field CharacterID NetId
 ---@field LastValue integer
 ---@field Value integer
 
@@ -101,6 +103,7 @@ if _ISCLIENT then
 	---@class SheetManagerOnEntryUpdatingBaseEventArgs
 	---@field ID string
 	---@field Character EclCharacter
+	---@field CharacterID NetId
 
 	---@class SheetManagerOnEntryUpdatingStatEventArgs:SheetManagerOnEntryUpdatingBaseEventArgs
 	---@field EntryType "SheetStatData"
@@ -132,6 +135,7 @@ if _ISCLIENT then
 	---@field ID string
 	---@field Stat AnyStatEntryDataType
 	---@field Character EclCharacter
+	---@field CharacterID NetId
 	---@field MovieClip FlashMovieClip
 	---@field UI UIObject
 	---@field Root FlashMainTimeline
@@ -145,3 +149,15 @@ if _ISCLIENT then
 	})
 end
 
+---@class SheetManagerCanUnlockTalentEventArgs
+---@field Character EclCharacter|EsvCharacter
+---@field CharacterID Guid|NetId Guid on the server-side, NetId on the client-side.
+---@field EntryType "SheetTalentData"
+---@field ID string
+---@field Talent SheetTalentData
+---@field CanUnlock boolean
+
+---Called when checking if a talent can be unlocked.  
+---🔨🔧**Server/Client**🔧🔨   
+---@type LeaderLibSubscribableEvent<SheetManagerCanUnlockTalentEventArgs>
+_EVENTS.CanUnlockTalent = Classes.SubscribableEvent:Create("SheetManager.CanUnlockTalent")

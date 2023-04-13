@@ -137,6 +137,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 			LastValue = last,
 			Value = value,
 			Character = character,
+			CharacterID = characterId,
 			IsClient = _ISCLIENT,
 		})
 		
@@ -312,6 +313,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 				ID = entry.ID,
 				Stat = entry,
 				Character = character,
+				CharacterID = characterId,
 				LastValue = points,
 				Value = points,
 			})

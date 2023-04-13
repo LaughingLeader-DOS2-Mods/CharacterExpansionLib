@@ -391,6 +391,7 @@ else
 						LastValue = last,
 						Value = value,
 						Character = character,
+						CharacterID = GameHelpers.GetObjectID(character),
 						IsClient = isClient,
 					})
 				end

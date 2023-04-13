@@ -1,6 +1,7 @@
 local isClient = Ext.IsClient()
 
 ---@class SheetTalentData:SheetBaseData
+---@field Requirements (StatRequirement[])|nil
 local SheetTalentData = {
 	Type = "SheetTalentData",
 	StatType = "Talent",
@@ -23,6 +24,7 @@ end
 
 SheetTalentData.PropertyMap = {
 	ISRACIAL = {Name="IsRacial", Type = "boolean"},
+	REQUIREMENTS = {Name="Requirements", Type = "table"},
 }
 
 TableHelpers.AddOrUpdate(SheetTalentData.PropertyMap, Classes.SheetBaseData.PropertyMap)
@@ -54,6 +56,37 @@ function SheetTalentData:GetValue(character)
 	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character))
 end
 
+---@param character CharacterParam
+---@return boolean
+function SheetTalentData:IsUnlockable(character)
+	local canUnlock = false
+	if self.Requirements then
+		canUnlock = GameHelpers.Stats.CharacterHasRequirements(character, self.Requirements)
+	end
+
+	---@type SubscribableEventInvokeResult<SheetManagerCanUnlockTalentEventArgs>
+	local invokeResult = SheetManager.Events.CanUnlockTalent:Invoke({
+		CanUnlock = canUnlock,
+		Character = character,
+		CharacterID = GameHelpers.GetObjectID(character),
+		ID = self.ID,
+		EntryType = "SheetTalentData",
+		Talent = self,
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		canUnlock = invokeResult.Args.CanUnlock == true
+		if invokeResult.Results then
+			for i=1,#invokeResult.Results do
+				local b = invokeResult.Results[i]
+				if type(b) == "boolean" then
+					canUnlock = b
+				end
+			end
+		end
+	end
+	return canUnlock
+end
+
 ---@class TalentState
 local TalentState = {
 	Selected = 0,
@@ -62,16 +95,18 @@ local TalentState = {
 }
 
 ---@param character CharacterParam
----@return boolean
+---@return integer
 function SheetTalentData:GetState(character)
 	local value = self:GetValue(character)
 	if value then
 		return TalentState.Selected
 	else
-		--TODO
-		-- Hook into talent requirement listener
-		return TalentState.Selectable
+		local canUnlock = self:IsUnlockable(character)
+		if canUnlock then
+			return TalentState.Selectable
+		end
 	end
+	return TalentState.Locked
 end
 
 ---@param character CharacterParam

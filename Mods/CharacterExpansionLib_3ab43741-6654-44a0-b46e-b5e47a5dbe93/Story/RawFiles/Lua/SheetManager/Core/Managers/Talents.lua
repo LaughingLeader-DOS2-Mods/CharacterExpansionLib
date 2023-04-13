@@ -714,10 +714,11 @@ local function GetRequirementFromText(text)
 end
 
 function SheetManager.Talents.LoadRequirements()
-	for _,uuid in pairs(Ext.GetModLoadOrder()) do
-		local modInfo = Ext.GetModInfo(uuid)
-		if modInfo and modInfo.Directory then
-			local talentRequirementsText = Ext.IO.LoadFile("Public/"..modInfo.Directory.."/Stats/Generated/Data/Requirements.txt", "data")
+	for _,uuid in pairs(Ext.Mod.GetLoadOrder()) do
+		local mod = Ext.Mod.GetMod(uuid)
+		if mod and mod.Info and mod.Info.Directory then
+			local directory = mod.Info.Directory
+			local talentRequirementsText = Ext.IO.LoadFile("Public/"..directory.."/Stats/Generated/Data/Requirements.txt", "data")
 			if not StringHelpers.IsNullOrEmpty(talentRequirementsText) then
 				for line in StringHelpers.GetLines(talentRequirementsText) do
 					local talent,requirementText = string.match(line, 'requirement.*"(.+)",.*"(.*)"')
