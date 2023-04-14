@@ -17,7 +17,7 @@ Ext.RegisterUINameCall("characterCreationStarted", ActuallySetCharacterHandle, "
 local function UpdateSheetHandlesAfterHotbar(hotBar, event, doubleHandle)
 	if doubleHandle ~= nil and doubleHandle ~= 0 then
 		for i=1,#uiTypes do
-			local ui = Ext.GetUIByType(uiTypes[i])
+			local ui = Ext.UI.GetByType(uiTypes[i])
 			if ui then
 				local this = ui:GetRoot()
 				if this then

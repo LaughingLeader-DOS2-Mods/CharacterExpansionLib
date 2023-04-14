@@ -328,7 +328,7 @@ end
 local function GetArrayValues(this,baseChanges,modChanges)
 	local defaultCanAdd = this.isGameMasterChar
 	local defaultCanRemove = this.isGameMasterChar
-	local time = Ext.MonotonicTime()
+	local time = Ext.Utils.MonotonicTime()
 	local arr = this.primStat_array
 	for i=0,#arr-1,4 do
 		local id = arr[i]
@@ -520,13 +520,15 @@ local function ParseArrayValues(this, skipSort)
 	end
 end
 
+---@param this CharacterSheetMainTimeline
+---@return EclCharacter|nil
 local function TryGetSheetCharacter(this)
-	if this.characterHandle ~= nil and not GameHelpers.Math.IsNaN(this.characterHandle) then
-		return Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle))
+	if this.characterHandle ~= nil then
+		return GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle)
 	end
 end
 
----@return EclCharacter
+---@return EclCharacter|nil
 function CharacterSheet.GetCharacter()
 	if Ext.GetGameState() ~= "Running" or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
 		return nil
@@ -702,10 +704,10 @@ Ext.RegisterUITypeInvokeListener(Data.UIType.characterSheet, "setTitle", functio
 	local this = CharacterSheet.Root
 	if this and this.isExtended then
 		local stats_mc = this.stats_mc
-		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_ATTRIBUTES, Ext.GetTranslatedString("h15c226f2g54dag4f0eg80e6g121098c0766e", "Attributes"))
-		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_STATS, Ext.GetTranslatedString("h3d70a7c1g6f19g4f28gad0cgf0722eea9850", "Stats"))
-		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_EXPERIENCE, Ext.GetTranslatedString("he50fce4dg250cg4449g9f33g7706377086f6", "Experience"))
-		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_RESISTANCES, Ext.GetTranslatedString("h5a0c9b53gd3f7g4e01gb43ege4a255e1c8ee", "Resistances"))
+		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_ATTRIBUTES, GameHelpers.GetTranslatedString("h15c226f2g54dag4f0eg80e6g121098c0766e", "Attributes"))
+		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_STATS, GameHelpers.GetTranslatedString("h3d70a7c1g6f19g4f28gad0cgf0722eea9850", "Stats"))
+		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_EXPERIENCE, GameHelpers.GetTranslatedString("he50fce4dg250cg4449g9f33g7706377086f6", "Experience"))
+		stats_mc.setMainStatsGroupName(stats_mc.GROUP_MAIN_RESISTANCES, GameHelpers.GetTranslatedString("h5a0c9b53gd3f7g4e01gb43ege4a255e1c8ee", "Resistances"))
 	end
 end)
 Ext.RegisterUITypeCall(Data.UIType.statsPanel_c, "characterSheetUpdateDone", CharacterSheet.Update)
@@ -787,13 +789,10 @@ end
 Ext.RegisterUITypeCall(Data.UIType.characterSheet, "entryAdded", OnEntryAdded)
 
 local function OnCharacterSelected(wrapper, e, ui, event, doubleHandle)
-	if doubleHandle and not GameHelpers.Math.IsNaN(doubleHandle) and doubleHandle ~= 0 then
-		local handle = Ext.DoubleToHandle(doubleHandle)
-		if handle then
-			local player = Ext.GetCharacter(handle)
-			if player then
-				SheetManager:SyncData(player)
-			end
+	if doubleHandle then
+		local player = GameHelpers.Client.TryGetCharacterFromDouble(doubleHandle)
+		if player then
+			SheetManager:SyncData(player)
 		end
 	end
 end
@@ -1032,9 +1031,9 @@ Input.RegisterListener("ToggleCraft", function(event, pressed, id, keys, control
 		---@type FlashMainTimeline
 		local this = nil
 		if not Vars.ControllerEnabled then
-			this = Ext.GetUIByType(Data.UIType.characterSheet):GetRoot()
+			this = Ext.UI.GetByType(Data.UIType.characterSheet):GetRoot()
 		else
-			this = Ext.GetUIByType(Data.UIType.statsPanel_c):GetRoot()
+			this = Ext.UI.GetByType(Data.UIType.statsPanel_c):GetRoot()
 		end
 		if not this then
 			return
@@ -1043,7 +1042,7 @@ Input.RegisterListener("ToggleCraft", function(event, pressed, id, keys, control
 			local character = Client:GetCharacter()
 			this.setGameMasterMode(false, false, false)
 			CharacterSheet.UpdateAllEntries()
-			Ext.PostMessageToServer("LeaderLib_RefreshCharacterSheet", Client.Character.UUID)
+			GameHelpers.Net.PostMessageToServer("LeaderLib_RefreshCharacterSheet", Client.Character.UUID)
 
 			local points = Client.Character.Points
 			this.setAvailableStatPoints(points.Attribute)

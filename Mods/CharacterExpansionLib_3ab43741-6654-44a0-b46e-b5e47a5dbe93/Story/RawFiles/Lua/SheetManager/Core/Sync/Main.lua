@@ -1,5 +1,5 @@
 local self = SheetManager
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---Functions related to data that gets saved to PersistentVars.
 SheetManager.Save = {}
@@ -7,12 +7,12 @@ SheetManager.Save = {}
 SheetManager.Sync = {}
 
 ---Sync all current values and available points for a specific character, or all characters if nil.
----@param character Guid|EsvCharacter|nil
+---@param character? Guid|EsvCharacter|EclCharacter
 function SheetManager:SyncData(character)
 	if SheetManager.Loaded ~= true then
 		return false
 	end
-	if not isClient then
+	if not _ISCLIENT then
 		SheetManager.Sync.EntryValues(character)
 		SheetManager.Sync.CustomAvailablePoints(character)
 		if character ~= nil then
@@ -21,14 +21,12 @@ function SheetManager:SyncData(character)
 		else
 			GameHelpers.Net.Broadcast("CEL_SheetManager_NotifyDataSynced", "")
 		end
-	else
-		if character then
-			Ext.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", GameHelpers.GetNetID(character))
-		end
+	elseif character then
+		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", GameHelpers.GetNetID(character))
 	end
 end
 
-if not isClient then
+if not _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_RequestCharacterSync", function(cmd, payload)
 		local netid = tonumber(payload)
 		if netid then

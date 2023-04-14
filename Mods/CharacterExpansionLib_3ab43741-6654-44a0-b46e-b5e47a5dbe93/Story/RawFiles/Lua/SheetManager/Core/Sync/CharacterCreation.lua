@@ -14,7 +14,7 @@ function SheetManager.IsInCharacterCreation(characterId)
 				return true
 			end
 		end
-		local ui = not Vars.ControllerEnabled and Ext.GetUIByType(Data.UIType.characterCreation) or Ext.GetUIByType(Data.UIType.characterCreation_c)
+		local ui = not Vars.ControllerEnabled and Ext.UI.GetByType(Data.UIType.characterCreation) or Ext.UI.GetByType(Data.UIType.characterCreation_c)
 		local player = GameHelpers.Client.GetCharacterCreationCharacter()
 		if player then
 			return GameHelpers.GetObjectID(player) == characterId

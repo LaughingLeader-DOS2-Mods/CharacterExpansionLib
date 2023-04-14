@@ -368,7 +368,6 @@ end)
 ---@return FlashCustomStat
 function CustomStatsUI:GetStatMovieClipByDouble(ui, statId)
 	if ui:GetTypeId() == Data.UIType.characterSheet then
-		local character = Ext.GetCharacter(ui:GetPlayerHandle())
 		local this = ui:GetRoot()
 		local stats = this.stats_mc.customStats_mc.stats_array
 		for i=0,#stats do

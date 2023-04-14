@@ -216,7 +216,7 @@ end
 local function HideTooltip(callingUI, call)
 	if isVisible then
 		isVisible = false
-		local ui = Ext.GetUIByType(Data.UIType.tooltip)
+		local ui = Ext.UI.GetByType(Data.UIType.tooltip)
 		if ui then
 			ui:Invoke("removeTooltip")
 			if lastTooltipX and lastTooltipY then

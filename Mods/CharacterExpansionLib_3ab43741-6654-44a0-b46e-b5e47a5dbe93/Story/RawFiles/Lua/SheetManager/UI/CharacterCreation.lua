@@ -336,11 +336,11 @@ CharacterCreation.Register:Call("selectOption", function(self, e, ui, call)
 	if not this then
 		return
 	end
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
 	if player then
 		SessionManager:ResetSession(player)
 	end
-	-- local color = math.tointeger(0xCC00FF); local wiz = Ext.UI.GetCharacterCreationWizard().CharacterCreationManager.Customizations[0].State; wiz.SkinColor.Value = color; Ext.GetUIByType(3):ExternalInterfaceCall("setArmourState", 0); --Ext.GetUIByType(119):ExternalInterfaceCall("setHelmetOption", 0) --Ext.GetUIByType(3):ExternalInterfaceCall("setGender", true); 
+	-- local color = math.tointeger(0xCC00FF); local wiz = Ext.UI.GetCharacterCreationWizard().CharacterCreationManager.Customizations[0].State; wiz.SkinColor.Value = color; Ext.UI.GetByType(3):ExternalInterfaceCall("setArmourState", 0); --Ext.UI.GetByType(119):ExternalInterfaceCall("setHelmetOption", 0) --Ext.UI.GetByType(3):ExternalInterfaceCall("setGender", true); 
 	-- local wiz = Ext.UI.GetCharacterCreationWizard()
 	-- if wiz then
 	-- 	local raceData = wiz.CharacterCreationManager.Customizations[0].State
