@@ -153,7 +153,7 @@ local function LoadData()
 		end
 	end
 
-	SheetManager.Talents.LoadRequirements()
+	SheetManager.Talents.Builtin.LoadRequirements()
 
 	if not _ISCLIENT then
 		--SheetManager.CustomStats.LoadUnregistered()
@@ -167,11 +167,11 @@ local function LoadData()
 	if _ISCLIENT then
 		---Divine Talents
 		if Ext.Mod.IsModLoaded("ca32a698-d63e-4d20-92a7-dd83cba7bc56") then
-			SheetManager.Talents.ToggleDivineTalents(true, "ca32a698-d63e-4d20-92a7-dd83cba7bc56")
+			SheetManager.Talents.Builtin.ToggleDivineTalents(true, "ca32a698-d63e-4d20-92a7-dd83cba7bc56")
 		elseif Mods.LeaderLib then
 			local gameSettings = GameSettingsManager.GetSettings()
 			if gameSettings.Client.DivineTalentsEnabled then
-				SheetManager.Talents.ToggleDivineTalents(true, Mods.LeaderLib.ModuleUUID)
+				SheetManager.Talents.Builtin.ToggleDivineTalents(true, Mods.LeaderLib.ModuleUUID)
 			end
 		end
 	else

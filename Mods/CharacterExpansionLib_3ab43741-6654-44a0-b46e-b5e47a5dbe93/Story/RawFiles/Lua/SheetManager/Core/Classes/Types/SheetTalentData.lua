@@ -79,7 +79,7 @@ function SheetTalentData:IsUnlockable(character)
 					canUnlock = false
 					break
 				end
-			elseif TalentManager.HasTalent(character, id) then
+			elseif SheetManager.Talents.HasTalent(character, id) then
 				canUnlock = false
 				break
 			end
@@ -109,26 +109,19 @@ function SheetTalentData:IsUnlockable(character)
 	return canUnlock
 end
 
----@class TalentState
-local TalentState = {
-	Selected = 0,
-	Selectable = 2,
-	Locked = 3
-}
-
 ---@param character CharacterParam
----@return integer
+---@return TalentState
 function SheetTalentData:GetState(character)
 	local value = self:GetValue(character)
 	if value then
-		return TalentState.Selected
+		return SheetManager.Talents.Data.TalentState.Selected
 	else
 		local canUnlock = self:IsUnlockable(character)
 		if canUnlock then
-			return TalentState.Selectable
+			return SheetManager.Talents.Data.TalentState.Selectable
 		end
 	end
-	return TalentState.Locked
+	return SheetManager.Talents.Data.TalentState.Locked
 end
 
 ---@param character CharacterParam

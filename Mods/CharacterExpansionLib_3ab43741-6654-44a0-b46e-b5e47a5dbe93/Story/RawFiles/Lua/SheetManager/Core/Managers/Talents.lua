@@ -4,8 +4,10 @@ local _ISCLIENT = Ext.IsClient()
 
 ---@alias TalentRequirementCheckCallback fun(talentId:string, player:EclCharacter):boolean
 
----@class TalentManager
-SheetManager.Talents = {
+---@class SheetManagerTalents
+SheetManager.Talents = {}
+
+local _INTERNAL = {
 	RegisteredTalents = {},
 	RegisteredCount = {},
 	---@type table<string, table<string, TalentRequirementCheckCallback>>
@@ -14,30 +16,24 @@ SheetManager.Talents = {
 	BuiltinRequirements = {},
 	HiddenTalents = {},
 	HiddenCount = {},
-	Data = {}
 }
+local Data = {}
+SheetManager.Talents._Internal = _INTERNAL
+SheetManager.Talents.Data = Data
 
-if not TalentManager then
-	TalentManager = SheetManager.Talents
-end
-
--- if not Mods.LeaderLib.TalentManager then
--- 	Mods.LeaderLib.TalentManager = SheetManager.Talents
--- end
-
----@enum
-SheetManager.Talents.Data.TalentState = {
+---@enum TalentState
+Data.TalentState = {
 	Selected = 0,
 	Selectable = 2,
 	Locked = 3
 }
 
-SheetManager.Talents.Data.TalentStateColor = {
+Data.TalentStateColor = {
 	[2] = "#403625",
 	[3] = "#C80030"
 }
 
-SheetManager.Talents.Data.DOSTalents = {
+Data.DOSTalents = {
 	ItemMovement = "TALENT_ItemMovement",
 	ItemCreation = "TALENT_ItemCreation",
 	--Flanking = "TALENT_Flanking",
@@ -170,7 +166,7 @@ SheetManager.Talents.Data.DOSTalents = {
 	MagicCycles = "TALENT_MagicCycles",
 }
 
-SheetManager.Talents.Data.RacialTalents = {
+Data.RacialTalents = {
 	Human_Inventive = "TALENT_Human_Inventive",
 	Human_Civil = "TALENT_Human_Civil",
 	Elf_Lore = "TALENT_Elf_Lore",
@@ -182,7 +178,7 @@ SheetManager.Talents.Data.RacialTalents = {
 	Zombie = "TALENT_Zombie",
 }
 
-SheetManager.Talents.Data.DivineTalents = {
+Data.DivineTalents = {
 	Rager = "TALENT_Rager",
 	Elementalist = "TALENT_Elementalist",
 	Sadist = "TALENT_Sadist",
@@ -197,7 +193,7 @@ SheetManager.Talents.Data.DivineTalents = {
 	MagicCycles = "TALENT_MagicCycles",
 }
 
-SheetManager.Talents.Data.VisibleDivineTalents = {
+Data.VisibleDivineTalents = {
 	Sadist = "TALENT_Sadist",
 	Haymaker = "TALENT_Haymaker",
 	Gladiator = "TALENT_Gladiator",
@@ -208,7 +204,7 @@ SheetManager.Talents.Data.VisibleDivineTalents = {
 	MagicCycles = "TALENT_MagicCycles",
 }
 
-SheetManager.Talents.Data.TalentStatAttributes = {
+Data.TalentStatAttributes = {
 	ItemMovement = "TALENT_ItemMovement",
 	ItemCreation = "TALENT_ItemCreation",
 	Flanking = "TALENT_Flanking",
@@ -341,7 +337,7 @@ SheetManager.Talents.Data.TalentStatAttributes = {
 	MagicCycles = "TALENT_MagicCycles",
 }
 
-SheetManager.Talents.Data.DefaultVisible = {
+Data.DefaultVisible = {
 	Ambidextrous = "TALENT_Ambidextrous",
 	AnimalEmpathy = "TALENT_AnimalEmpathy",
 	AttackOfOpportunity = "TALENT_AttackOfOpportunity",
@@ -377,19 +373,22 @@ SheetManager.Talents.Data.DefaultVisible = {
 	WhatARush = "TALENT_WhatARush",
 }
 
-for name,v in pairs(SheetManager.Talents.Data.DOSTalents) do
-	SheetManager.Talents.RegisteredCount[name] = 0
+for name,v in pairs(Data.DOSTalents) do
+	_INTERNAL.RegisteredCount[name] = 0
 end
 
 for talentId,enum in pairs(Data.TalentEnum) do
-	SheetManager.Talents.HiddenTalents[talentId] = {}
+	_INTERNAL.HiddenTalents[talentId] = {}
 end
 
----@private
+local Builtin = {}
+
+SheetManager.Talents.Builtin = Builtin
+
 ---@param talentId string
 ---@return boolean
-function SheetManager.Talents.IsRegisteredTalent(talentId)
-	return SheetManager.Talents.RegisteredCount[talentId] and SheetManager.Talents.RegisteredCount[talentId] > 0
+function Builtin.IsRegistered(talentId)
+	return _INTERNAL.RegisteredCount[talentId] and _INTERNAL.RegisteredCount[talentId] > 0
 end
 
 ---@param player EclCharacter|EsvCharacter
@@ -424,52 +423,52 @@ end
 --Requires a name and description to be manually set in the tooltip, as well as an icon
 local ragerWasEnabled = false
 
----@param talentId string The talent id, i.e. Executioner
+---@param talentId string A builtin talent id, i.e. Executioner
 ---@param modID string The registering mod's UUID.
 ---@param getRequirements TalentRequirementCheckCallback|nil A function that gets invoked when looking to see if a player has met the talent's requirements.
-function SheetManager.Talents.EnableTalent(talentId, modID, getRequirements)
+function Builtin.EnableTalent(talentId, modID, getRequirements)
 	if talentId == "Rager" then
 		ragerWasEnabled = true
 	end
 	if talentId == "all" then
-		for talent,v in pairs(SheetManager.Talents.Data.DOSTalents) do
-			SheetManager.Talents.EnableTalent(talent, modID, getRequirements)
+		for talent,v in pairs(Data.DOSTalents) do
+			Builtin.EnableTalent(talent, modID, getRequirements)
 		end
 	else
-		if SheetManager.Talents.RegisteredTalents[talentId] == nil then
-			SheetManager.Talents.RegisteredTalents[talentId] = {}
+		if _INTERNAL.RegisteredTalents[talentId] == nil then
+			_INTERNAL.RegisteredTalents[talentId] = {}
 		end
-		if SheetManager.Talents.RegisteredTalents[talentId][modID] ~= true then
-			SheetManager.Talents.RegisteredTalents[talentId][modID] = true
-			SheetManager.Talents.RegisteredCount[talentId] = (SheetManager.Talents.RegisteredCount[talentId] or 0) + 1
+		if _INTERNAL.RegisteredTalents[talentId][modID] ~= true then
+			_INTERNAL.RegisteredTalents[talentId][modID] = true
+			_INTERNAL.RegisteredCount[talentId] = (_INTERNAL.RegisteredCount[talentId] or 0) + 1
 		end
 		if getRequirements then
-			if not SheetManager.Talents.RequirementHandlers[talentId] then
-				SheetManager.Talents.RequirementHandlers[talentId] = {}
+			if not _INTERNAL.RequirementHandlers[talentId] then
+				_INTERNAL.RequirementHandlers[talentId] = {}
 			end
-			SheetManager.Talents.RequirementHandlers[talentId][modID] = getRequirements
+			_INTERNAL.RequirementHandlers[talentId][modID] = getRequirements
 		end
 	end
 end
 
 ---@param talentId string The talent id, i.e. Executioner
 ---@param modID string The registering mod's UUID.
-function SheetManager.Talents.DisableTalent(talentId, modID)
+function Builtin.DisableTalent(talentId, modID)
 	if talentId == "all" then
-		for talent,v in pairs(SheetManager.Talents.Data.DOSTalents) do
-			SheetManager.Talents.DisableTalent(talent, modID)
+		for talent,v in pairs(Data.DOSTalents) do
+			Builtin.DisableTalent(talent, modID)
 		end
 		TryRequestRefresh()
 	else
-		local data = SheetManager.Talents.RegisteredTalents[talentId]
+		local data = _INTERNAL.RegisteredTalents[talentId]
 		if data ~= nil then
-			if SheetManager.Talents.RegisteredTalents[talentId][modID] ~= nil then
-				SheetManager.Talents.RegisteredTalents[talentId][modID] = nil
-				SheetManager.Talents.RegisteredCount[talentId] = SheetManager.Talents.RegisteredCount[talentId] - 1
+			if _INTERNAL.RegisteredTalents[talentId][modID] ~= nil then
+				_INTERNAL.RegisteredTalents[talentId][modID] = nil
+				_INTERNAL.RegisteredCount[talentId] = _INTERNAL.RegisteredCount[talentId] - 1
 			end
-			if SheetManager.Talents.RegisteredCount[talentId] <= 0 then
-				SheetManager.Talents.RegisteredTalents[talentId] = nil
-				SheetManager.Talents.RegisteredCount[talentId] = 0
+			if _INTERNAL.RegisteredCount[talentId] <= 0 then
+				_INTERNAL.RegisteredTalents[talentId] = nil
+				_INTERNAL.RegisteredCount[talentId] = 0
 				TryRequestRefresh()
 			end
 		end
@@ -479,19 +478,19 @@ end
 ---Hides a talent from the UI, effectively disabling the ability to select it.
 ---@param talentId string
 ---@param modID string
-function SheetManager.Talents.HideTalent(talentId, modID)
+function Builtin.HideTalent(talentId, modID)
 	if talentId == "all" then
 		for talentId,enum in pairs(Data.TalentEnum) do
-			SheetManager.Talents.HideTalent(talentId, modID)
+			Builtin.HideTalent(talentId, modID)
 		end
 		TryRequestRefresh()
 	else
-		if SheetManager.Talents.HiddenTalents[talentId] == nil then
-			SheetManager.Talents.HiddenTalents[talentId] = {}
+		if _INTERNAL.HiddenTalents[talentId] == nil then
+			_INTERNAL.HiddenTalents[talentId] = {}
 		end
-		if SheetManager.Talents.HiddenTalents[talentId][modID] ~= true then
-			SheetManager.Talents.HiddenTalents[talentId][modID] = true
-			SheetManager.Talents.HiddenCount[talentId] = (SheetManager.Talents.HiddenCount[talentId] or 0) + 1
+		if _INTERNAL.HiddenTalents[talentId][modID] ~= true then
+			_INTERNAL.HiddenTalents[talentId][modID] = true
+			_INTERNAL.HiddenCount[talentId] = (_INTERNAL.HiddenCount[talentId] or 0) + 1
 			TryRequestRefresh()
 		end
 	end
@@ -500,36 +499,36 @@ end
 ---Stops hiding a talent from the UI.
 ---@param talentId string
 ---@param modID string
-function SheetManager.Talents.UnhideTalent(talentId, modID)
+function Builtin.UnhideTalent(talentId, modID)
 	if talentId == "all" then
 		for _,talent in pairs(Data.Talents) do
-			SheetManager.Talents.UnhideTalent(talent, modID)
+			Builtin.UnhideTalent(talent, modID)
 		end
 	else
-		local count = SheetManager.Talents.HiddenCount[talentId] or 0
-		local data = SheetManager.Talents.HiddenTalents[talentId]
+		local count = _INTERNAL.HiddenCount[talentId] or 0
+		local data = _INTERNAL.HiddenTalents[talentId]
 		if data ~= nil then
-			if SheetManager.Talents.HiddenTalents[talentId][modID] ~= nil then
-				SheetManager.Talents.HiddenTalents[talentId][modID] = nil
+			if _INTERNAL.HiddenTalents[talentId][modID] ~= nil then
+				_INTERNAL.HiddenTalents[talentId][modID] = nil
 				count = count - 1
 			end
 		end
 		if count <= 0 then
-			SheetManager.Talents.HiddenTalents[talentId] = nil
-			SheetManager.Talents.HiddenCount[talentId] = nil
+			_INTERNAL.HiddenTalents[talentId] = nil
+			_INTERNAL.HiddenCount[talentId] = nil
 		else
-			SheetManager.Talents.HiddenCount[talentId] = count
+			_INTERNAL.HiddenCount[talentId] = count
 		end
 	end
 end
 
 ---@param player EclCharacter
----@param id string
-function SheetManager.Talents.HasRequirements(player, id)
-	local getRequirementsHandlers = SheetManager.Talents.RequirementHandlers[id]
+---@param talentId string
+function Builtin.HasRequirements(player, talentId)
+	local getRequirementsHandlers = _INTERNAL.RequirementHandlers[talentId]
 	if getRequirementsHandlers then
 		for modid,handler in pairs(getRequirementsHandlers) do
-			local b,result = xpcall(handler, debug.traceback, id, player)
+			local b,result = xpcall(handler, debug.traceback, talentId, player)
 			if b then
 				if result == false then
 					return false
@@ -540,7 +539,7 @@ function SheetManager.Talents.HasRequirements(player, id)
 			end
 		end
 	end
-	local builtinRequirements = SheetManager.Talents.BuiltinRequirements[id]
+	local builtinRequirements = _INTERNAL.BuiltinRequirements[talentId]
 	if builtinRequirements and #builtinRequirements > 0 then
 		for _,req in pairs(builtinRequirements) do
 			local playerValue = player.Stats[req.Requirement]
@@ -559,23 +558,23 @@ function SheetManager.Talents.HasRequirements(player, id)
 	return true
 end
 
----@param talentState integer
+---@param talentState TalentState
 ---@return string
 function SheetManager.Talents.GetTalentStateFontFormat(talentState)
-	local color = SheetManager.Talents.Data.TalentStateColor[talentState]
+	local color = Data.TalentStateColor[talentState]
 	if color then
 		return "<font color='"..color.."'>%s</font>"
 	end
 	return "%s"
 end
 
----@param id string
----@param talentState integer
+---@param talentId string The talent ID
+---@param talentState TalentState
 ---@return string
-function SheetManager.Talents.GetTalentDisplayName(id, talentState)
-	local name = id
-	if LocalizedText.TalentNames[id] then
-		name = LocalizedText.TalentNames[id].Value
+function Builtin.GetDisplayName(talentId, talentState)
+	local name = talentId
+	if LocalizedText.TalentNames[talentId] then
+		name = LocalizedText.TalentNames[talentId].Value
 	end
 	return string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), name)
 end
@@ -584,23 +583,23 @@ end
 ---@param talentId string
 ---@param hasTalent boolean
 ---@return TalentState
-function SheetManager.Talents.GetTalentState(player, talentId, hasTalent)
+function Builtin.GetTalentState(player, talentId, hasTalent)
 	if hasTalent == true then 
 		return Data.TalentState.Selected
-	elseif not SheetManager.Talents.HasRequirements(player, talentId) then 
+	elseif not Builtin.HasRequirements(player, talentId) then 
 		return Data.TalentState.Locked
 	else
 		return Data.TalentState.Selectable
 	end
 end
 
-function SheetManager.Talents.TalentIsHidden(talentId)
-	local count = SheetManager.Talents.HiddenCount[talentId]
+function Builtin.TalentIsHidden(talentId)
+	local count = _INTERNAL.HiddenCount[talentId]
 	return count and count > 0
 end
 
 local function CanDisplayDivineTalent(talentId)
-	if not SheetManager.Talents.Data.DivineTalents[talentId] then
+	if not Data.DivineTalents[talentId] then
 		return true
 	end
 	local name = LocalizedText.TalentNames[talentId]
@@ -616,7 +615,7 @@ local function CanDisplayDivineTalent(talentId)
 		-- Seems to have no handles for its name/description
 		return ragerWasEnabled
 	elseif talentId == "Jitterbug" then
-		local tooltip = Ext.GetTranslatedString("h758efe2fgb3bag4935g9500g2c789497e87a", "")
+		local tooltip = GameHelpers.GetTranslatedString("h758efe2fgb3bag4935g9500g2c789497e87a", "|Being depleted of Physical or Magical armour teleports you to random location, away from the source of damage. Can happen once every 2 turns.|")
 		if string.find(tooltip, "|", 1, true) then
 			return false
 		end
@@ -625,21 +624,21 @@ local function CanDisplayDivineTalent(talentId)
 end
 
 ---@private
-function SheetManager.Talents.CanAddTalent(talentId, hasTalent)
+function Builtin.CanAddTalent(talentId, hasTalent)
 	local isGM = GameHelpers.Client.IsGameMaster()
-	if (SheetManager.Talents.TalentIsHidden(talentId) and not isGM) then
+	if (Builtin.TalentIsHidden(talentId) and not isGM) then
 		return false
 	end
 	if hasTalent == true then
 		return true
 	end
 
-	local isRegistered = SheetManager.Talents.RegisteredCount[talentId] and SheetManager.Talents.RegisteredCount[talentId] > 0
+	local isRegistered = _INTERNAL.RegisteredCount[talentId] and _INTERNAL.RegisteredCount[talentId] > 0
 	if isRegistered then
 		return true
 	end
 
-	if SheetManager.Talents.Data.VisibleDivineTalents[talentId] and CanDisplayDivineTalent(talentId) then
+	if Data.VisibleDivineTalents[talentId] and CanDisplayDivineTalent(talentId) then
 		return true
 	end
 
@@ -649,10 +648,10 @@ function SheetManager.Talents.CanAddTalent(talentId, hasTalent)
 	then
 		return true
 	end
-	if SheetManager.Talents.Data.DefaultVisible[talentId] then
+	if Data.DefaultVisible[talentId] then
 		return true
 	end
-	if SheetManager.Talents.Data.RacialTalents[talentId] and isGM then
+	if Data.RacialTalents[talentId] and isGM then
 		return true
 	end
 	return false
@@ -661,10 +660,8 @@ end
 if Vars.DebugMode then
 	if _ISCLIENT then
 		Events.LuaReset:Subscribe(function(e)
-			if not Vars.ControllerEnabled then
-
-			else
-				local ui = Ext.GetUIByType(Data.UIType.statsPanel_c)
+			if Vars.ControllerEnabled then
+				local ui = Ext.UI.GetByType(Data.UIType.statsPanel_c)
 				if ui then
 					ui:GetRoot().mainpanel_mc.stats_mc.talents_mc.statList.clearElements()
 				end
@@ -675,14 +672,14 @@ end
 
 ---@param enabled boolean
 ---@param modId Guid|nil Mod UUID
-function SheetManager.Talents.ToggleDivineTalents(enabled, modId)
+function Builtin.ToggleDivineTalents(enabled, modId)
 	if enabled then
-		for talent,id in pairs(SheetManager.Talents.Data.VisibleDivineTalents) do
-			SheetManager.Talents.EnableTalent(talent, modId or ModuleUUID)
+		for talent,id in pairs(Data.VisibleDivineTalents) do
+			Builtin.EnableTalent(talent, modId or ModuleUUID)
 		end
 	else
-		for talent,id in pairs(SheetManager.Talents.Data.VisibleDivineTalents) do
-			SheetManager.Talents.DisableTalent(talent, modId or ModuleUUID)
+		for talent,id in pairs(Data.VisibleDivineTalents) do
+			Builtin.DisableTalent(talent, modId or ModuleUUID)
 		end
 	end
 end
@@ -690,7 +687,7 @@ end
 local pointRequirement = "(.+) (%d+)"
 local talentRequirement = "(%!*)(TALENT_.+)"
 
-local function GetRequirementFromText(text)
+local function _GetRequirementFromText(text)
 	local requirementName,param = string.match(text, pointRequirement)
 	if requirementName and param then
 		return {
@@ -711,7 +708,7 @@ local function GetRequirementFromText(text)
 	return nil
 end
 
-function SheetManager.Talents.LoadRequirements()
+function Builtin.LoadRequirements()
 	for _,uuid in pairs(Ext.Mod.GetLoadOrder()) do
 		local mod = Ext.Mod.GetMod(uuid)
 		if mod and mod.Info and mod.Info.Directory then
@@ -721,12 +718,12 @@ function SheetManager.Talents.LoadRequirements()
 				for line in StringHelpers.GetLines(talentRequirementsText) do
 					local talent,requirementText = string.match(line, 'requirement.*"(.+)",.*"(.*)"')
 					if talent then
-						SheetManager.Talents.BuiltinRequirements[talent] = {}
+						_INTERNAL.BuiltinRequirements[talent] = {}
 						if requirementText then
 							for i,v in pairs(StringHelpers.Split(requirementText, ";")) do
-								local req = GetRequirementFromText(v)
+								local req = _GetRequirementFromText(v)
 								if req then
-									table.insert(SheetManager.Talents.BuiltinRequirements[talent], req)
+									table.insert(_INTERNAL.BuiltinRequirements[talent], req)
 								end
 							end
 						end
@@ -739,115 +736,112 @@ end
 
 if _ISCLIENT then
 
----@private
-function SheetManager.Talents.HideTalents(uiType)
-	if uiType == Data.UIType.characterSheet or uiType == Data.UIType.statsPanel_c then
-		SheetManager.Talents.Sheet.HideTalents()
-	elseif uiType == Data.UIType.characterCreation or uiType == Data.UIType.characterCreation_c then
-		SheetManager.Talents.CC.HideTalents()
-	end
-end
-
----@class SheetManager.TalentsUIEntry
----@field ID string
----@field GeneratedID integer
----@field Enum string
----@field HasTalent boolean
----@field DisplayName string
----@field IsRacial boolean
----@field IsChoosable boolean
----@field CanAdd boolean
----@field CanRemove boolean
----@field IsCustom boolean
----@field State integer
----@field Visible boolean
-
----@private
----@param player EclCharacter
----@param isCharacterCreation boolean|nil
----@param isGM boolean|nil
----@param availablePoints ?integer
----@return fun():SheetManager.TalentsUIEntry
-function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, availablePoints)
-	if isCharacterCreation == nil then
-		isCharacterCreation = false
-	end
-	if isGM == nil then
-		isGM = false
-	end
-
-	local talentPoints = availablePoints or SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
-	local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
-
-	local entries = {}
-	--Default entries
-	for numId,talentId in Data.Talents:Get() do
-		local hasTalent = targetStats[SheetManager.Talents.Data.TalentStatAttributes[talentId]] == true
-		if SheetManager.Talents.CanAddTalent(talentId, hasTalent) then
-			local talentState = SheetManager.Talents.GetTalentState(player, talentId, hasTalent)
-			local name = SheetManager.Talents.GetTalentDisplayName(talentId, talentState)
-			local isRacial = SheetManager.Talents.Data.RacialTalents[talentId] ~= nil
-			local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
-			-- if hasTalent then 
-			-- 	fprint(LOGLEVEL.WARNING, "[%s] Name(%s) State(%s) hasTalent(%s) isChoosable(%s) isRacial(%s)", talentId, name, talentState, hasTalent, isChoosable, isRacial)
-			-- end
-
-			local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == SheetManager.Talents.Data.TalentState.Selectable))
-			local canRemove = hasTalent and ((not isRacial and isCharacterCreation) or isGM)
-
-			---@type SheetManager.TalentsUIEntry
-			local data = {
-				ID = talentId,
-				GeneratedID = Data.TalentEnum[talentId],
-				HasTalent = hasTalent,
-				DisplayName = name,
-				IsRacial = isRacial,
-				IsChoosable = isChoosable,
-				State = talentState,
-				IsCustom = false,
-				CanAdd = canAdd,
-				CanRemove = canRemove,
-				Visible = true,
-			}
-			entries[#entries+1] = data
+	---@private
+	function SheetManager.Talents.HideTalents(uiType)
+		if uiType == Data.UIType.characterSheet or uiType == Data.UIType.statsPanel_c then
+			SheetManager.UI.Sheet.HideTalents()
+		elseif uiType == Data.UIType.characterCreation or uiType == Data.UIType.characterCreation_c then
+			SheetManager.UI.CC.HideTalents()
 		end
 	end
-	for mod,dataTable in pairs(SheetManager.Data.Talents) do
-		for id,data in pairs(dataTable) do
-			local hasTalent = data:GetValue(player) == true
-			if SheetManager:IsEntryVisible(data, player, hasTalent, isCharacterCreation, isGM) then
-				local talentState = data:GetState(player)
-				local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))
-				local isRacial = data.IsRacial
-				local isChoosable = not isRacial and talentState ~= SheetManager.Talents.Data.TalentState.Locked
-				local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or isGM
-				local canRemove = hasTalent and (isCharacterCreation or isGM)
+
+	---@class SheetManager.TalentsUIEntry
+	---@field ID string
+	---@field GeneratedID integer
+	---@field Enum string
+	---@field HasTalent boolean
+	---@field DisplayName string
+	---@field IsRacial boolean
+	---@field IsChoosable boolean
+	---@field CanAdd boolean
+	---@field CanRemove boolean
+	---@field IsCustom boolean
+	---@field State TalentState
+	---@field Visible boolean
+
+	---@private
+	---@param player EclCharacter
+	---@param isCharacterCreation boolean|nil
+	---@param isGM boolean|nil
+	---@param availablePoints ?integer
+	---@return fun():SheetManager.TalentsUIEntry
+	function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, availablePoints)
+		if isCharacterCreation == nil then
+			isCharacterCreation = false
+		end
+		if isGM == nil then
+			isGM = false
+		end
+
+		local talentPoints = availablePoints or SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
+		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
+
+		local entries = {}
+		--Default entries
+		for numId,talentId in Data.Talents:Get() do
+			local hasTalent = targetStats[Data.TalentStatAttributes[talentId]] == true
+			if Builtin.CanAddTalent(talentId, hasTalent) then
+				local talentState = Builtin.GetTalentState(player, talentId, hasTalent)
+				local name = Builtin.GetDisplayName(talentId, talentState)
+				local isRacial = Data.RacialTalents[talentId] ~= nil
+				local isChoosable = not isRacial and talentState ~= Data.TalentState.Locked
+
+				local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == Data.TalentState.Selectable))
+				local canRemove = hasTalent and ((not isRacial and isCharacterCreation) or isGM)
+
 				---@type SheetManager.TalentsUIEntry
-				local sheetData = {
-					ID = data.ID,
-					GeneratedID = data.GeneratedID,
+				local data = {
+					ID = talentId,
+					GeneratedID = Data.TalentEnum[talentId],
 					HasTalent = hasTalent,
-					DisplayName = name .. data.Suffix,
+					DisplayName = name,
 					IsRacial = isRacial,
 					IsChoosable = isChoosable,
-					CanAdd = SheetManager:GetIsPlusVisible(data, player, canAdd, hasTalent),
-					CanRemove = SheetManager:GetIsMinusVisible(data, player, canRemove, hasTalent),
 					State = talentState,
-					IsCustom = true,
+					IsCustom = false,
+					CanAdd = canAdd,
+					CanRemove = canRemove,
 					Visible = true,
 				}
-				entries[#entries+1] = sheetData
+				entries[#entries+1] = data
+			end
+		end
+		for mod,dataTable in pairs(SheetManager.Data.Talents) do
+			for id,data in pairs(dataTable) do
+				local hasTalent = data:GetValue(player) == true
+				if SheetManager:IsEntryVisible(data, player, hasTalent, isCharacterCreation, isGM) then
+					local talentState = data:GetState(player)
+					local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))
+					local isRacial = data.IsRacial
+					local isChoosable = not isRacial and talentState ~= Data.TalentState.Locked
+					local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or isGM
+					local canRemove = hasTalent and (isCharacterCreation or isGM)
+					---@type SheetManager.TalentsUIEntry
+					local sheetData = {
+						ID = data.ID,
+						GeneratedID = data.GeneratedID,
+						HasTalent = hasTalent,
+						DisplayName = name .. data.Suffix,
+						IsRacial = isRacial,
+						IsChoosable = isChoosable,
+						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAdd, hasTalent),
+						CanRemove = SheetManager:GetIsMinusVisible(data, player, canRemove, hasTalent),
+						State = talentState,
+						IsCustom = true,
+						Visible = true,
+					}
+					entries[#entries+1] = sheetData
+				end
+			end
+		end
+		local i = 0
+		local count = #entries
+		return function ()
+			i = i + 1
+			if i <= count then
+				return entries[i]
 			end
 		end
 	end
-	local i = 0
-	local count = #entries
-	return function ()
-		i = i + 1
-		if i <= count then
-			return entries[i]
-		end
-	end
-end
 
 end

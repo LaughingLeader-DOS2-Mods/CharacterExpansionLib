@@ -2,7 +2,7 @@ local ts = Classes.TranslatedString
 
 local _ISCLIENT = Ext.IsClient()
 
----@class StatsManager
+---@class SheetManagerStats
 SheetManager.Stats = {
 	Data = {
 		Default = {

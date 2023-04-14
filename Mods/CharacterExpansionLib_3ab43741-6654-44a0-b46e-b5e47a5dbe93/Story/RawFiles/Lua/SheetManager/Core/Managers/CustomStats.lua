@@ -2,6 +2,7 @@ local _ISCLIENT = Ext.IsClient()
 
 local _INTERNAL = {}
 
+---@class SheetManagerCustomStats
 local CustomStats = {
 	Loaded = false,
 	MISC_CATEGORY = 99999,

@@ -1,7 +1,7 @@
 local ts = Classes.TranslatedString
 local _ISCLIENT = Ext.IsClient()
 
----@class AbilityManager
+---@class SheetManagerAbilities
 SheetManager.Abilities = {
 	RegisteredAbilities = {},
 	RegisteredCount = {},
