@@ -234,7 +234,7 @@ if isClient then
 				}
 			end
 		end
-		Ext.PostMessageToServer("CEL_SheetManager_RequestValueChange", Common.JsonStringify(data))
+		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestValueChange", data)
 	end
 
 	RegisterNetListener("CEL_SheetManager_UpdateCCWizardAvailablePoints", function (cmd, payload)
@@ -410,7 +410,7 @@ else
 			if SheetManager.Loaded then
 				delayNotify = false
 				for netid,data in pairs(self.CurrentValues) do
-					local character = Ext.GetCharacter(netid)
+					local character = GameHelpers.GetCharacter(netid)
 					if character then
 						NotifyValueChanges(character, lastValues[netid], data)
 					end
@@ -426,7 +426,7 @@ else
 			delayNotify = false
 			local client = Client:GetCharacter()
 			if client then
-				Ext.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", client.NetID)
+				GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestCharacterSync", client.NetID)
 			end
 		end
 	end)
@@ -441,7 +441,7 @@ else
 			--fprint(LOGLEVEL.TRACE, "[SheetManager:LoadCharacterSyncData:CLIENT] Received sync data for character NetID (%s).", data.NetID)
 
 			if SheetManager.Loaded then
-				local character = Ext.GetCharacter(data.NetID)
+				local character = GameHelpers.GetCharacter(data.NetID)
 				if character then
 					NotifyValueChanges(character, lastValues, self.CurrentValues[data.NetID])
 				end

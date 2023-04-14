@@ -1,6 +1,8 @@
 local self = SheetManager
 local _ISCLIENT = Ext.IsClient()
 
+---@diagnostic disable deprecated
+
 ---@alias OnSheetStatChangedCallback fun(id:string, stat:SheetStatData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean)
 ---@alias OnSheetAbilityChangedCallback fun(id:string, stat:SheetAbilityData, character:EsvCharacter, lastValue:integer, value:integer, isClientSide:boolean)
 ---@alias OnSheetTalentChangedCallback fun(id:string, stat:SheetTalentData, character:EsvCharacter, lastValue:boolean, value:boolean, isClientSide:boolean)
@@ -189,105 +191,6 @@ function SheetManager:RegisterVisibilityListener(id, callback)
 			end, {MatchArgs={ID=id, Action="Visibility"}})
 		end
 	end
-end
-
----@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
----@param character EclCharacter
----@param defaultValue boolean
----@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
-function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValue)
-	if defaultValue == nil then
-		defaultValue = GameHelpers.Client.IsGameMaster()
-	end
-	if entryValue == nil then
-		entryValue = entry:GetValue(character)
-	end
-	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == true then
-		return false
-	end
-	local bResult = defaultValue
-	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
-	local invokeResult = self.Events.CanChangeEntry:Invoke({
-		EntryType = entry.Type,
-		ID = entry.ID,
-		Value = entryValue,
-		Character = character,
-		CharacterID = character.NetID,
-		Stat = entry,
-		Result = bResult,
-		Action = "Add",
-	})
-	if invokeResult.ResultCode ~= "Error" then
-		bResult = invokeResult.Args.Result == true
-	end
-	return bResult
-end
-
----@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
----@param character EclCharacter
----@param defaultValue boolean
----@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
-function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryValue)
-	if defaultValue == nil then
-		defaultValue = GameHelpers.Client.IsGameMaster()
-	end
-	if entryValue == nil then
-		entryValue = entry:GetValue(character)
-	end
-	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == false then
-		return false
-	end
-	local bResult = defaultValue
-	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
-	local invokeResult = self.Events.CanChangeEntry:Invoke({
-		EntryType = entry.Type,
-		ID = entry.ID,
-		Value = entryValue,
-		Character = character,
-		CharacterID = character.NetID,
-		Stat = entry,
-		Result = bResult,
-		Action = "Remove",
-	})
-	if invokeResult.ResultCode ~= "Error" then
-		bResult = invokeResult.Args.Result == true
-	end
-	return bResult
-end
-
----@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
----@param character EclCharacter
----@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
----@param isCharacterCreation boolean|nil
----@param isGM boolean|nil
-function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCreation, isGM)
-	if entryValue == nil then
-		entryValue = entry:GetValue(character)
-	end
-	if isGM == nil then
-		isGM = _ISCLIENT and GameHelpers.Client.IsGameMaster()
-	end
-	local bResult = entry.Visible == true
-	--Default racial talents to not being visible
-	if entry.IsRacial then
-		bResult = isGM
-	end
-
-	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
-	local invokeResult = self.Events.CanChangeEntry:Invoke({
-		EntryType = entry.Type,
-		ID = entry.ID,
-		Value = entryValue,
-		Character = character,
-		CharacterID = character.NetID,
-		Stat = entry,
-		Result = bResult,
-		Action = "Visibility",
-	})
-	if invokeResult.ResultCode ~= "Error" then
-		bResult = invokeResult.Args.Result == true
-	end
-	return bResult
 end
 
 ---@deprecated

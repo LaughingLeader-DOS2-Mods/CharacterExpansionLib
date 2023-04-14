@@ -24,7 +24,7 @@ function SheetManager.Sync.CustomAvailablePoints(characterId)
 			for player in GameHelpers.Character.GetPlayers(false) do
 				allPoints[player.NetID] = PersistentVars.CustomStatAvailablePoints[player.MyGuid] or {}
 			end
-			GameHelpers.Net.Broadcast("CEL_SheetManager_LoadAllAvailablePoints", Ext.JsonStringify(allPoints))
+			GameHelpers.Net.Broadcast("CEL_SheetManager_LoadAllAvailablePoints", allPoints)
 		else
 			local character = GameHelpers.GetCharacter(characterId)
 			assert(character ~= nil, string.format("Failed to get character from id %s", characterId))

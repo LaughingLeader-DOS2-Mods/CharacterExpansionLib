@@ -30,7 +30,7 @@ if not _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_RequestCharacterSync", function(cmd, payload)
 		local netid = tonumber(payload)
 		if netid then
-			local character = Ext.GetCharacter(netid)
+			local character = GameHelpers.GetCharacter(netid, "EsvCharacter")
 			if character then
 				SheetManager:SyncData(character)
 			end

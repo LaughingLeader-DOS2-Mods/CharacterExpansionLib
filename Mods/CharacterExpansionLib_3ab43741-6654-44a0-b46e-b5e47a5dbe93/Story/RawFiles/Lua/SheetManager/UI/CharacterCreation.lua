@@ -71,7 +71,7 @@ end
 -- CharacterCreation.Register:Call("toggleTalent", function (self, e, ui, call, statID)
 -- 	local this = ui:GetRoot()
 -- 	if this and this.isExtended then
--- 		local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+-- 		local player = GameHelpers.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
 -- 		if updateSessionPoints[player.NetID] == nil then
 -- 			updateSessionPoints[player.NetID] = {}
 -- 		end
@@ -87,7 +87,7 @@ function CharacterCreation.UpdateTalents(self, e, ui, method)
 		return
 	end
 
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
 	---@cast player EclCharacter
 
 	local engineValues = {}
@@ -147,7 +147,7 @@ function CharacterCreation.UpdateAbilities(self, e, ui, method)
 	end
 	--this.clearArray("abilityArray")
 
-	local player = Ext.GetCharacter(Ext.DoubleToHandle(this.characterHandle)) or Client:GetCharacter()
+	local player = GameHelpers.Client.TryGetCharacterFromDouble(this.characterHandle) or Client:GetCharacter()
 	---@cast player EclCharacter
 	local engineValues = {}
 

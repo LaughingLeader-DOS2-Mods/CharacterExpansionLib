@@ -1,5 +1,5 @@
 local self = SheetManager
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 
 ---Get a sheet entry from a string id.
@@ -83,7 +83,7 @@ function SheetManager:GetValueByEntry(entry, characterId)
 			if value ~= nil then
 				return value
 			end
-			if isClient then
+			if _ISCLIENT then
 				local stats = SessionManager.CharacterCreationWizard.Stats[characterId]
 				if stats and stats[entry.BoostAttribute] then
 					return stats[entry.BoostAttribute]
@@ -200,7 +200,7 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 	characterId = GameHelpers.GetObjectID(characterId)
 
 	if pointType == "Custom" then
-		if isClient then
+		if _ISCLIENT then
 			assert(not StringHelpers.IsNullOrWhitespace(customStatPointsID), "Param customStatPointsID needs to be a valid string (not empty/whitespace).")
 			if SheetManager.CustomAvailablePoints[characterId] then
 				return SheetManager.CustomAvailablePoints[characterId][customStatPointsID] or 0
@@ -212,11 +212,11 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 			end
 		end
 		return 0
-	elseif isClient and isCharacterCreation then
+	elseif _ISCLIENT and isCharacterCreation then
 		return SessionManager.CharacterCreationWizard.AvailablePoints[pointType]
 	end
 
-	if isClient or not Ext.OsirisIsCallable() then
+	if _ISCLIENT or not Ext.Osiris.IsCallable() then
 		local character = GameHelpers.GetCharacter(characterId)
 		if character.PlayerUpgrade then
 			if pointType == "Attribute" then
@@ -310,4 +310,104 @@ function SheetManager:GetAllEntries(boostOnly, includeCustom)
 			return entries[i]
 		end
 	end
+end
+
+
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
+---@param character EclCharacter
+---@param defaultValue boolean
+---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
+function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValue)
+	if defaultValue == nil then
+		defaultValue = GameHelpers.Client.IsGameMaster()
+	end
+	if entryValue == nil then
+		entryValue = entry:GetValue(character)
+	end
+	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == true then
+		return false
+	end
+	local bResult = defaultValue
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		CharacterID = character.NetID,
+		Stat = entry,
+		Result = bResult,
+		Action = "Add",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
+	end
+	return bResult
+end
+
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
+---@param character EclCharacter
+---@param defaultValue boolean
+---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
+function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryValue)
+	if defaultValue == nil then
+		defaultValue = GameHelpers.Client.IsGameMaster()
+	end
+	if entryValue == nil then
+		entryValue = entry:GetValue(character)
+	end
+	if defaultValue == true and entry.StatType == SheetManager.StatType.Talent and entryValue == false then
+		return false
+	end
+	local bResult = defaultValue
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		CharacterID = character.NetID,
+		Stat = entry,
+		Result = bResult,
+		Action = "Remove",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
+	end
+	return bResult
+end
+
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
+---@param character EclCharacter
+---@param entryValue integer|boolean|nil The entry's current value. Provide one here to skip having to retrieve it.
+---@param isCharacterCreation boolean|nil
+---@param isGM boolean|nil
+function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCreation, isGM)
+	if entryValue == nil then
+		entryValue = entry:GetValue(character)
+	end
+	if isGM == nil then
+		isGM = _ISCLIENT and GameHelpers.Client.IsGameMaster()
+	end
+	local bResult = entry.Visible == true
+	--Default racial talents to not being visible
+	if entry.IsRacial then
+		bResult = isGM
+	end
+
+	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
+	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		EntryType = entry.Type,
+		ID = entry.ID,
+		Value = entryValue,
+		Character = character,
+		CharacterID = character.NetID,
+		Stat = entry,
+		Result = bResult,
+		Action = "Visibility",
+	})
+	if invokeResult.ResultCode ~= "Error" then
+		bResult = invokeResult.Args.Result == true
+	end
+	return bResult
 end

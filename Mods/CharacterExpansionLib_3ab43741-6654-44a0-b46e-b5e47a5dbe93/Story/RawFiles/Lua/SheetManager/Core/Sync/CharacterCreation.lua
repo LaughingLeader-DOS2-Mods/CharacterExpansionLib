@@ -19,7 +19,7 @@ function SheetManager.IsInCharacterCreation(characterId)
 		if player then
 			return GameHelpers.GetObjectID(player) == characterId
 		end
-	elseif Ext.OsirisIsCallable() then
+	elseif Ext.Osiris.IsCallable() then
 		local db = Osi.DB_Illusionist:Get(nil,nil)
 		if db and #db > 0 then
 			local playerId = StringHelpers.GetUUID(db[1][1])

@@ -165,8 +165,8 @@ SheetManager.Stats = {
 						end
 				
 						for damageType, range in pairs(mainDamageRange) do
-							local min = Ext.Round(range.Min * 1.0)
-							local max = Ext.Round(range.Max * 1.0)
+							local min = Ext.Utils.Round(range.Min * 1.0)
+							local max = Ext.Utils.Round(range.Max * 1.0)
 							range.Min = min + math.ceil(min * Game.Math.GetDamageBoostByType(character, damageType))
 							range.Max = max + math.ceil(max * Game.Math.GetDamageBoostByType(character, damageType))
 						end
