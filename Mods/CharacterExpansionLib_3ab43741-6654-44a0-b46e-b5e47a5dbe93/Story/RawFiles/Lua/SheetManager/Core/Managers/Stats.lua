@@ -554,7 +554,7 @@ if _ISCLIENT then
 							ID = data.ID,
 							GeneratedID = data.GeneratedID,
 							DisplayName = name,
-							Description = data:GetDescription(player),
+							Description = data:GetDescription(player, TooltipExpander.IsExpanded()),
 							Value = valueLabel,
 							Delta = value - data.BaseValue,
 							CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),

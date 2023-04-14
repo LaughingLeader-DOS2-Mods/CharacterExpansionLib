@@ -1,6 +1,9 @@
 local isClient = Ext.IsClient()
 
 ---@class SheetCustomStatBase
+---@field DisplayName TranslatedString|string
+---@field Description TranslatedString|string
+---@field ExpandedDescription TranslatedString|string|nil The description to use if the tooltip is expanded. Defaults to the `Description` value if not set.
 local SheetCustomStatBase = {
 	Type="SheetCustomStatBase",
 	TooltipType = "Stat",
@@ -26,8 +29,9 @@ local SheetCustomStatBase = {
 SheetCustomStatBase.__index = SheetCustomStatBase
 
 SheetCustomStatBase.PropertyMap = {
-	DISPLAYNAME = {Name="DisplayName", Type = "string"},
-	DESCRIPTION = {Name="Description", Type = "string"},
+	DISPLAYNAME = {Name="DisplayName", Type = "TranslatedString"},
+	DESCRIPTION = {Name="Description", Type = "TranslatedString"},
+	EXPANDEDDESCRIPTION = {Name="ExpandedDescription", Type = "TranslatedString"},
 	ICON = {Name="Icon", Type = "string"},
 	ICONWIDTH = {Name="IconWidth", Type = "number"},
 	ICONHEIGHT = {Name="IconHeight", Type = "number"},
@@ -66,25 +70,15 @@ function SheetCustomStatBase.SetDefaults(data)
 	end
 end
 
-local function FormatText(txt, forceCheckForStringKey)
-	if forceCheckForStringKey or string.find(txt, "_", 1, true) then
-		txt = GameHelpers.GetStringKeyText(txt)
-	end
-	return GameHelpers.Tooltip.ReplacePlaceholders(txt)
+---@param character? CharacterParam Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+function SheetCustomStatBase:GetDisplayName(character)
+	return Classes.SheetBaseData.GetDisplayName(self, character)
 end
 
-function SheetCustomStatBase:GetDisplayName()
-	if self.DisplayName then
-		return FormatText(self.DisplayName, self.LoadStringKey)
-	end
-	return self.ID
-end
-
-function SheetCustomStatBase:GetDescription()
-	if self.Description then
-		return FormatText(self.Description, self.LoadStringKey)
-	end
-	return ""
+---@param character? CharacterParam Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+---@param isExpanded? boolean Whether the tooltip is expanded, which will result in the `ExpandedDescription` being used, if set.
+function SheetCustomStatBase:GetDescription(character, isExpanded)
+	return Classes.SheetBaseData.GetDescription(self, character, isExpanded)
 end
 
 Classes.SheetCustomStatBase = SheetCustomStatBase

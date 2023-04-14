@@ -1,6 +1,7 @@
 ---@class SheetBaseData
 ---@field DisplayName TranslatedString|string
 ---@field Description TranslatedString|string
+---@field ExpandedDescription TranslatedString|string|nil The description to use if the tooltip is expanded. Defaults to the `Description` value if not set.
 local SheetBaseData = {
 	Type="SheetBaseData",
 	TooltipType = "Stat",
@@ -35,6 +36,7 @@ local SheetBaseData = {
 SheetBaseData.PropertyMap = {
 	DISPLAYNAME = {Name="DisplayName", Type = "TranslatedString"},
 	DESCRIPTION = {Name="Description", Type = "TranslatedString"},
+	EXPANDEDDESCRIPTION = {Name="ExpandedDescription", Type = "TranslatedString"},
 	TOOLTIPTYPE = {Name="TooltipType", Type = "string"},
 	BASEVALUE = {Name="BaseValue", Type = "number"},
 	VISIBLE = {Name="Visible", Type = "boolean"},
@@ -79,29 +81,34 @@ function SheetBaseData.SetDefaults(data)
 		end
 	end
 end
----@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+
+---@param character? CharacterParam Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
 function SheetBaseData:GetDisplayName(character)
 	return GameHelpers.Tooltip.ReplacePlaceholders(self.DisplayName, character)
 end
 
----@param character CharacterParam|nil Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
-function SheetBaseData:GetDescription(character)
-	if self.Description then
-		local text = GameHelpers.Tooltip.ReplacePlaceholders(self.Description, character)
-		if self.Mod then
-			local name = GameHelpers.GetModName(self.Mod, true)
-			if not StringHelpers.IsNullOrWhitespace(name) then
-				local titleColor = "#2299FF"
-				local settings = SettingsManager.GetMod(self.Mod, false, false)
-				if settings and not StringHelpers.IsNullOrWhitespace(settings.TitleColor) and not StringHelpers.Equals(settings.TitleColor, "#FFFFFF", true, true) then
-					titleColor = settings.TitleColor
-				end
-				text = string.format("%s<br><font color='%s' size='18'>%s</font>", text, titleColor, name)
-			end
-		end
-		return text
+---@param character? CharacterParam Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+---@param isExpanded? boolean Whether the tooltip is expanded, which will result in the `ExpandedDescription` being used, if set.
+function SheetBaseData:GetDescription(character, isExpanded)
+	local text = ""
+	if isExpanded and self.ExpandedDescription then
+		text = GameHelpers.Tooltip.ReplacePlaceholders(self.ExpandedDescription, character)
 	end
-	return ""
+	if self.Description and StringHelpers.IsNullOrEmpty(text) then
+		text = GameHelpers.Tooltip.ReplacePlaceholders(self.Description, character)
+	end
+	if self.Mod then
+		local name = GameHelpers.GetModName(self.Mod, true)
+		if not StringHelpers.IsNullOrWhitespace(name) then
+			local titleColor = "#2299FF"
+			local settings = SettingsManager.GetMod(self.Mod, false, false)
+			if settings and not StringHelpers.IsNullOrWhitespace(settings.TitleColor) and not StringHelpers.Equals(settings.TitleColor, "#FFFFFF", true, true) then
+				titleColor = settings.TitleColor
+			end
+			text = string.format("%s<br><font color='%s' size='18'>%s</font>", text, titleColor, name)
+		end
+	end
+	return text
 end
 
 ---@param character CharacterParam

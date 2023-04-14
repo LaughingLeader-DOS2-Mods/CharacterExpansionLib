@@ -86,6 +86,8 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 	this.addStatusTooltip() -- Clear tooltip_array
 	this.isStatusTT = false
 
+	local isExpanded = TooltipExpander.IsExpanded()
+
 	local data = SheetManager:GetEntryByGeneratedID(id, requestType)
 	if this and this.tooltip_array and data then
 		local request = Game.Tooltip.RequestProcessor.CreateRequest()
@@ -97,10 +99,10 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 		local resolved = false
 		if requestType == "Ability" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-			this.tooltip_array[1] = data:GetDisplayName()
+			this.tooltip_array[1] = data:GetDisplayName(character)
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.AbilityDescription
 			this.tooltip_array[3] = data.GeneratedID
-			this.tooltip_array[4] = data:GetDescription()
+			this.tooltip_array[4] = data:GetDescription(character, isExpanded)
 			this.tooltip_array[5] = ""
 			this.tooltip_array[6] = ""
 			this.tooltip_array[7] = ""
@@ -113,11 +115,11 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 			resolved = true
 		elseif requestType == "Talent" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-			this.tooltip_array[1] = data:GetDisplayName()
+			this.tooltip_array[1] = data:GetDisplayName(character)
 			--TalentDescription = {{"TalentId", "number"}, {"Description", "string"}, {"Requirement", "string"}, {"IncompatibleWith", "string"}, {"Selectable", "boolean"}, {"Unknown", "boolean"}},
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.TalentDescription
 			this.tooltip_array[3] = data.GeneratedID
-			this.tooltip_array[4] = data:GetDescription()
+			this.tooltip_array[4] = data:GetDescription(character, isExpanded)
 			this.tooltip_array[5] = ""
 			this.tooltip_array[6] = ""
 			this.tooltip_array[7] = true
@@ -131,19 +133,19 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 			resolved = true
 		elseif requestType == "Stat" then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-			this.tooltip_array[1] = data:GetDisplayName()
+			this.tooltip_array[1] = data:GetDisplayName(character)
 
 			if not StringHelpers.IsNullOrWhitespace(data.Icon) then
 				this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.AbilityDescription
 				this.tooltip_array[3] = data.GeneratedID
-				this.tooltip_array[4] = data:GetDescription()
+				this.tooltip_array[4] = data:GetDescription(character, isExpanded)
 				this.tooltip_array[5] = ""
 				this.tooltip_array[6] = ""
 				this.tooltip_array[7] = ""
 				Game.Tooltip.PrepareIcon(ui, string.format("tt_ability_%i", data.GeneratedID), data.Icon, data.IconWidth or 128, data.IconHeight or 128)
 			else
 				this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.StatsDescription
-				this.tooltip_array[3] = data:GetDescription()
+				this.tooltip_array[3] = data:GetDescription(character, isExpanded)
 			end
 
 			request.Stat = data.ID
@@ -154,7 +156,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 
 			request.StatData = data
 			request.Stat = data.ID
-			local description = data:GetDescription()
+			local description = data:GetDescription(character, isExpanded)
 			if data.DisplayValueInTooltip then
 				local value = data:GetValue(character)
 				local valueFormatted = StringHelpers.CommaNumber(value)
@@ -167,7 +169,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 
 			if not StringHelpers.IsNullOrWhitespace(data.Icon) then
 				this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-				this.tooltip_array[1] = data:GetDisplayName()
+				this.tooltip_array[1] = data:GetDisplayName(character)
 				if tooltipType == Game.Tooltip.TooltipItemTypes.Tag then
 					this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.TagDescription
 					this.tooltip_array[3] = description
@@ -188,7 +190,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 
 			if not resolved then
 				this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-				this.tooltip_array[1] = data:GetDisplayName()
+				this.tooltip_array[1] = data:GetDisplayName(character)
 				this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.StatsDescription
 				this.tooltip_array[3] = description
 				resolved = true
@@ -197,9 +199,9 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 
 		if not resolved then
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
-			this.tooltip_array[1] = data:GetDisplayName()
+			this.tooltip_array[1] = data:GetDisplayName(character)
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.StatsDescription
-			this.tooltip_array[3] = data:GetDescription()
+			this.tooltip_array[3] = data:GetDescription(character, isExpanded)
 		end
 
 		Game.Tooltip.TooltipHooks.NextRequest = request

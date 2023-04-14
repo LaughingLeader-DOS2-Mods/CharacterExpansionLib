@@ -318,7 +318,7 @@ function CustomStatsUI:OnGroupAdded(ui, call, id, label, arrayIndex)
 		end
 	end
 	if category and category.Description then
-		this.setGroupTooltip(category.GroupId, category:GetDescription())
+		this.setGroupTooltip(category.GroupId, category:GetDescription(Client:GetCharacter(), TooltipExpander.IsExpanded()))
 	end
 end
 
