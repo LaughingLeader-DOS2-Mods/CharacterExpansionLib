@@ -114,15 +114,16 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 			end
 			resolved = true
 		elseif requestType == "Talent" then
+			---@cast data SheetTalentData
 			this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 			this.tooltip_array[1] = data:GetDisplayName(character)
 			--TalentDescription = {{"TalentId", "number"}, {"Description", "string"}, {"Requirement", "string"}, {"IncompatibleWith", "string"}, {"Selectable", "boolean"}, {"Unknown", "boolean"}},
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.TalentDescription
 			this.tooltip_array[3] = data.GeneratedID
 			this.tooltip_array[4] = data:GetDescription(character, isExpanded)
-			this.tooltip_array[5] = ""
-			this.tooltip_array[6] = ""
-			this.tooltip_array[7] = true
+			this.tooltip_array[5] = data:GetRequirementText()
+			this.tooltip_array[6] = data:GetIncompatibleWithText(character)
+			this.tooltip_array[7] = data:IsUnlockable(character)
 			this.tooltip_array[8] = true
 
 			request.Talent = data.ID

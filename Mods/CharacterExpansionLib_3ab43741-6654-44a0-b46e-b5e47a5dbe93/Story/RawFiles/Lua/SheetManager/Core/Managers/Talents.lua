@@ -25,6 +25,7 @@ end
 -- 	Mods.LeaderLib.TalentManager = SheetManager.Talents
 -- end
 
+---@enum
 SheetManager.Talents.Data.TalentState = {
 	Selected = 0,
 	Selectable = 2,
@@ -558,9 +559,8 @@ function SheetManager.Talents.HasRequirements(player, id)
 	return true
 end
 
----@param id string
 ---@param talentState integer
----@return string,boolean
+---@return string
 function SheetManager.Talents.GetTalentStateFontFormat(talentState)
 	local color = SheetManager.Talents.Data.TalentStateColor[talentState]
 	if color then
@@ -571,13 +571,11 @@ end
 
 ---@param id string
 ---@param talentState integer
----@return string,boolean
+---@return string
 function SheetManager.Talents.GetTalentDisplayName(id, talentState)
-	local name = LocalizedText.TalentNames[id]
-	if not name or StringHelpers.IsNullOrEmpty(name.Value) then
-		name = id
-	else
-		name = name.Value
+	local name = id
+	if LocalizedText.TalentNames[id] then
+		name = LocalizedText.TalentNames[id].Value
 	end
 	return string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), name)
 end
@@ -588,11 +586,11 @@ end
 ---@return TalentState
 function SheetManager.Talents.GetTalentState(player, talentId, hasTalent)
 	if hasTalent == true then 
-		return SheetManager.Talents.Data.TalentState.Selected
+		return Data.TalentState.Selected
 	elseif not SheetManager.Talents.HasRequirements(player, talentId) then 
-		return SheetManager.Talents.Data.TalentState.Locked
+		return Data.TalentState.Locked
 	else
-		return SheetManager.Talents.Data.TalentState.Selectable
+		return Data.TalentState.Selectable
 	end
 end
 

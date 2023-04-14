@@ -2,6 +2,7 @@ local isClient = Ext.IsClient()
 
 ---@class SheetTalentData:SheetBaseData
 ---@field Requirements (StatRequirement[])|nil
+---@field IncompatibleWith (string[])|nil
 local SheetTalentData = {
 	Type = "SheetTalentData",
 	StatType = "Talent",
@@ -25,6 +26,7 @@ end
 SheetTalentData.PropertyMap = {
 	ISRACIAL = {Name="IsRacial", Type = "boolean"},
 	REQUIREMENTS = {Name="Requirements", Type = "table"},
+	INCOMPATIBLEWITH = {Name="IncompatibleWith", Type = "table"},
 }
 
 TableHelpers.AddOrUpdate(SheetTalentData.PropertyMap, Classes.SheetBaseData.PropertyMap)
@@ -64,6 +66,24 @@ function SheetTalentData:IsUnlockable(character)
 		canUnlock = GameHelpers.Stats.CharacterHasRequirements(character, self.Requirements)
 	else
 		canUnlock = true
+	end
+
+	if self.IncompatibleWith then
+		for _,id in pairs(self.IncompatibleWith) do
+			local actualId = id
+			if string.find(id, "TALENT_") then
+				actualId = string.gsub(id, "TALENT_", "")
+			end
+			if Data.Talents[actualId] then
+				if character.Stats[id] == true then
+					canUnlock = false
+					break
+				end
+			elseif TalentManager.HasTalent(character, id) then
+				canUnlock = false
+				break
+			end
+		end
 	end
 
 	---@type SubscribableEventInvokeResult<SheetManagerCanUnlockTalentEventArgs>
@@ -117,6 +137,89 @@ end
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
 function SheetTalentData:SetValue(character, value, skipListenerInvoke, skipSync)
 	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
+end
+
+---@param tbl StatRequirement[]
+local function _GetRequirementLabels(tbl)
+	local requirementLabels = {}
+	for _,req in pairs(tbl) do
+		if req.Requirement ~= "None" then
+			local reqName = ""
+			local notText = req.Not and "!" or ""
+			if req.Requirement == "Level" then
+				reqName = string.format("%s%s %i", notText, LocalizedText.Requirements.Level.Value, req.Param)
+			elseif req.Requirement == "Combat" then
+				if req.Not then
+					reqName = string.format("%s%s", notText, LocalizedText.Requirements.NotCombat.Value)
+				else
+					reqName = string.format("%s%s", notText, LocalizedText.Requirements.Combat.Value)
+				end
+			elseif req.Requirement == "Immobile" then
+				if req.Not then
+					reqName = string.format("%s%s", notText, LocalizedText.Requirements.NotImmobile.Value)
+				else
+					reqName = string.format("%s%s", notText, LocalizedText.Requirements.Immobile.Value)
+				end
+			elseif req.Requirement == "TALENT_Sourcerer" then
+				if req.Not then
+					reqName = LocalizedText.Requirements.NotTALENT_Sourcerer.Value
+				else
+					reqName = LocalizedText.Requirements.TALENT_Sourcerer.Value
+				end
+			elseif req.Requirement == "Tag" then
+				local tagReqName = LocalizedText.Requirements.Tag.Value
+				if not StringHelpers.IsNullOrWhitespace(tagReqName) then
+					tagReqName = tagReqName .. " "
+				end
+				local tagName = GameHelpers.GetStringKeyText(req.Param)
+				reqName = string.format("%s%s%s", notText, tagReqName, tagName)
+			elseif Data.Attribute[req.Requirement] then
+				reqName = string.format("%s%s %i", notText, LocalizedText.AttributeNames[req.Requirement].Value, req.Param)
+			elseif Data.Ability[req.Requirement] then
+				reqName = string.format("%s%s %i", notText, LocalizedText.AbilityNames[req.Requirement].Value, req.Param)
+			elseif Data.Talents[req.Requirement] or Data.Talents["TALENT_" .. req.Requirement] then
+				local talentId = string.gsub(req.Requirement, "TALENT_", "")
+				reqName = string.format("%s%s", notText, LocalizedText.TalentNames[talentId].Value)
+			elseif Data.Traits[req.Requirement] or Data.Traits["TRAIT_" .. req.Requirement] then
+				local traitId = string.gsub(req.Requirement, "TRAIT_", "")
+				reqName = string.format("%s%s", notText, LocalizedText.TraitNames[traitId].Value)
+			end
+			if not StringHelpers.IsNullOrEmpty(reqName) then
+				requirementLabels[#requirementLabels+1] = reqName
+			end
+		end
+	end
+	table.sort(requirementLabels)
+	return requirementLabels
+end
+
+function SheetTalentData:GetRequirementText()
+	local text = ""
+	if self.Requirements then
+		local requirementLabels = _GetRequirementLabels(self.Requirements)
+		text = LocalizedText.Requirements.Requires:ReplacePlaceholders(StringHelpers.Join(", ", requirementLabels))
+	end
+	return text
+end
+
+---@param character? CharacterParam Optional character to pass to GameHelpers.Tooltip.ReplacePlaceholders.
+function SheetTalentData:GetIncompatibleWithText(character)
+	local text = ""
+	if self.IncompatibleWith then
+		local talentNames = {}
+		for _,v in pairs(self.IncompatibleWith) do
+			local talentId = string.gsub(v, "TALENT_", "")
+			if Data.Talents[talentId] then
+				talentNames[#talentNames+1] = LocalizedText.TalentNames[talentId].Value
+			else
+				local talent = SheetManager:GetEntryByID(talentId, nil, "Talent")
+				if talent then
+					talentNames[#talentNames+1] = talent:GetDisplayName(character)
+				end
+			end
+		end
+	end
+	return text
 end
 
 SheetTalentData.ModifyValue = SheetTalentData.SetValue
