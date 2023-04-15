@@ -392,7 +392,7 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 	local bResult = entry.Visible == true
 	--Default racial talents to not being visible
 	if entry.IsRacial then
-		bResult = isGM
+		bResult = isGM or entryValue == true
 	end
 
 	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
