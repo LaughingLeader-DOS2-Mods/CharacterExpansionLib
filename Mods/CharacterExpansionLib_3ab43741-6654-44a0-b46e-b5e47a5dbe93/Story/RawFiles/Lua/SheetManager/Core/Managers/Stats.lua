@@ -499,7 +499,10 @@ if _ISCLIENT then
 							delta = value - Ext.ExtraData.AttributeBaseValue
 						end
 
-						local name = data.DisplayName.Value
+						local name = id
+						if data.DisplayName then
+							name = data.DisplayName.Value
+						end
 						local valueLabel = string.format("%s%s", value, data.Suffix or "")
 						--TODO Red text conditions may be more complex (like it looking for a negative boost)
 						if type(value) == "number" and value < 0 then

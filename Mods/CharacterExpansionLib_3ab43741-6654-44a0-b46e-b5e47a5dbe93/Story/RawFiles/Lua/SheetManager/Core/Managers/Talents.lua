@@ -780,7 +780,7 @@ if _ISCLIENT then
 
 		local entries = {}
 		--Default entries
-		for numId,talentId in _Data.Talents:Get() do
+		for numId,talentId in _TalentEnum:Get() do
 			local hasTalent = targetStats[_Data.TalentStatAttributes[talentId]] == true
 			if Builtin.CanAddTalent(talentId, hasTalent) then
 				local talentState = Builtin.GetTalentState(player, talentId, hasTalent)

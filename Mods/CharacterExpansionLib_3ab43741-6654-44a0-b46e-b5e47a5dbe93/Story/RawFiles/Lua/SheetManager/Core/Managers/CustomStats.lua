@@ -314,7 +314,7 @@ if _ISCLIENT then
 		if trySortByValue and sortVal1 ~= sortVal2 then
 			return sortVal1 < sortVal2
 		end
-		return name1 < name2
+		return tostring(name1) < tostring(name2)
 	end
 
 	_INTERNAL.SortStats = _SortStats
