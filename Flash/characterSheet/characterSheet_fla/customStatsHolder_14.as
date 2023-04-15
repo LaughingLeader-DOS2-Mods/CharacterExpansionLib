@@ -281,7 +281,7 @@ package characterSheet_fla
 		public function frame1() : *
 		{
 			//Hide the BG
-			var obj:MovieClip = this.getChildAt(0);
+			var obj:MovieClip = this.getChildAt(0) as MovieClip;
 			if(obj != null)
 			{
 				obj.visible = false;

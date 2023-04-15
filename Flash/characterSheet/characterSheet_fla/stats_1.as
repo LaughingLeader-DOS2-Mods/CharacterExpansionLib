@@ -201,6 +201,23 @@ package characterSheet_fla
 		public function resetListPositions() : *
 		{
 		}
+
+		private function addCharacterExpansionTabs() : void
+		{
+			var tab_button:MovieClip = null;
+
+			//CharacterExpansionLib: Always add the custom stats button
+			tab_button = new StatsTabButton();
+			tab_button.id = 8;
+			this.tabsArray.push(tab_button);
+			this.tabsList.EL_SPACING = -10;
+			//CharacterExpansionLib: Always add the visuals button
+			
+			tab_button = new StatsTabButton();
+			tab_button.id = 7;
+			this.tabsArray.push(tab_button);
+			this.tabsList.EL_SPACING = -10;
+		}
 		
 		public function buildTabs(tabState:Number, initializeTabs:Boolean = false) : *
 		{
@@ -234,25 +251,19 @@ package characterSheet_fla
 						this.tabsArray.push(tab_button);
 						i++;
 					}
-					//CharacterExpansionLib: Always add the custom stats button
-					tab_button = new StatsTabButton();
-					tab_button.id = 8;
-					this.tabsArray.push(tab_button);
-					this.tabsList.EL_SPACING = -10;
+					this.addCharacterExpansionTabs();
 					break;
 				case 1:
 					i = 0;
-					while(i < 9)
+					//CharacterExpansionLib: Making sure the tags button is added. i < 4 changed to i < 5
+					while(i < 5)
 					{
-						//CharacterExpansionLib: Making sure the tags button is added. i < 4 changed to i < 5
-						if(i < 5 || i == 8)
-						{
-							tab_button2 = new StatsTabButton();
-							tab_button2.id = i;
-							this.tabsArray.push(tab_button2);
-						}
+						tab_button2 = new StatsTabButton();
+						tab_button2.id = i;
+						this.tabsArray.push(tab_button2);
 						i++;
 					}
+					this.addCharacterExpansionTabs();
 					this.tabsList.EL_SPACING = -10;
 					break;
 				case 2:
@@ -281,6 +292,17 @@ package characterSheet_fla
 				i++;
 			}
 			this.tabsList.positionElements();
+
+			if(tabState != 2)
+			{
+				var appearanceTab:MovieClip = this.tabsList.getElementByNumber("id", 7);
+				var extraStatsTab:MovieClip = this.tabsList.getElementByNumber("id", 8);
+				if (appearanceTab != null && extraStatsTab != null)
+				{
+					appearanceTab.x = extraStatsTab.x
+					appearanceTab.y = extraStatsTab.y + extraStatsTab.height
+				}
+			}
 			
 			//CharacterExpansionLib addition
 			this.alignPointWarningsToButtons();

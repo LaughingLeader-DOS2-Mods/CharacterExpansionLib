@@ -65,37 +65,4 @@ function RegisterNetListener(id, callback)
 end
 
 Ext.Require("SheetManager/Init.lua")
-
-local function TryFindOsiToolsConfig(info)
-	local filePath = string.format("Mods/%s/OsiToolsConfig.json", info.Directory)
-	local file = Ext.IO.LoadFile(filePath, "data")
-	if file then
-		return Common.JsonParse(file)
-	end
-end
-
-local function CheckOsiToolsConfig()
-	local order = Ext.Mod.GetLoadOrder()
-	for i=1,#order do
-		local uuid = order[i]
-		if IgnoredMods[uuid] ~= true then
-			local info = Ext.Mod.GetModInfo(uuid)
-			if info ~= nil then
-				local b,result = xpcall(TryFindOsiToolsConfig, debug.traceback, info)
-				if not b then
-					Ext.Utils.PrintError(result)
-				elseif result ~= nil then
-					if result.FeatureFlags 
-					and (Common.TableHasValue(result.FeatureFlags, "CustomStats") or Common.TableHasValue(result.FeatureFlags, "CustomStatsPane")) then
-						return true
-					end
-				end
-			end
-		end
-	end
-end
-
-Events.LuaReset:Subscribe(function(e)
-	--Mods.LeaderLib.Vars.Print.UI = true
-	--CheckOsiToolsConfig()
-end)
+Ext.Require("CharacterSheetExtended/VisualTab.lua")
