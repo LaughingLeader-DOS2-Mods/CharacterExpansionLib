@@ -131,6 +131,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 		value = stat:GetValue(character)
 
 		self.Events.OnEntryChanged:Invoke({
+			ModuleUUID = stat.Mod,
 			EntryType = stat.Type,
 			Stat = stat,
 			ID = stat.ID,
@@ -309,6 +310,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 				assert(points ~= updatedPoints, errorMessage("Failed to alter character(%s)'s (%s) points.", characterId, (entryType and isCivil) and "CivilAbility" or entryType))
 			end
 			SheetManager.Events.OnAvailablePointsChanged:Invoke({
+				ModuleUUID = entry.Mod,
 				EntryType = entry.Type,
 				ID = entry.ID,
 				Stat = entry,

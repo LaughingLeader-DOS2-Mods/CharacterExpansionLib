@@ -330,6 +330,7 @@ function SheetManager:GetIsPlusVisible(entry, character, defaultValue, entryValu
 	local bResult = defaultValue
 	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
 	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		ModuleUUID = entry.Mod,
 		EntryType = entry.Type,
 		ID = entry.ID,
 		Value = entryValue,
@@ -362,6 +363,7 @@ function SheetManager:GetIsMinusVisible(entry, character, defaultValue, entryVal
 	local bResult = defaultValue
 	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
 	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		ModuleUUID = entry.Mod,
 		EntryType = entry.Type,
 		ID = entry.ID,
 		Value = entryValue,
@@ -397,6 +399,7 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 
 	---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
 	local invokeResult = self.Events.CanChangeEntry:Invoke({
+		ModuleUUID = entry.Mod,
 		EntryType = entry.Type,
 		ID = entry.ID,
 		Value = entryValue,

@@ -199,6 +199,7 @@ if _ISCLIENT then
 	---@field CanRemove boolean
 	---@field IsCustom boolean
 	---@field Visible boolean
+	---@field Mod Guid
 
 	---@private
 	---@param player EclCharacter
@@ -255,6 +256,7 @@ if _ISCLIENT then
 					---@type SheetManager.AbilitiesUIEntry
 					local data = {
 						ID = id,
+						Mod = Data.ModID.Shared,
 						GeneratedID = Data.AbilityEnum[id],
 						DisplayName = name,
 						IsCivil = isCivil,
@@ -295,6 +297,7 @@ if _ISCLIENT then
 					---@type SheetManager.AbilitiesUIEntry
 					local data = {
 						ID = data.ID,
+						Mod = data.Mod,
 						GeneratedID = data.GeneratedID,
 						DisplayName = data:GetDisplayName(),
 						IsCivil = data.IsCivil,

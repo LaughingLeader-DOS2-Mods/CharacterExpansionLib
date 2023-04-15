@@ -760,6 +760,7 @@ if _ISCLIENT then
 	---@field IsCustom boolean
 	---@field State TalentState
 	---@field Visible boolean
+	---@field Mod Guid
 
 	---@private
 	---@param player EclCharacter
@@ -804,6 +805,7 @@ if _ISCLIENT then
 					CanAdd = canAdd,
 					CanRemove = canRemove,
 					Visible = true,
+					Mod = Data.ModID.Shared
 				}
 				entries[#entries+1] = data
 			end
@@ -831,6 +833,7 @@ if _ISCLIENT then
 						State = talentState,
 						IsCustom = true,
 						Visible = true,
+						Mod = data.Mod,
 					}
 					entries[#entries+1] = sheetData
 				end

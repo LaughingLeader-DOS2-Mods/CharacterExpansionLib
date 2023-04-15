@@ -385,6 +385,7 @@ else
 						last = lastValues[entryType][modid][id]
 					end
 					self.Events.OnEntryChanged:Invoke({
+						ModuleUUID = entry.Mod,
 						EntryType = entry.Type,
 						Stat = entry,
 						ID = entry.ID,

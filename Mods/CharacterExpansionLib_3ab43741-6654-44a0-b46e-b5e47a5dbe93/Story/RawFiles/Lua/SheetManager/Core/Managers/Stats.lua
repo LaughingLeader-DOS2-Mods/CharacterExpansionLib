@@ -432,6 +432,7 @@ if _ISCLIENT then
 	---@field IconWidth number
 	---@field IconHeight number
 	---@field Visible boolean
+	---@field Mod Guid
 
 	local _NEGATIVE_FORMAT = "<font color='#C80030'>%s</font>"
 
@@ -512,6 +513,7 @@ if _ISCLIENT then
 
 						local entry = {
 							ID = id,
+							Mod = Data.ModID.Shared,
 							GeneratedID = data.StatID,
 							DisplayName = name,
 							Description = "",
@@ -555,6 +557,7 @@ if _ISCLIENT then
 
 						local entry = {
 							ID = data.ID,
+							Mod = data.Mod,
 							GeneratedID = data.GeneratedID,
 							DisplayName = name,
 							Description = data:GetDescription(player, TooltipExpander.IsExpanded()),

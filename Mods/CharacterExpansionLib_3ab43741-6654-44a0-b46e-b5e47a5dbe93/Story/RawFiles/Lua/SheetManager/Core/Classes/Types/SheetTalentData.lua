@@ -88,6 +88,7 @@ function SheetTalentData:IsUnlockable(character)
 
 	---@type SubscribableEventInvokeResult<SheetManagerCanUnlockTalentEventArgs>
 	local invokeResult = SheetManager.Events.CanUnlockTalent:Invoke({
+		ModuleUUID = self.Mod,
 		CanUnlock = canUnlock,
 		Character = character,
 		CharacterID = GameHelpers.GetObjectID(character),

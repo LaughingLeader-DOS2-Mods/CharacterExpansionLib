@@ -157,7 +157,7 @@ function CustomStatsUI.Update(ui, method, this)
 					MinusVisible = minusVisible,
 					DisplayName = stat:GetDisplayName(),
 				}
-				SheetManager.Events.OnEntryUpdating:Invoke({ID=stat.ID, EntryType="SheetCustomStatData", Stat=data, Character=client, CharacterID=client.NetID})
+				SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = stat.Mod, ID=stat.ID, EntryType="SheetCustomStatData", Stat=data, Character=client, CharacterID=client.NetID})
 				if stat.Visible then
 					this.stats_mc.customStats_mc.addCustomStat(data.GeneratedID, data.DisplayName, tostring(data.Value), data.GroupID, data.PlusVisible == true, data.MinusVisible == true, true)
 				end
@@ -390,6 +390,7 @@ function CustomStatsUI:OnStatAdded(ui, call, doubleHandle, index)
 		local character = Client:GetCharacter()
 		self:UpdateStatValue(stat_mc, stat, character)
 		SheetManager.Events.OnEntryAddedToUI:Invoke({
+			ModuleUUID = stat.Mod,
 			ID = stat.ID,
 			EntryType = "SheetCustomStatData",
 			Stat = stat,

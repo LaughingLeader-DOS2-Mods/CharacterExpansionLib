@@ -10,6 +10,7 @@ SheetManager.Events = _EVENTS
 _EVENTS.Loaded = Classes.SubscribableEvent:Create("SheetManager.Loaded")
 
 ---@class SheetManagerOnEntryChangedBaseEventArgs
+---@field ModuleUUID Guid The related mod Guid.
 ---@field ID string
 ---@field Character EsvCharacter|EclCharacter
 ---@field CharacterID Guid|NetId Guid on the server-side, NetId on the client-side.
@@ -49,6 +50,7 @@ _EVENTS.OnEntryChanged = Classes.SubscribableEvent:Create("SheetManager.OnEntryC
 })
 
 ---@class SheetManagerOnAvailablePointsChangedEventArgs
+---@field ModuleUUID Guid The related mod Guid.
 ---@field EntryType SheetEntryDataType
 ---@field ID string
 ---@field Stat AnyStatEntryDataType
@@ -66,6 +68,7 @@ _EVENTS.OnAvailablePointsChanged = Classes.SubscribableEvent:Create("SheetManage
 
 if _ISCLIENT then
 	---@class SheetManagerCanChangeEntryBaseEventArgs
+	---@field ModuleUUID Guid The related mod Guid.
 	---@field ID string
 	---@field Character EclCharacter
 	---@field Action "Add"|"Remove"|"Visibility"
@@ -101,6 +104,7 @@ if _ISCLIENT then
 	})
 
 	---@class SheetManagerOnEntryUpdatingBaseEventArgs
+	---@field ModuleUUID Guid The mod Guid.
 	---@field ID string
 	---@field Character EclCharacter
 	---@field CharacterID NetId
@@ -131,6 +135,7 @@ if _ISCLIENT then
 	})
 
 	---@class SheetManagerOnEntryAddedToUIEventArgs
+	---@field ModuleUUID Guid The mod Guid.
 	---@field EntryType SheetEntryDataType
 	---@field ID string
 	---@field Stat AnyStatEntryDataType
