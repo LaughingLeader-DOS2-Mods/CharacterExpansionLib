@@ -847,3 +847,23 @@ if _ISCLIENT then
 	end
 
 end
+
+---@param character CharacterParam
+---@param talentId string
+---@param enabled boolean
+---@param modGuid? Guid
+function SheetManager.Talents.EnableTalent(character, talentId, enabled, modGuid)
+	if _ISCLIENT then
+		error("Talents must be enabled on the server-side")	
+	end
+	if _TalentEnum[talentId] then
+		local id = "TALENT_" .. talentId
+		if character.Stats[id] ~= enabled then
+			character.Stats.DynamicStats[1][id] = false
+			character.Stats.DynamicStats[2][id] = enabled
+			Osi.CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+		end
+	else
+		SheetManager:SetValueByID(character, talentId, enabled == true, modGuid, "Talent")
+	end
+end
