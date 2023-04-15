@@ -299,8 +299,9 @@ package characterSheet_fla
 				var extraStatsTab:MovieClip = this.tabsList.getElementByNumber("id", 8);
 				if (appearanceTab != null && extraStatsTab != null)
 				{
-					appearanceTab.x = extraStatsTab.x
-					appearanceTab.y = extraStatsTab.y + extraStatsTab.height
+					appearanceTab.x = 598;
+					//appearanceTab.x = extraStatsTab.x;
+					//appearanceTab.y = extraStatsTab.y + extraStatsTab.height;
 				}
 			}
 			
