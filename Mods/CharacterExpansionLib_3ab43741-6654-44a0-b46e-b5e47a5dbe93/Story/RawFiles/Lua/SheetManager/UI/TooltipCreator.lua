@@ -291,4 +291,30 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 			end
 		end, {Priority=9999})
 	end
-end, {Priority=0})
+
+	Game.Tooltip.Register.Global(function (request, tooltip, ...)
+		if request.Type == "Talent" then
+			local stat = SheetManager:GetEntryByID(request.Talent, nil, "Talent")
+			if stat and stat.ExpandedDescription then
+				tooltip:MarkDirty()
+			end
+		elseif request.Type == "Ability" then
+			local stat = SheetManager:GetEntryByID(request.Ability, nil, "Ability") or SheetManager:GetEntryByID(request.Ability, nil, "CivilAbility")
+			if stat and stat.ExpandedDescription then
+				tooltip:MarkDirty()
+			end
+		elseif request.Type == "Stat" then
+			local stat = SheetManager:GetEntryByID(request.Stat, nil, "PrimaryStat") or SheetManager:GetEntryByID(request.Stat, nil, "SecondaryStat")
+			if stat and stat.ExpandedDescription then
+				tooltip:MarkDirty()
+			end
+		elseif request.Type == "CustomStat" then
+			if request.StatData then
+				local stat = SheetManager:GetEntryByID(request.StatData.ID, nil, "Custom")
+				if stat and stat.ExpandedDescription then
+					tooltip:MarkDirty()
+				end
+			end
+		end
+	end)
+end, {Priority=1})
