@@ -300,7 +300,39 @@ else
 			end
 		end
 	end)
-	RegisterNetListener("CEL_SheetManager_RequestBaseValueChange", function(cmd, payload)
+
+	---@param character EsvCharacter
+	local function _CheckTalentRequirements(character)
+		local talents = SheetManager.Save.GetCharacterData(character.MyGuid, "Talent")
+		if talents then
+			--Clone so we aren't iterating a table that may be changing
+			local tbl = TableHelpers.Clone(talents)
+			local availablePoints = nil
+			if character.CharCreationInProgress then
+				availablePoints = SheetManager:GetAvailablePoints(character.MyGuid, "Talent", nil, character.CharCreationInProgress)
+			end
+			for modGuid,entries in pairs(tbl) do
+				for id,b in pairs(entries) do
+					if b then
+						local talent = SheetManager:GetEntryByID(id, modGuid, "Talent") --[[@as SheetTalentData]]
+						if talent and not talent:IsUnlockable(character) then
+							--talent:SetValue(character, false)
+							if ProcessPointChange(character.NetID, id, modGuid, "Talent", false, character.IsGameMaster, character.CharCreationInProgress, availablePoints) then
+								if availablePoints then
+									GameHelpers.Net.PostToUser(character, "CEL_SheetManager_UpdateCCWizardAvailablePoints", availablePoints)
+									SessionManager:SyncSession(character)
+								else
+									SheetManager:SyncData(character)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	RegisterNetListener("CEL_SheetManager_RequestBaseValueChange", function(cmd, payload, user)
 		local data = Common.JsonParse(payload)
 		if data then
 			assert(data.ModifyBy ~= "nil", "Payload needs a ModifyBy value (integer or boolean).")
@@ -320,6 +352,8 @@ else
 
 			--Force PlayerUpgrade sync
 			CharacterAddCivilAbilityPoint(character.MyGuid, 0)
+
+			_CheckTalentRequirements(character)
 		end
 	end)
 end
