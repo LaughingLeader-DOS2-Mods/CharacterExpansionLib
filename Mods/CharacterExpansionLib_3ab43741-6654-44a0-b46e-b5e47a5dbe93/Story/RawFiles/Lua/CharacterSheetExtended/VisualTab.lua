@@ -28,7 +28,7 @@ if _ISCLIENT then
 			Ext.Events.UICall:Subscribe(function (e)
 				if e.Function == "selectOption" and e.UI.Type == 119 and e.When == "Before" then
 					local contentID, optionID, someBool = table.unpack(e.Args)
-					local contentName = _ContentToVisualType[contentID]
+					local visualType = _ContentToVisualType[contentID]
 
 					local player = GameHelpers.Client.GetCharacterSheetCharacter(e.UI:GetRoot())
 					local visualSet = GameHelpers.Visual.GetVisualSet(player, true)
@@ -37,7 +37,7 @@ if _ISCLIENT then
 						local visual = Ext.Resource.Get("Visual", visualId)
 
 						if visual then
-							GameHelpers.Net.PostMessageToServer("CEL_Sheet_SetVisualElement", {NetID=player.NetID, Slot=VisualSlot[contentName], Element=visual.Name})
+							GameHelpers.Net.PostMessageToServer("CEL_Sheet_SetVisualElement", {NetID=player.NetID, Slot=VisualSlot[visualType], Element=visual.Name})
 						end
 
 						--[[ Ext.Utils.Print(Lib.serpent.dump({
@@ -59,6 +59,8 @@ else
 
 	GameHelpers.Net.Subscribe("CEL_Sheet_SetVisualElement", function (e, data)
 		local player = GameHelpers.GetCharacter(data.NetID, "EsvCharacter")
+		assert(player ~= nil, "Failed to get player from NetID" .. tostring(data.NetID))
+		GameHelpers.Utils.UpdatePlayerCustomData(player)
 		Osi.CharacterSetVisualElement(player.MyGuid, data.Slot, data.Element)
 	end)
 end
