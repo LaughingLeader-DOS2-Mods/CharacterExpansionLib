@@ -859,12 +859,17 @@ function SheetManager.Talents.EnableTalent(character, talentId, enabled, modGuid
 	if _ISCLIENT then
 		error("Talents must be enabled on the server-side")	
 	end
+	if string.find(talentId, "TALENT_") then
+		local builtinId = string.gsub(talentId, "TALENT_", "")
+		if _TalentEnum[builtinId] then
+			talentId = builtinId
+		end
+	end
 	if _TalentEnum[talentId] then
 		local id = "TALENT_" .. talentId
 		if character.Stats[id] ~= enabled then
-			character.Stats.DynamicStats[1][id] = false
-			character.Stats.DynamicStats[2][id] = enabled
-			Osi.CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+			GameHelpers.Character.SetPermanentBoosts(character, {[id] = false}, 1)
+			GameHelpers.Character.SetPermanentBoosts(character, {[id] = enabled}, 2)
 		end
 	else
 		SheetManager:SetValueByID(character, talentId, enabled == true, modGuid, "Talent")
