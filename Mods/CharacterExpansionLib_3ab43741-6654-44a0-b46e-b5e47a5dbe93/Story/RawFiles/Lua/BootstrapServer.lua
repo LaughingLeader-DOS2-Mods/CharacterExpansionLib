@@ -16,3 +16,10 @@ Ext.Require("CharacterCreationExtended/Init.lua")
 PersistentVars = GameHelpers.PersistentVars.Initialize(Mods.CharacterExpansionLib, defaultPersistentVars, function ()
 	PersistentVars = GameHelpers.PersistentVars.Update(defaultPersistentVars, PersistentVars)
 end)
+
+Events.TemporaryCharacterRemoved:Subscribe(function (e)
+	SheetManager.Save.RemoveCharacterData(e.CharacterGUID)
+	if e.NetID then
+		GameHelpers.Net.Broadcast("CEL_SheetManager_ClearCharacterData", {NetID=e.NetID})
+	end
+end)
