@@ -1,5 +1,5 @@
 local self = SheetManager
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 if SheetManager.Save == nil then SheetManager.Save = {} end
 
@@ -13,20 +13,24 @@ if SheetManager.Save == nil then SheetManager.Save = {} end
 ---@type table<Guid|NETID, SheetManagerSaveData>
 SheetManager.CurrentValues = {}
 
-if not isClient then
+if not _ISCLIENT then
 	local Handler = {
 		__index = function(tbl,k)
 			return PersistentVars.CharacterSheetValues[k]
 		end,
 		__newindex = function(tbl,k,v)
 			PersistentVars.CharacterSheetValues[k] = v
+		end,
+		__pairs = function(t, ...)
+			return next, PersistentVars.CharacterSheetValues, nil
 		end
 	}
+	Handler.__ipairs = Handler.__pairs
 	setmetatable(SheetManager.CurrentValues, Handler)
 end
 
 ---@private
----@param characterId Guid|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 ---@return SheetManagerSaveData
 function SheetManager.Save.CreateCharacterData(characterId)
 	characterId = GameHelpers.GetObjectID(characterId)
@@ -58,11 +62,11 @@ function SheetManager.Save.GetTableNameForType(statType)
 	end
 end
 
----@param characterId Guid|EsvCharacter|NETID|EclCharacter
----@param statType SheetStatType|nil
----@param mod string|nil
----@param entryId string|nil
----@return table
+---@param characterId CharacterParam
+---@param statType? SheetStatType
+---@param mod? string
+---@param entryId? string
+---@return table|nil
 function SheetManager.Save.GetCharacterData(characterId, statType, mod, entryId)
 	local data = self.CurrentValues[characterId]
 	if data then
@@ -108,10 +112,10 @@ end
 --region Get/Set Values
 
 ---Get the pending value from character creation, if any.
----@param characterId Guid|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
----@return integer|boolean
----@return table<SheetEntryId, integer> The mod data table containing all stats.
+---@return integer|boolean|nil
+---@return table<SheetEntryId, integer>|nil modData #The mod data table containing all stats.
 function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	characterId = GameHelpers.GetObjectID(characterId)
 	local sessionData = SessionManager:GetSession(characterId)
@@ -131,9 +135,9 @@ function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	return nil
 end
 
----@param characterId Guid|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
----@return integer|boolean
+---@return integer|boolean|nil
 function SheetManager.Save.GetEntryValue(characterId, entry)
 	local t = type(entry)
 	assert(t == "table", string.format("[SheetManager.Save.GetEntryValue] Entry type invalid (%s). Must be one of the following types: SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData", t))
@@ -173,7 +177,7 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 	return nil
 end
 
----@param characterId Guid|EsvCharacter|NETID|EclCharacter
+---@param characterId CharacterParam
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param value integer|boolean
 ---@param skipSessionCheck ?boolean
@@ -203,9 +207,27 @@ function SheetManager.Save.SetEntryValue(characterId, entry, value, skipSessionC
 	data[tableName][entry.Mod][entry.ID] = value
 	return true
 end
+
+---@param characterId Guid|NetId
+function SheetManager.Save.RemoveCharacterData(characterId)
+	self.CurrentValues[characterId] = nil
+	if not _ISCLIENT then
+		PersistentVars.CustomStatAvailablePoints[characterId] = nil
+		PersistentVars.CustomStatValues[characterId] = nil
+	end
+end
+
 --endregion
 
-if isClient then
+if _ISCLIENT then
+	---@class CEL_SheetManager_ClearCharacterData
+	---@field NetID integer
+
+	GameHelpers.Net.Subscribe("CEL_SheetManager_ClearCharacterData", function (e, data)
+		SheetManager.Save.RemoveCharacterData(data.NetID)
+	end)
+
+
 	---Request a value change for a sheet entry on the server side.
 	---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 	---@param character EclCharacter|NETID
@@ -359,7 +381,7 @@ else
 end
 
 --region Value Syncing
-if not isClient then
+if not _ISCLIENT then
 	---@protected
 	---@param character Guid|EsvCharacter
 	---@param user number|string|nil Optional client to sync to if character is nil.
@@ -427,7 +449,7 @@ else
 						Value = value,
 						Character = character,
 						CharacterID = GameHelpers.GetObjectID(character),
-						IsClient = isClient,
+						IsClient = _ISCLIENT,
 					})
 				end
 			end
@@ -488,7 +510,7 @@ else
 end
 --endregion
 
-if isClient then
+if _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_EntryValueChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
