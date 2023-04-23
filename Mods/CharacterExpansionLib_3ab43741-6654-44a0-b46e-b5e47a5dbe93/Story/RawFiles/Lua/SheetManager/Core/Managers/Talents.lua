@@ -447,7 +447,6 @@ function SheetManager.Talents.GetCharactersWithTalent(talentId, mod)
 	local entries = {}
 	local count = 0
 	for characterId,data in pairs(SheetManager.CurrentValues) do
-		print(characterId, data)
 		if data.Talents then
 			if mod then
 				local modData = data.Talents[mod]
