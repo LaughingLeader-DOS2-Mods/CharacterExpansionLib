@@ -412,6 +412,78 @@ function SheetManager.Talents.HasTalent(player, talentId, mod)
 	return false
 end
 
+---@param talentId string Custom talent ID.
+---@param mod Guid|nil The mod UUID, if any
+---@return boolean
+function SheetManager.Talents.AnyCharacterHasCustomTalent(talentId, mod)
+	for characterId,data in pairs(SheetManager.CurrentValues) do
+		if data.Talents then
+			if mod then
+				local modData = data.Talents[mod]
+				if modData then
+					local hasTalent = modData[talentId]
+					if hasTalent then
+						return true
+					end
+				end
+			else
+				for modGuid,modData in pairs(data.Talents) do
+					local hasTalent = modData[talentId]
+					if hasTalent then
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
+---@param talentId string Custom talent ID.
+---@param mod Guid|nil The mod UUID, if any
+---@return (fun():CharacterObject) characterIterator
+---@return integer count
+function SheetManager.Talents.GetCharactersWithTalent(talentId, mod)
+	local entries = {}
+	local count = 0
+	for characterId,data in pairs(SheetManager.CurrentValues) do
+		print(characterId, data)
+		if data.Talents then
+			if mod then
+				local modData = data.Talents[mod]
+				if modData then
+					local hasTalent = modData[talentId]
+					if hasTalent then
+						local character = GameHelpers.GetCharacter(characterId)
+						if character then
+							count = count + 1
+							entries[count] = character
+						end
+					end
+				end
+			else
+				for modGuid,modData in pairs(data.Talents) do
+					local hasTalent = modData[talentId]
+					if hasTalent then
+						local character = GameHelpers.GetCharacter(characterId)
+						if character then
+							count = count + 1
+							entries[count] = character
+						end
+					end
+				end
+			end
+		end
+	end
+	local i = 0
+	return function ()
+		i = i + 1
+		if i <= count then
+			return entries[i]
+		end
+	end, count
+end
+
 local function TryRequestRefresh()
 	-- if isClient then
 	-- 	if Vars.ControllerEnabled then
