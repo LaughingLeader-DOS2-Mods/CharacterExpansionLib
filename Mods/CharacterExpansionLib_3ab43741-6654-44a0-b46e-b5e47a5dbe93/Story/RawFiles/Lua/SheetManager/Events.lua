@@ -96,7 +96,7 @@ if _ISCLIENT then
 
 	---@alias SheetManagerCanChangeEntryAnyTypeEventArgs SheetManagerCanChangeEntryStatEventArgs|SheetManagerCanChangeEntryAbilityEventArgs|SheetManagerCanChangeEntryTalentEventArgs|SheetManagerCanChangeEntryCustomStatEventArgs
 
-	---Called when the UI checks if a stat can be added to. 
+	---Called when the UI checks if a stat can be added to.  
 	---🔧**Client-Only**🔧  
 	---@type LeaderLibSubscribableEvent<SheetManagerCanChangeEntryAnyTypeEventArgs>
 	_EVENTS.CanChangeEntry = Classes.SubscribableEvent:Create("SheetManager.CanChangeEntry", {
@@ -162,7 +162,8 @@ end
 ---@field Talent SheetTalentData
 ---@field CanUnlock boolean
 
----Called when checking if a talent can be unlocked.  
+---Called when checking if a talent can be unlocked. 
+---This is called after the talent's requirements are checked.  
 ---🔨🔧**Server/Client**🔧🔨   
 ---@type LeaderLibSubscribableEvent<SheetManagerCanUnlockTalentEventArgs>
 _EVENTS.CanUnlockTalent = Classes.SubscribableEvent:Create("SheetManager.CanUnlockTalent")
