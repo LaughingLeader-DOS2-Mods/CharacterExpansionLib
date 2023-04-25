@@ -102,15 +102,15 @@ function SheetManager:GetValueByEntry(entry, characterId)
 	return 0
 end
 
----@param characterId Guid|NETID
+---@param character CharacterParam
 ---@param id string
 ---@param mod? string
 ---@param statType? SheetEntryType
 ---@return integer|boolean
-function SheetManager:GetValueByID(characterId, id, mod, statType)
+function SheetManager:GetValueByID(character, id, mod, statType)
 	local entry = self:GetEntryByID(id, mod, statType)
 	if entry then
-		return self:GetValueByEntry(entry, characterId)
+		return self:GetValueByEntry(entry, character)
 	end
 	if statType == "Talent" then
 		return false
