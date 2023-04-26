@@ -1,6 +1,7 @@
 local _ISCLIENT = Ext.IsClient()
 
 ---@class SheetStatData:SheetBaseData
+---@field MaxValue integer|nil Overrides the default max value (`Ext.ExtraData.AttributeSoftCap` if a PrimaryStat).
 local SheetStatData = {
 	Type = "SheetStatData",
 	TooltipType = "Stat",
@@ -28,6 +29,7 @@ SheetStatData.__index = function(t,k)
 end
 
 SheetStatData.PropertyMap = {
+	MAXVALUE = {Name="MaxValue", Type = "integer"},
 	STATTYPE = {Name="StatType", Type = "enum", Parse = function(val,t)
 		if t == "string" then
 			local id = string.lower(val)

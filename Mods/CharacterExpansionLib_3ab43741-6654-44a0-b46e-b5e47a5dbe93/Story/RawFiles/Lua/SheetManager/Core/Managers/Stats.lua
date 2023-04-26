@@ -455,7 +455,8 @@ if _ISCLIENT then
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 		local points = availablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, isCharacterCreation)
 		local maxAttribute = GameHelpers.GetExtraData("AttributeSoftCap", 40)
-		
+		local baseAttribute = GameHelpers.GetExtraData("AttributeBaseValue", 10)
+
 		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
 
 		local defaultCanRemove = isGM or isCharacterCreation
@@ -487,7 +488,7 @@ if _ISCLIENT then
 						local canAdd = (data.Type == "PrimaryStat" and points > 0 and value < maxAttribute) or isGM
 						local canRemove = defaultCanRemove
 						if data.Type == "PrimaryStat" and not canRemove then
-							canRemove = isCharacterCreation and value > Ext.ExtraData.AttributeBaseValue
+							canRemove = isCharacterCreation and value > baseAttribute
 						end
 						
 						local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
@@ -497,7 +498,7 @@ if _ISCLIENT then
 
 						local delta = 0
 						if data.Type == "PrimaryStat" then
-							delta = value - Ext.ExtraData.AttributeBaseValue
+							delta = value - baseAttribute
 						end
 
 						local name = id
@@ -546,7 +547,18 @@ if _ISCLIENT then
 				if data.StatType == "PrimaryStat" then
 					local value = data:GetValue(player) or 0
 					if SheetManager:IsEntryVisible(data, player, value) then
-						local defaultCanAdd = (data.StatType == "PrimaryStat" and (data.UsePoints == true and points > 0)) or isGM
+						local defaultCanAdd = false
+						if data.StatType == "PrimaryStat" then
+							local maxVal = data.MaxValue or maxAttribute
+							defaultCanAdd = isGM
+							if not isGM then
+								if data.UsePoints then
+									defaultCanAdd = points > 0 and value < maxVal
+								else
+									defaultCanAdd = value < maxVal
+								end
+							end
+						end
 
 						local name = data:GetDisplayName(player)
 						local valueLabel = string.format("%s%s", value, data.Suffix or "")

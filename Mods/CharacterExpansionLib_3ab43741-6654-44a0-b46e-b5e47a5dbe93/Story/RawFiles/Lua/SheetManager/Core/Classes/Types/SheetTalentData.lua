@@ -40,6 +40,9 @@ local defaults = {
 
 ---@protected
 function SheetTalentData.SetDefaults(data)
+	if data.IsRacial and data.UsePoints == nil then
+		data.UsePoints = false
+	end
 	Classes.SheetBaseData.SetDefaults(data)
 	for k,v in pairs(defaults) do
 		if data[k] == nil then

@@ -281,10 +281,14 @@ if _ISCLIENT then
 				local value = data:GetValue(player)
 				if SheetManager:IsEntryVisible(data, player, value) then
 					local canAddPoints = false
+					local maxVal = civilOnly and maxCivil or maxAbility
+					if data.MaxValue then
+						maxVal = data.MaxValue
+					end
 					if civilOnly then
-						canAddPoints = civilPoints > 0 and value < maxCivil
+						canAddPoints = civilPoints > 0 and value < maxVal
 					else
-						canAddPoints = abilityPoints > 0 and value < maxAbility
+						canAddPoints = abilityPoints > 0 and value < maxVal
 					end
 
 					local groupName = SheetManager.Abilities.Data.GroupDisplayName[data.GroupID]
@@ -295,7 +299,7 @@ if _ISCLIENT then
 					end
 
 					---@type SheetManager.AbilitiesUIEntry
-					local data = {
+					local uiEntry = {
 						ID = data.ID,
 						Mod = data.Mod,
 						GeneratedID = data.GeneratedID,
@@ -312,7 +316,7 @@ if _ISCLIENT then
 						CanRemove = SheetManager:GetIsMinusVisible(data, player, isCharacterCreation or isGM, value),
 						Visible = true
 					}
-					entries[#entries+1] = data
+					entries[#entries+1] = uiEntry
 				end
 			end
 		end

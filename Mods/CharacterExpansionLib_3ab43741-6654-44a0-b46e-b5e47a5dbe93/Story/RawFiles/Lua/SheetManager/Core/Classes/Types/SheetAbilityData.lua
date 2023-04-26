@@ -1,6 +1,7 @@
 local _ISCLIENT = Ext.IsClient()
 
 ---@class SheetAbilityData:SheetBaseData
+---@field MaxValue integer|nil Overrides the default max value (`Ext.ExtraData.CombatAbilityCap` or `Ext.ExtraData.CivilAbilityCap`).
 local SheetAbilityData = {
 	Type = "SheetAbilityData",
 	TooltipType = "Ability",
@@ -23,6 +24,7 @@ SheetAbilityData.__index = function(t,k)
 end
 
 SheetAbilityData.PropertyMap = {
+	MAXVALUE = {Name="MaxValue", Type = "integer"},
 	ISCIVIL = {Name="IsCivil", Type = "boolean"},
 	GROUPID = {Name="GroupID", Type = "enum", Parse = function(val,t)
 		if t == "string" then

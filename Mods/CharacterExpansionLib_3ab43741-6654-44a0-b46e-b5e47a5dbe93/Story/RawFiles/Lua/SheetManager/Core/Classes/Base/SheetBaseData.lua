@@ -25,7 +25,7 @@ local SheetBaseData = {
 	---Text to append to the value display, such as a percentage sign.
 	Suffix = "",
 	---Whether  this entry uses character points, such as Attribute/Ability/Talent points.
-	UsePoints = false,
+	UsePoints = true,
 	Icon = "",
 	IconWidth = 128,
 	IconHeight = 128,
