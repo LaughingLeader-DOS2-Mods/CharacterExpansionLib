@@ -25,3 +25,5 @@ Mods.CharacterExpansionLib = {
 ---@alias StatSheetSecondaryStatType "Info"|"Normal"|"Resistance"
 ---@alias StatSheetStatType "PrimaryStat"|"SecondaryStat"|"Spacing"
 ---@alias PersistentVarsStatTypeTableName "Stats"|"Abilities"|"Talents"|"CustomStats"
+---@alias SheetBuiltinType "Attribute"|"Ability"|"Talent"
+---@alias SheetBuiltinSecondaryType "PrimaryStat"|"SecondaryStat"|"CombatAbility"|"CivilAbility"

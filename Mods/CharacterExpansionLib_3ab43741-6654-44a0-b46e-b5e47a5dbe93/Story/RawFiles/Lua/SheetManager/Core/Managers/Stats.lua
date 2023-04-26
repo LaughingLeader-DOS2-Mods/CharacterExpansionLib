@@ -512,7 +512,7 @@ if _ISCLIENT then
 							valueLabel = string.format(_NEGATIVE_FORMAT, valueLabel)
 						end
 
-						local entry = {
+						local uiEntry = {
 							ID = id,
 							Mod = Data.ModID.Shared,
 							GeneratedID = data.StatID,
@@ -534,9 +534,9 @@ if _ISCLIENT then
 							Visible = true,
 						}
 						if isCharacterCreation and not isRespec then
-							entry.GeneratedID = entry.GeneratedID + 1
+							uiEntry.GeneratedID = uiEntry.GeneratedID + 1
 						end
-						entries[#entries+1] = entry
+						entries[#entries+1] = uiEntry
 					end
 				end
 			end
@@ -567,7 +567,7 @@ if _ISCLIENT then
 							valueLabel = string.format(_NEGATIVE_FORMAT, valueLabel)
 						end
 
-						local entry = {
+						local uiEntry = {
 							ID = data.ID,
 							Mod = data.Mod,
 							GeneratedID = data.GeneratedID,
@@ -591,11 +591,11 @@ if _ISCLIENT then
 							Visible = true,
 						}
 						if not StringHelpers.IsNullOrEmpty(data.SheetIcon) then
-							entry.Frame = 99
-							entry.IconDrawCallName = string.format("LL_%s", data.ID)
-							entry.IconClipName = "iggy_" .. entry.IconDrawCallName
+							uiEntry.Frame = 99
+							uiEntry.IconDrawCallName = string.format("LL_%s", data.ID)
+							uiEntry.IconClipName = "iggy_" .. uiEntry.IconDrawCallName
 						end
-						entries[#entries+1] = entry
+						entries[#entries+1] = uiEntry
 					end
 				end
 			end
