@@ -282,9 +282,9 @@ if _ISCLIENT then
 				if SheetManager:IsEntryVisible(data, player, value) then
 					local canAddPoints = false
 					if civilOnly then
-						canAddPoints = civilPoints > 0
+						canAddPoints = civilPoints > 0 and value < maxCivil
 					else
-						canAddPoints = abilityPoints > 0
+						canAddPoints = abilityPoints > 0 and value < maxAbility
 					end
 
 					local groupName = SheetManager.Abilities.Data.GroupDisplayName[data.GroupID]
@@ -309,7 +309,7 @@ if _ISCLIENT then
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),
-						CanRemove = SheetManager:GetIsMinusVisible(data, player, isCharacterCreation, value),
+						CanRemove = SheetManager:GetIsMinusVisible(data, player, isCharacterCreation or isGM, value),
 						Visible = true
 					}
 					entries[#entries+1] = data
