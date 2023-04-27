@@ -328,19 +328,25 @@ local function GetCharacterStats(character)
 			setmetatable(stats, {
 				__index = function (tbl, k)
 					local player = GameHelpers.GetCharacter(netid, "EclCharacter")
-					local customization = GetWizCustomizationForCharacter(player)
+					customization = GetWizCustomizationForCharacter(player)
 					assert(customization ~= nil, "Failed to get CC Customization for character")
-					local base, current = 0,0
+					---@type integer|boolean
+					local base = 0
+					---@type integer|boolean
+					local current = 0
 					if string.find(k, "TALENT_") then
 						k = StringHelpers.Replace(k, "TALENT_", "")
 					end
-					local baseStatHolder = player.Stats.DynamicStats[1]
-					if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
-						--The character is likely the dummy being transformed. Stat changes apply immediately.
-						baseStatHolder = {}
-					end
+					-- local baseStatHolder = player.Stats.DynamicStats[1]
+					-- if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
+					-- 	--The character is likely the dummy being transformed. Stat changes apply immediately.
+					-- 	baseStatHolder = {}
+					-- end
 					if Data.AttributeEnum[k] then
-						base = (baseStatHolder[k] or 0) + GameHelpers.GetExtraData("AttributeBaseValue", 10)
+						---@cast current -boolean
+						---@cast base -boolean
+						--base = (baseStatHolder[k] or 0) + GameHelpers.GetExtraData("AttributeBaseValue", 10)
+						base = GameHelpers.GetExtraData("AttributeBaseValue", 10)
 						current = base
 						for i,v in pairs(customization.Class.AttributeChanges) do
 							if v.Attribute == k then
@@ -349,7 +355,10 @@ local function GetCharacterStats(character)
 							end
 						end
 					elseif Data.AbilityEnum[k] then
-						base = (baseStatHolder[k] or 0) + GameHelpers.GetExtraData("AbilityBaseValue", 0)
+						---@cast current -boolean
+						---@cast base -boolean
+						--base = (baseStatHolder[k] or 0) + GameHelpers.GetExtraData("AbilityBaseValue", 0)
+						base = GameHelpers.GetExtraData("AbilityBaseValue", 0)
 						current = base
 						for i,v in pairs(customization.Class.AbilityChanges) do
 							if v.Ability == k then
@@ -358,8 +367,10 @@ local function GetCharacterStats(character)
 							end
 						end
 					elseif Data.TalentEnum[k] then
-						base = baseStatHolder["TALENT_" .. k] or false
-						current = base
+						---@cast base -integer
+						---@cast current -integer
+						--base = baseStatHolder["TALENT_" .. k] or false
+						current = false
 						for i,v in pairs(customization.Class.TalentsAdded) do
 							if v == k then
 								current = true
@@ -372,7 +383,8 @@ local function GetCharacterStats(character)
 				end,
 				__newindex = function (tbl, k, value)
 					local player = GameHelpers.GetCharacter(netid)
-					local customization = GetWizCustomizationForCharacter(player)
+					customization = GetWizCustomizationForCharacter(player)
+					assert(customization ~= nil, "Failed to get CC Customization for character")
 					if Data.AttributeEnum[k] then
 						for i,v in pairs(customization.Class.AttributeChanges) do
 							if v.Attribute == k then
