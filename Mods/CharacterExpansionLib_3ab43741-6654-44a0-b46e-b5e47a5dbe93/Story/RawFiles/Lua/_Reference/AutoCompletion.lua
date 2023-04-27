@@ -27,3 +27,8 @@ Mods.CharacterExpansionLib = {
 ---@alias PersistentVarsStatTypeTableName "Stats"|"Abilities"|"Talents"|"CustomStats"
 ---@alias SheetBuiltinType "Attribute"|"Ability"|"Talent"
 ---@alias SheetBuiltinSecondaryType "PrimaryStat"|"SecondaryStat"|"CombatAbility"|"CivilAbility"
+
+---@class SheetManagerGetVisibleBaseOptions
+---@field IsCharacterCreation boolean
+---@field IsGM boolean
+---@field Stats CDivinityStatsCharacter 

@@ -436,35 +436,38 @@ if _ISCLIENT then
 
 	local _NEGATIVE_FORMAT = "<font color='#C80030'>%s</font>"
 
+	---@class SheetManagerStatsGetVisibleOptions:SheetManagerGetVisibleBaseOptions
+	---@field IsRespec boolean
+	---@field AvailablePoints integer
+	local DefaultOptions = {
+		IsCharacterCreation = false,
+		IsGM = false,
+		IsRespec = false,
+		AvailablePoints = 0,
+	}
+
 	---@private
 	---@param player EclCharacter
-	---@param isCharacterCreation ?boolean
-	---@param isGM ?boolean
-	---@param isRespec ?boolean
-	---@param availablePoints ?integer
+	---@param opts? SheetManagerStatsGetVisibleOptions
 	---@return fun():SheetManager.StatsUIEntry
-	function SheetManager.Stats.GetVisible(player, isCharacterCreation, isGM, isRespec, availablePoints)
-		if isCharacterCreation == nil then
-			isCharacterCreation = false
+	function SheetManager.Stats.GetVisible(player, opts)
+		local options = TableHelpers.SetDefaultOptions(opts, DefaultOptions)
+		if options.Stats == nil then
+			options.Stats = SessionManager:CreateCharacterSessionMetaTable(player)
 		end
-		if isGM == nil then
-			isGM = false
-		end
+		local targetStats = options.Stats
+		local defaultCanRemove = options.IsCharacterCreation or options.IsGM
 
 		local entries = {}
 		--local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
-		local points = availablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, isCharacterCreation)
+		local points = options.AvailablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, options.IsCharacterCreation)
 		local maxAttribute = GameHelpers.GetExtraData("AttributeSoftCap", 40)
-		local baseAttribute = GameHelpers.GetExtraData("AttributeBaseValue", 10)
-
-		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
-
-		local defaultCanRemove = isGM or isCharacterCreation
+		local startAttribute = GameHelpers.GetExtraData("AttributeBaseValue", 10)
 
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
 			local data = SheetManager.Stats.Data.Default.Entries[id]
-			if not isCharacterCreation or data.Type == "PrimaryStat" then
+			if not options.IsCharacterCreation or data.Type == "PrimaryStat" then
 				if id == "Spacing" then
 					local entry = {
 						StatType = SheetManager.Stats.Data.StatType.Spacing,
@@ -473,6 +476,7 @@ if _ISCLIENT then
 					entries[#entries+1] = entry
 				else
 					local value = nil
+					local baseValue = 0
 					if type(data.Attribute) == "function" then
 						local b,result = xpcall(data.Attribute, debug.traceback, targetStats)
 						if b then
@@ -482,23 +486,26 @@ if _ISCLIENT then
 						end
 					else
 						value = targetStats[data.Attribute]
+						if data.Attribute ~= "MPStart" and data.Attribute ~= "Experience" then
+							baseValue = targetStats["Base"..data.Attribute]
+						end
 					end
 					if value ~= nil then
 						--TODO Make sure add/remove works for info stats
-						local canAdd = (data.Type == "PrimaryStat" and points > 0 and value < maxAttribute) or isGM
+						local canAdd = (data.Type == "PrimaryStat" and points > 0 and baseValue < maxAttribute) or options.IsGM
 						local canRemove = defaultCanRemove
 						if data.Type == "PrimaryStat" and not canRemove then
-							canRemove = isCharacterCreation and value > baseAttribute
+							canRemove = options.IsCharacterCreation and value > startAttribute
 						end
 						
 						local frame = data.Frame or (data.Type == "PrimaryStat" and -1 or 0)
-						if isCharacterCreation and data.CCFrame then
+						if options.IsCharacterCreation and data.CCFrame then
 							frame = data.CCFrame
 						end
 
 						local delta = 0
 						if data.Type == "PrimaryStat" then
-							delta = value - baseAttribute
+							delta = value - startAttribute
 						end
 
 						local name = id
@@ -533,7 +540,7 @@ if _ISCLIENT then
 							IconDrawCallName = "",
 							Visible = true,
 						}
-						if isCharacterCreation and not isRespec then
+						if options.IsCharacterCreation and not options.IsRespec then
 							uiEntry.GeneratedID = uiEntry.GeneratedID + 1
 						end
 						entries[#entries+1] = uiEntry
@@ -550,8 +557,8 @@ if _ISCLIENT then
 						local defaultCanAdd = false
 						if data.StatType == "PrimaryStat" then
 							local maxVal = data.MaxValue or maxAttribute
-							defaultCanAdd = isGM
-							if not isGM then
+							defaultCanAdd = options.IsGM
+							if not defaultCanAdd then
 								if data.UsePoints then
 									defaultCanAdd = points > 0 and value < maxVal
 								else

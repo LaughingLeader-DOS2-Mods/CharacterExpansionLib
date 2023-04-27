@@ -168,7 +168,6 @@ function CustomStats:GetTotalStatsInCategory(categoryId, visibleOnly)
 				visible = SheetManager:IsEntryVisible(stat, character) == true
 			end
 			if visible and stat.Category == categoryId then
-				Ext.Utils.PrintError(categoryId, stat.ID, total)
 				total = total + 1
 			end
 		end

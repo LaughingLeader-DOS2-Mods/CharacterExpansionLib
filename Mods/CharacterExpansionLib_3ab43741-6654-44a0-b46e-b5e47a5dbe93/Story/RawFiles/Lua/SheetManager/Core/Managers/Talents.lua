@@ -29,8 +29,8 @@ _Data.TalentState = {
 }
 
 _Data.TalentStateColor = {
-	[2] = "#403625",
-	[3] = "#C80030"
+	[_Data.TalentState.Selectable] = "#403625",
+	[_Data.TalentState.Locked] = "#C80030"
 }
 
 _Data.DOSTalents = {
@@ -833,35 +833,46 @@ if _ISCLIENT then
 	---@field Visible boolean
 	---@field Mod Guid
 
+	---@class SheetManagerTalentsGetVisibleOptions:SheetManagerGetVisibleBaseOptions
+	---@field AvailablePoints integer
+	local DefaultOptions = {
+		IsCharacterCreation = false,
+		IsGM = false,
+		AvailablePoints = 0,
+	}
+
 	---@private
 	---@param player EclCharacter
-	---@param isCharacterCreation boolean|nil
-	---@param isGM boolean|nil
-	---@param availablePoints ?integer
-	---@return fun():SheetManager.TalentsUIEntry
-	function SheetManager.Talents.GetVisible(player, isCharacterCreation, isGM, availablePoints)
-		if isCharacterCreation == nil then
-			isCharacterCreation = false
+	---@param opts? SheetManagerTalentsGetVisibleOptions
+	function SheetManager.Talents.GetVisible(player, opts)
+		local options = TableHelpers.SetDefaultOptions(opts, DefaultOptions)
+		if options.Stats == nil then
+			options.Stats = SessionManager:CreateCharacterSessionMetaTable(player)
 		end
-		if isGM == nil then
-			isGM = false
-		end
+		local targetStats = options.Stats
 
-		local talentPoints = availablePoints or SheetManager:GetAvailablePoints(player, "Talent", nil, isCharacterCreation)
-		local targetStats = SessionManager:CreateCharacterSessionMetaTable(player)
+		local talentPoints = options.AvailablePoints or SheetManager:GetAvailablePoints(player, "Talent", nil, options.IsCharacterCreation)
+		local equipmentTalents = GameHelpers.Character.GetEquipmentTalents(player, true)
 
 		local entries = {}
 		--Default entries
-		for numId,talentId in _TalentEnum:Get() do
+		for _,talentId in _TalentEnum:Get() do
 			local hasTalent = targetStats[_Data.TalentStatAttributes[talentId]] == true
 			if Builtin.CanAddTalent(talentId, hasTalent) then
 				local talentState = Builtin.GetTalentState(player, talentId, hasTalent)
-				local name = Builtin.GetDisplayName(talentId, talentState)
 				local isRacial = _Data.RacialTalents[talentId] ~= nil
 				local isChoosable = not isRacial and talentState ~= _Data.TalentState.Locked
-
-				local canAdd = not hasTalent and (isGM or (talentPoints > 0 and talentState == _Data.TalentState.Selectable))
-				local canRemove = hasTalent and ((not isRacial and isCharacterCreation) or isGM)
+				
+				local canAdd = not hasTalent and (options.IsGM or (talentPoints > 0 and talentState == _Data.TalentState.Selectable))
+				local canRemove = hasTalent and ((not isRacial and options.IsCharacterCreation) or options.IsGM)
+				if equipmentTalents[talentId] then
+					talentState = _Data.TalentState.Selected
+					canRemove = false
+					canAdd = false
+					isChoosable = false
+					isRacial = true -- Makes the color grey instead of red
+				end
+				local name = Builtin.GetDisplayName(talentId, talentState)
 
 				---@type SheetManager.TalentsUIEntry
 				local data = {
@@ -884,13 +895,13 @@ if _ISCLIENT then
 		for mod,dataTable in pairs(SheetManager.Data.Talents) do
 			for id,data in pairs(dataTable) do
 				local hasTalent = data:GetValue(player) == true
-				if SheetManager:IsEntryVisible(data, player, hasTalent, isCharacterCreation, isGM) then
+				if SheetManager:IsEntryVisible(data, player, hasTalent, options.IsCharacterCreation, options.IsGM) then
 					local talentState = data:GetState(player)
 					local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))
 					local isRacial = data.IsRacial
 					local isChoosable = not isRacial and talentState ~= _Data.TalentState.Locked
-					local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or isGM
-					local canRemove = hasTalent and (isCharacterCreation or isGM)
+					local canAdd = not hasTalent and (isChoosable and talentPoints > 0) or options.IsGM
+					local canRemove = hasTalent and (options.IsCharacterCreation or options.IsGM)
 					---@type SheetManager.TalentsUIEntry
 					local sheetData = {
 						ID = data.ID,

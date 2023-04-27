@@ -582,9 +582,11 @@ function CharacterSheet.Update(ui, method, params)
 	targetsUpdated = TableHelpers.Clone(updateTargetsDefaults)
 	local isGM = GameHelpers.Client.IsGameMaster(ui, this)
 
+	local stats = SessionManager:CreateCharacterSessionMetaTable(player)
+
 	if updateTargets.PrimaryStats or updateTargets.SecondaryStats then
 		--this.clearStats()
-		for stat in SheetManager.Stats.GetVisible(player, false, isGM) do
+		for stat in SheetManager.Stats.GetVisible(player, {IsGM=isGM, Stats=stats}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = stat.Mod, ID=stat.ID, EntryType="SheetStatData", Stat=stat, Character=player, CharacterID=player.NetID})
 			-- local arrayData = modChanges.Stats[stat.ID]
 			-- if arrayData then
@@ -622,11 +624,11 @@ function CharacterSheet.Update(ui, method, params)
 			end
 		end
 	end
-	
+
 	if updateTargets.Talents then
 		--this.clearTalents()
 		--local points = this.stats_mc.pointsWarn[3].avPoints
-		for talent in SheetManager.Talents.GetVisible(player, false, isGM) do
+		for talent in SheetManager.Talents.GetVisible(player, {IsGM=isGM, Stats=stats}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = talent.Mod, ID=talent.ID, EntryType="SheetTalentData", Stat=talent, Character=player, CharacterID=player.NetID})
 			if talent.Visible then
 				if not Vars.ControllerEnabled then
@@ -641,7 +643,7 @@ function CharacterSheet.Update(ui, method, params)
 
 	if updateTargets.Abilities then
 		--this.clearAbilities()
-		for ability in SheetManager.Abilities.GetVisible(player, updateTargets.Civil, false, isGM) do
+		for ability in SheetManager.Abilities.GetVisible(player, {IsGM=isGM, Stats=stats, CivilOnly=updateTargets.Civil}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 			if ability.Visible then
 				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, ability.Value, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)

@@ -1,4 +1,4 @@
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 ---@class CharacterCreationSessionPointsData
 ---@field Attribute integer
@@ -26,7 +26,7 @@ local function ErrorMessage(prefix, txt, ...)
 	end
 end
 
-if not isClient then
+if not _ISCLIENT then
 	---@param character CharacterParam
 	---@param respec boolean
 	---@param skipSync boolean|nil
@@ -158,12 +158,12 @@ end
 ---@param character CharacterParam
 ---@param skipSync ?boolean
 function SessionManager:ClearSession(character, skipSync)
-	if not isClient then
+	if not _ISCLIENT then
 		character = GameHelpers.GetCharacter(character)
 		local characterId = GameHelpers.GetObjectID(character)
 		SessionManager.Sessions[character.ReservedUserID] = nil
 		--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
-		if skipSync ~= true and not isClient then
+		if skipSync ~= true and not _ISCLIENT then
 			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(characterId), "CEL_SessionManager_ClearCharacterData", character.NetID)
 		end
 	end
@@ -176,10 +176,10 @@ end
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
 	character = GameHelpers.GetCharacter(character)
-	local id = isClient and character.NetID or character.ReservedUserID
+	local id = _ISCLIENT and character.NetID or character.ReservedUserID
 	local respec = respec or SessionManager.Sessions[id] and SessionManager.Sessions[id].Respec
 	SessionManager.Sessions[id] = nil
-	if not isClient then
+	if not _ISCLIENT then
 		if skipSync ~= true then
 			SessionManager:CreateSession(character, respec, skipSync)
 		end
@@ -195,7 +195,7 @@ function SessionManager:ResetSession(character, skipSync, respec, isInCharacterC
 	end
 end
 
-if not isClient then
+if not _ISCLIENT then
 	RegisterNetListener("CEL_SessionManager_ResetCharacterData", function (cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
@@ -207,7 +207,7 @@ end
 ---@param character CharacterParam
 function SessionManager:ApplySession(character)
 	character = GameHelpers.GetCharacter(character)
-	if isClient then
+	if _ISCLIENT then
 		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
 	else
 		local characterId = GameHelpers.GetUUID(character)
@@ -254,7 +254,7 @@ end
 ---@return CharacterCreationSessionData
 function SessionManager:GetSession(character)
 	character = GameHelpers.GetCharacter(character)
-	if not isClient then
+	if not _ISCLIENT then
 		return self.Sessions[character.ReservedUserID]
 	else
 		return self.Sessions[character.NetID]
@@ -262,7 +262,7 @@ function SessionManager:GetSession(character)
 end
 
 ---@type CharacterCreationWizard
-local CharacterCreationWizard = isClient and Ext.Require("SheetManager/Core/Managers/Utilities/CharacterCreationWizard.lua") or {}
+local CharacterCreationWizard = _ISCLIENT and Ext.Require("SheetManager/Core/Managers/Utilities/CharacterCreationWizard.lua") or {}
 SessionManager.CharacterCreationWizard = CharacterCreationWizard
 
 ---Creates a table that can be used to get a current value of a session, that falls back to the character's Stats otherwise.
@@ -277,9 +277,12 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 		local targetStats = {}
 		setmetatable(targetStats, {
 			__index = function(_, k)
-				if isClient then
+				if _ISCLIENT then
 					local stats = CharacterCreationWizard.Stats[netid]
 					if stats then
+						if k == "Stats" then
+							return stats
+						end
 						return stats[k]
 					end
 				end

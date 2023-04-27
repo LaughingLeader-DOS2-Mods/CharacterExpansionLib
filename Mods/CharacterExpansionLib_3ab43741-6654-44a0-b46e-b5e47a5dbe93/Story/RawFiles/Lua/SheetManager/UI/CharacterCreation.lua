@@ -7,8 +7,8 @@ local CharacterCreation = Classes.UIWrapper:CreateFromType(Data.UIType.character
 local self = CharacterCreation
 
 ---@class FlashCharacterCreationTalentsMC:FlashMovieClip
----@field addTalentElement fun(talentID:integer, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean):void
----@field addCustomTalentElement fun(customID:string, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean):void
+---@field addTalentElement fun(talentID:integer, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean)
+---@field addCustomTalentElement fun(customID:string, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean)
 
 local updateSessionPoints = {}
 local PresetData = {}
@@ -117,7 +117,7 @@ function CharacterCreation.UpdateTalents(self, e, ui, method)
 	---@type FlashCharacterCreationTalentsMC
 	local talentsMC = this.CCPanel_mc.talents_mc
 
-	for talent in SheetManager.Talents.GetVisible(player, true, nil, this.availableTalentPoints) do
+	for talent in SheetManager.Talents.GetVisible(player, {IsCharacterCreation=true, AvailablePoints=points}) do
 		if engineValues[talent.ID] ~= nil then
 			talent.HasTalent = engineValues[talent.ID]
 		end
@@ -178,7 +178,7 @@ function CharacterCreation.UpdateAbilities(self, e, ui, method)
 	local abilitiesWithDelta = {}
 	local updateClassContent = SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION
 	
-	for ability in SheetManager.Abilities.GetVisible(player, nil, true, nil, this.availableAbilityPoints, this.availableCivilPoints) do
+	for ability in SheetManager.Abilities.GetVisible(player, {IsCharacterCreation=true, AvailableAbilityPoints=points.Ability, AvailableCivilPoints=points.Civil}) do
 		local updateData = engineValues[ability.ID]
 		if updateData then
 			ability.Value = updateData.Value
@@ -258,7 +258,7 @@ function CharacterCreation.UpdateAttributes(self, e, ui, method)
 	local attributesWithDelta = {}
 	local updateClassContent = SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION
 
-	for stat in SheetManager.Stats.GetVisible(player, true, false, not updateClassContent, this.availableAttributePoints) do
+	for stat in SheetManager.Stats.GetVisible(player, {IsCharacterCreation=true, AvailablePoints=points, IsRespec=not updateClassContent}) do
 		local updateData = engineValues[stat.ID]
 		if updateData then
 			stat.Value = updateData.Value
