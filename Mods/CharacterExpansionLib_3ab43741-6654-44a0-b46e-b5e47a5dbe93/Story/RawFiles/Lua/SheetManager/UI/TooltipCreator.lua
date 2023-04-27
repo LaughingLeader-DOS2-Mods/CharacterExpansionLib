@@ -103,9 +103,9 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 			this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.AbilityDescription
 			this.tooltip_array[3] = data.GeneratedID
 			this.tooltip_array[4] = data:GetDescription(character, isExpanded)
-			this.tooltip_array[5] = ""
-			this.tooltip_array[6] = ""
-			this.tooltip_array[7] = ""
+			this.tooltip_array[5] = "" -- Description2
+			this.tooltip_array[6] = "" -- CurrentLevelEffect
+			this.tooltip_array[7] = "" -- NextLevelEffect
 
 			request.Ability = data.ID
 
@@ -295,8 +295,32 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 	Game.Tooltip.Register.Global(function (request, tooltip, ...)
 		if request.Type == "Talent" then
 			local stat = SheetManager:GetEntryByID(request.Talent, nil, "Talent")
-			if stat and stat.ExpandedDescription then
-				tooltip:MarkDirty()
+			if stat then 
+				if stat.ExpandedDescription then
+					tooltip:MarkDirty()
+				end
+			else
+				local name = ""
+				local titleColor = "#33AAFF"
+				if SheetManager.Talents.Data.DivineTalents[request.Talent] then
+					name = LocalizedText.Mods.DivineTalents.Value
+				else
+					name = GameHelpers.GetModName(Data.ModID.DivinityOriginalSin2, true)
+				end
+				local desc = tooltip:GetElement("TalentDescription")
+				if desc then
+					desc.Description = string.format("%s<br><font color='%s' size='18'>%s</font>", desc.Description, titleColor, name)
+				end
+			end
+			if Data.Talents[request.Talent] then
+				local equipmentTalents = GameHelpers.Character.GetEquipmentTalents(request.Character, true)
+				local item = equipmentTalents[request.Talent]
+				if item then
+					local itemName = string.format("<br>%s", GameHelpers.GetDisplayName(item))
+					local slot = string.format("<br>(%s)", LocalizedText.Slots[item.Stats.ItemSlot].Value)
+					local text = LocalizedText.CharacterSheet.Tooltip.FromGear:ReplacePlaceholders(itemName, slot):gsub("<br>", "", 1)
+					tooltip:AppendElement({Type="StatsTalentsBoost", Label=text})
+				end
 			end
 		elseif request.Type == "Ability" then
 			local stat = SheetManager:GetEntryByID(request.Ability, nil, "Ability") or SheetManager:GetEntryByID(request.Ability, nil, "CivilAbility")
