@@ -312,16 +312,6 @@ Ext.Events.SessionLoaded:Subscribe(function (e)
 					desc.Description = string.format("%s<br><font color='%s' size='18'>%s</font>", desc.Description, titleColor, name)
 				end
 			end
-			if Data.Talents[request.Talent] then
-				local equipmentTalents = GameHelpers.Character.GetEquipmentTalents(request.Character, true)
-				local item = equipmentTalents[request.Talent]
-				if item then
-					local itemName = string.format("<br>%s", GameHelpers.GetDisplayName(item))
-					local slot = string.format("<br>(%s)", LocalizedText.Slots[item.Stats.ItemSlot].Value)
-					local text = LocalizedText.CharacterSheet.Tooltip.FromGear:ReplacePlaceholders(itemName, slot):gsub("<br>", "", 1)
-					tooltip:AppendElement({Type="StatsTalentsBoost", Label=text})
-				end
-			end
 		elseif request.Type == "Ability" then
 			local stat = SheetManager:GetEntryByID(request.Ability, nil, "Ability") or SheetManager:GetEntryByID(request.Ability, nil, "CivilAbility")
 			if stat and stat.ExpandedDescription then
