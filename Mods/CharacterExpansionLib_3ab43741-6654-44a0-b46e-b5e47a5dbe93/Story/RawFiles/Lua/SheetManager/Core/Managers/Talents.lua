@@ -838,7 +838,6 @@ if _ISCLIENT then
 	local DefaultOptions = {
 		IsCharacterCreation = false,
 		IsGM = false,
-		AvailablePoints = 0,
 	}
 
 	---@private
