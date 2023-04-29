@@ -443,7 +443,6 @@ if _ISCLIENT then
 		IsCharacterCreation = false,
 		IsGM = false,
 		IsRespec = false,
-		AvailablePoints = 0,
 	}
 
 	---@private
