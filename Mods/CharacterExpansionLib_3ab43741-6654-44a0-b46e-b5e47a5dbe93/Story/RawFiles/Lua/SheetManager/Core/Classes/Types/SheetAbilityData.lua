@@ -73,7 +73,7 @@ function SheetAbilityData.SetDefaults(data)
 	end
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@return integer
 function SheetAbilityData:GetValue(character)
 	if StringHelpers.IsNullOrWhitespace(self.ID) then
@@ -82,16 +82,12 @@ function SheetAbilityData:GetValue(character)
 	if not StringHelpers.IsNullOrWhitespace(self.BoostAttribute) then
 		return self:GetBoostValue(character, 0)
 	else
-		if not _ISCLIENT then
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetUUID(character)) or 0
-		else
-			return SheetManager:GetValueByEntry(self, GameHelpers.GetNetID(character)) or 0
-		end
+		return SheetManager:GetValueByEntry(self, character) or 0
 	end
 end
 
 ---[SERVER]
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param value integer
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
@@ -99,7 +95,7 @@ function SheetAbilityData:SetValue(character, value, skipListenerInvoke, skipSyn
 	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param amount integer
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.

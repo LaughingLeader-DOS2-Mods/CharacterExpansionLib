@@ -308,16 +308,16 @@ function CharacterCreationWizard.GetStatsAsTable()
 	}
 end
 
+---@param character EsvCharacter|EclCharacter
 local function GetCharacterStats(character)
-	character = GameHelpers.GetCharacter(character)
 	if character then
-		local netid = character.NetID
+		local handle = character.Handle
 		local customization = GetWizCustomizationForCharacter(character)
 		if customization then
 			local stats = {}
 			setmetatable(stats, {
 				__index = function (tbl, k)
-					local player = GameHelpers.GetCharacter(netid, "EclCharacter")
+					local player = GameHelpers.GetObjectFromHandle(handle, "EclCharacter")
 					customization = GetWizCustomizationForCharacter(player)
 					assert(customization ~= nil, "Failed to get CC Customization for character")
 					---@type integer|boolean
@@ -372,7 +372,7 @@ local function GetCharacterStats(character)
 					return current
 				end,
 				__newindex = function (tbl, k, value)
-					local player = GameHelpers.GetCharacter(netid)
+					local player = GameHelpers.GetObjectFromHandle(handle, "EclCharacter")
 					customization = GetWizCustomizationForCharacter(player)
 					assert(customization ~= nil, "Failed to get CC Customization for character")
 					if Data.AttributeEnum[k] then
@@ -406,7 +406,7 @@ local function GetCharacterStats(character)
 	end
 end
 
----@type table<NETID,CCWizardCurrentStats>
+---@type table<EsvCharacter|EclCharacter,CCWizardCurrentStats>
 CharacterCreationWizard.Stats = {}
 setmetatable(CharacterCreationWizard.Stats, {
 	__index = function(tbl, k)

@@ -194,7 +194,6 @@ function SessionManager:ApplySession(character)
 	if _ISCLIENT then
 		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
 	else
-		local characterId = GameHelpers.GetUUID(character)
 		local sessionData = self:GetSession(character)
 		if sessionData then
 			if sessionData.PendingChanges then
@@ -204,7 +203,7 @@ function SessionManager:ApplySession(character)
 						for id,value in pairs(entries) do
 							local stat = SheetManager:GetEntryByID(id, modId, statType)
 							--SheetManager.Save.SetEntryValue(character.MyGuid, stat, value)
-							SheetManager:SetEntryValue(stat, characterId, value, false, true, true, true)
+							SheetManager:SetEntryValue(stat, character, value, false, true, true, true)
 						end
 					end
 				end
@@ -213,7 +212,7 @@ function SessionManager:ApplySession(character)
 				fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] Session data is missing PendingChanges for character %s", character.DisplayName)
 			end
 		else
-			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", characterId, Lib.serpent.block(self.Sessions))
+			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", character.MyGuid, Lib.serpent.block(self.Sessions))
 		end
 	end
 	SessionManager:ClearSession(character)
@@ -234,14 +233,15 @@ SessionManager.CharacterCreationWizard = CharacterCreationWizard
 ---@param character EsvCharacter|EclCharacter
 ---@return StatCharacter
 function SessionManager:CreateCharacterSessionMetaTable(character)
-	local netid = character.NetID
+	local handle = character.Handle
 	local sessionData = SessionManager:GetSession(character)
 	if sessionData then
 		local targetStats = {}
 		setmetatable(targetStats, {
 			__index = function(_, k)
+				local player = GameHelpers.GetObjectFromHandle(handle, "EclCharacter")
 				if _ISCLIENT then
-					local stats = CharacterCreationWizard.Stats[netid]
+					local stats = CharacterCreationWizard.Stats[player]
 					if stats then
 						if k == "Stats" then
 							return stats
@@ -250,15 +250,16 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 					end
 				end
 				if k == "Stats" then
-					return character.Stats
+					return player.Stats
 				end
-				return character.Stats[k]
+				return player.Stats[k]
 			end,
 			__newindex = function(_, k, v)
 				if k == "Stats" then
 					return
 				end
-				character.Stats[k] = v
+				local player = GameHelpers.GetObjectFromHandle(handle, "EclCharacter")
+				player.Stats[k] = v
 			end
 		})
 		return targetStats

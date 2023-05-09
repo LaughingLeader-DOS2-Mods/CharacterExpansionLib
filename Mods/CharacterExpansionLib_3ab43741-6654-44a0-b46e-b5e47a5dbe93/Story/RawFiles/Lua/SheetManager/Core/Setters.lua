@@ -100,17 +100,17 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 end
 
 ---@param stat SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
----@param characterId Guid|NETID
+---@param character EsvCharacter|EclCharacter
 ---@param value integer|boolean
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
 ---@param force boolean|nil Skip requesting changes if on the client side.
 ---@param skipSessionCheck boolean|nil Used by the SessionManager to write changes directly when applying changes.
-function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
-	local characterId = GameHelpers.GetObjectID(characterId)
-	local last = stat:GetValue(characterId)
+function SheetManager:SetEntryValue(stat, character, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
+	local characterId = GameHelpers.GetObjectID(character)
+	local last = stat:GetValue(character)
 	local character = GameHelpers.GetCharacter(characterId, "EsvCharacter")
-	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(characterId)
+	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(character)
 
 	if _ISCLIENT and not force then
 		---@cast characterId NETID
@@ -167,7 +167,7 @@ function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke
 end
 
 ---Add an amount to a stat value.
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param id string The stat ID.
 ---@param amount integer|boolean
 ---@param modGUID GUID|nil The ModuleUUID for the stat.
@@ -182,7 +182,7 @@ function SheetManager:ModifyValueByID(character, id, amount, modGUID, statType, 
 end
 
 ---Set a stat value.
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param id string The stat ID.
 ---@param value integer|boolean
 ---@param modGUID GUID|nil The ModuleUUID for the stat.

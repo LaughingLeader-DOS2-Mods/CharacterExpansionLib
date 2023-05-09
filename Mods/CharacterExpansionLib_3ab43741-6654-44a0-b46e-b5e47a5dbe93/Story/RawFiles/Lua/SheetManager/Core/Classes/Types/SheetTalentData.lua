@@ -55,13 +55,13 @@ function SheetTalentData.SetDefaults(data)
 	end
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@return boolean
 function SheetTalentData:GetValue(character)
-	return SheetManager:GetValueByEntry(self, GameHelpers.GetObjectID(character))
+	return SheetManager:GetValueByEntry(self, character)
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@return boolean
 function SheetTalentData:IsUnlockable(character)
 	local canUnlock = false
@@ -113,7 +113,7 @@ function SheetTalentData:IsUnlockable(character)
 	return canUnlock
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@return TalentState
 function SheetTalentData:GetState(character)
 	local value = self:GetValue(character)
@@ -128,7 +128,7 @@ function SheetTalentData:GetState(character)
 	return SheetManager.Talents.Data.TalentState.Locked
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param value boolean
 ---@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
 ---@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
@@ -221,7 +221,7 @@ end
 
 SheetTalentData.ModifyValue = SheetTalentData.SetValue
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 function SheetTalentData:HasTalent(character)
 	return self:GetValue(character) == true
 end

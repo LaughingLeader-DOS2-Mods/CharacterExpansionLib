@@ -2,12 +2,12 @@ local _ISCLIENT = Ext.IsClient()
 
 if SheetManager.Save == nil then SheetManager.Save = {} end
 
----@param characterId CharacterParam
-function SheetManager.IsInCharacterCreation(characterId)
-	characterId = GameHelpers.GetObjectID(characterId)
+---@param character EsvCharacter|EclCharacter
+function SheetManager.IsInCharacterCreation(character)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
 		return true
 	end
+	local characterId = GameHelpers.GetObjectID(character)
 	if _ISCLIENT then
 		if Client.Character then
 			if characterId == Client.Character.NetID and Client.Character.IsInCharacterCreation then

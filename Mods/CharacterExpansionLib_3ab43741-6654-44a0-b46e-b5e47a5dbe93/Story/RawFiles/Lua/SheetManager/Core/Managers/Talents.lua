@@ -933,7 +933,7 @@ if _ISCLIENT then
 
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param talentId string
 ---@param enabled boolean
 ---@param modGuid? Guid

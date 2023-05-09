@@ -210,9 +210,12 @@ else
 	--Query support
 
 	local function Query_GetAttribute(uuid, id, val, boostCheck, statType)
-		local stat = SheetManager:GetEntryByID(id, nil, statType or "PrimaryStat")
-		if stat and (boostCheck ~= true or stat.BoostAttribute) then
-			return stat:GetValue(StringHelpers.GetUUID(uuid))
+		local character = GameHelpers.GetCharacter(uuid, "EsvCharacter")
+		if character then
+			local stat = SheetManager:GetEntryByID(id, nil, statType or "PrimaryStat")
+			if stat and (boostCheck ~= true or stat.BoostAttribute) then
+				return stat:GetValue(character)
+			end
 		end
 	end
 	Ext.Osiris.RegisterListener("CharacterGetAttribute", 3, "after", Query_GetAttribute)
@@ -222,9 +225,12 @@ else
 	end)
 
 	local function Query_GetAbility(uuid, id, value, boostCheck)
-		local stat = SheetManager:GetEntryByID(id, nil, "Ability")
-		if stat and (boostCheck ~= true or stat.BoostAttribute) then
-			return stat:GetValue(StringHelpers.GetUUID(uuid))
+		local character = GameHelpers.GetCharacter(uuid, "EsvCharacter")
+		if character then
+			local stat = SheetManager:GetEntryByID(id, nil, "Ability")
+			if stat and (boostCheck ~= true or stat.BoostAttribute) then
+				return stat:GetValue(character)
+			end
 		end
 	end
 	Ext.Osiris.RegisterListener("CharacterGetAbility", 3, "after", Query_GetAbility)
@@ -234,10 +240,13 @@ else
 	end)
 
 	local function Query_HasTalent(uuid, id, bool, boostCheck)
-		if bool ~= 1 then
-			local stat = SheetManager:GetEntryByID(id, nil, "Talent")
-			if stat and (boostCheck ~= true or stat.BoostAttribute) then
-				return stat:GetValue(StringHelpers.GetUUID(uuid))
+		local character = GameHelpers.GetCharacter(uuid, "EsvCharacter")
+		if character then
+			if bool ~= 1 then
+				local stat = SheetManager:GetEntryByID(id, nil, "Talent")
+				if stat and (boostCheck ~= true or stat.BoostAttribute) then
+					return stat:GetValue(character)
+				end
 			end
 		end
 	end

@@ -69,13 +69,12 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 end
 
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData
----@param characterId Guid|NETID
+---@param character EsvCharacter|EclCharacter
 ---@return integer|boolean
-function SheetManager:GetValueByEntry(entry, characterId)
-	local isInCharacterCreation = SheetManager.IsInCharacterCreation(characterId)
+function SheetManager:GetValueByEntry(entry, character)
+	local isInCharacterCreation = SheetManager.IsInCharacterCreation(character)
 	if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
 		if not isInCharacterCreation then
-			local character = GameHelpers.GetCharacter(characterId)
 			if character and character.Stats then
 				local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
 				if charValue ~= nil then
@@ -83,19 +82,19 @@ function SheetManager:GetValueByEntry(entry, characterId)
 				end
 			end
 		else
-			local value = SheetManager.Save.GetEntryValue(characterId, entry)
+			local value = SheetManager.Save.GetEntryValue(character, entry)
 			if value ~= nil then
 				return value
 			end
 			if _ISCLIENT then
-				local stats = SessionManager.CharacterCreationWizard.Stats[characterId]
+				local stats = SessionManager.CharacterCreationWizard.Stats[character]
 				if stats and stats[entry.BoostAttribute] then
 					return stats[entry.BoostAttribute]
 				end
 			end
 		end
 	else
-		local value = SheetManager.Save.GetEntryValue(characterId, entry)
+		local value = SheetManager.Save.GetEntryValue(character, entry)
 		if value ~= nil then
 			return value
 		end
@@ -106,7 +105,7 @@ function SheetManager:GetValueByEntry(entry, characterId)
 	return 0
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param id string
 ---@param mod? string
 ---@param statType? SheetEntryType
@@ -124,7 +123,7 @@ end
 
 ---Checks if an entry with the provided ID has the provided value.
 ---@param id string
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param value integer|boolean
 ---@param mod string|nil
 ---@param statType SheetEntryType|nil Optional stat type.
@@ -165,14 +164,12 @@ end
 
 ---Gets the builtin available points for a stat.
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param clientCharacterCreationPoints table|nil If in CC, pass this from Ext.UI.GetCharacterCreationWizard
 ---@return integer
 function SheetManager:GetBuiltinAvailablePointsForEntry(entry, character, clientCharacterCreationPoints)
 	local entryType = entry.StatType
-
 	local characterId = GameHelpers.GetObjectID(character)
-
 	if entryType == "Custom" then
 		if SheetManager.CustomAvailablePoints[characterId] then
 			local pointID = entry:GetAvailablePointsID()

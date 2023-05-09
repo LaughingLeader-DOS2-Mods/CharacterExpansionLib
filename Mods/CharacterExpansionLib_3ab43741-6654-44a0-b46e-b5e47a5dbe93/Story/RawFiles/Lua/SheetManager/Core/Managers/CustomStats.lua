@@ -398,7 +398,7 @@ if _ISCLIENT then
 	end
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@return integer
 function CustomStats:GetTotalAvailablePoints(character)
 	character = character or SheetManager.UI.CharacterSheet.GetCharacter()

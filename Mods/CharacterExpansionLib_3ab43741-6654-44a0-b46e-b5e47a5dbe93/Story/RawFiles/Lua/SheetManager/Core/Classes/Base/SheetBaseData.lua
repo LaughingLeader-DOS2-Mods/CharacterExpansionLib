@@ -111,7 +111,7 @@ function SheetBaseData:GetDescription(character, isExpanded)
 	return text
 end
 
----@param character CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param fallback integer|boolean
 function SheetBaseData:GetBoostValue(character, fallback)
 	local character = GameHelpers.GetCharacter(character)
