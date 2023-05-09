@@ -1,4 +1,13 @@
 {
+	"Races": {
+		"CEL_Demon": {
+			"Tags": ["CEL_DEMON"],
+			"Talents": [
+				{"ID": "Demon", "Mod": "3ab43741-6654-44a0-b46e-b5e47a5dbe93"},
+				{"ID": "ResistSilence", "Mod": "3ab43741-6654-44a0-b46e-b5e47a5dbe93"}
+			]
+		}
+	},
 	"Stats": {
 		"Agility": {
 			"DisplayName": "Agility",
@@ -25,7 +34,7 @@
 			"DisplayName": "[Handle:ha8b343fbg4ebbg4e72gb58fg633850ad0580:Sourcery]",
 			"Description": "Sourcery empowers your ability to cast source abilities and grants passive source regeneration.",
 			"Icon": "Ability_Necromancy",
-			"GroupID": "Skills",
+			"CategoryID": "Skills",
 			"BoostAttribute": "Sourcery",
 			"UsePoints": true
 		},
@@ -34,7 +43,7 @@
 			"Description": "Hardy har, ya be brewin",
 			"BoostAttribute": "Brewmaster",
 			"Icon": "Ability_Perseverance",
-			"GroupID": "Craftsmanship",
+			"CategoryID": "Craftsmanship",
 			"IsCivil": true,
 			"UsePoints": true
 		}
