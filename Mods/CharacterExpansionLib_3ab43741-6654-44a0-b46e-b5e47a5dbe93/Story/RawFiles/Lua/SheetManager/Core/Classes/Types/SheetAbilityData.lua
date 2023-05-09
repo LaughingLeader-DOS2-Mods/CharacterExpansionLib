@@ -37,7 +37,7 @@ SheetAbilityData.PropertyMap = {
 					return v
 				end
 			end
-			return id -- Custom categories?
+			return val -- Custom categories?
 		elseif t == "number" then
 			local id = SheetManager.Abilities.Data.GroupID[val]
 			if id then
@@ -61,6 +61,9 @@ local defaults = {
 
 ---@protected
 function SheetAbilityData.SetDefaults(data)
+	if not data.GroupMod and type(data.GroupID) == "string" and not SheetManager.Abilities.Data.GroupID[data.GroupID] then
+		data.GroupMod = data.Mod
+	end
 	Classes.SheetBaseData.SetDefaults(data)
 	for k,v in pairs(defaults) do
 		if data[k] == nil then
