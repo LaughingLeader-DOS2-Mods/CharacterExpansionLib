@@ -131,6 +131,18 @@ local function LoadData()
 		Ext.Utils.PrintError(data)
 	end
 
+	--Set abilities using custom categories to use the generated ID
+	for modId,entries in pairs(SheetManager.Data.Abilities) do
+		for id,entry in pairs(entries) do
+			if not StringHelpers.IsNullOrEmpty(entry.CustomGroup) then
+				local category = SheetManager:GetEntryByID(entry.CustomGroup, entry.GroupMod, "AbilityCategory")
+				if category then
+					entry.GroupID = category.GeneratedID
+				end
+			end
+		end
+	end
+
 	if not _ISCLIENT then
 		for uuid,entry in pairs(PersistentVars.CharacterSheetValues) do
 			local characterCount = 0

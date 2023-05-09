@@ -832,6 +832,8 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 		local defaultCanAdd = ((entry.UsePoints and points > 0) or isGM)
 		local defaultCanRemove = entry.UsePoints and isGM
 
+		local recountGroup = ""
+
 		local mc,arr,index = CharacterSheet.TryGetEntryMovieClip(entry, this.stats_mc)
 		--fprint(LOGLEVEL.TRACE, "Entry[%s](%s) statID(%s) ListHolder(%s) arr(%s) mc(%s) index(%s)", entry.StatType, id, entry.GeneratedID, entry.ListHolder, arr, mc, index)
 		if arr and mc then
@@ -859,6 +861,9 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 				mc.am = value
 				mc.texts_mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 				mc.statBasePoints = value
+				if not StringHelpers.IsNullOrEmpty(entry.CustomGroup) then
+					recountGroup = entry.IsCivil and "Civil" or "Combat"
+				end
 				-- mc.statPoints = 0
 			elseif entry.StatType == "Talent" then
 				local talentState = entry:GetState(character)
@@ -892,6 +897,10 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 					mc.delete_mc.visible = not mc.isCustom and isGM
 				end
 			end
+		end
+
+		if recountGroup ~= "" then
+			this.stats_mc.recountAbilityPoints(recountGroup == "Civil")
 		end
 	end
 end

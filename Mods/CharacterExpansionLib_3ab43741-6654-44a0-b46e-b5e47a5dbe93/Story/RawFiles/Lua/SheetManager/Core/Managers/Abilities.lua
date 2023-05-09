@@ -353,29 +353,17 @@ if _ISCLIENT then
 					local groupName = ""
 					local groupID = data.GroupID
 
-					if groupID then
-						local t = type(groupID)
-						if t == "number" then
-							if groupID <= 5 then
-								---@type string|TranslatedString
-								local groupNameEntry = SheetManager.Abilities.Data.GroupDisplayName[groupID]
-								if groupNameEntry then
-									groupName = groupNameEntry.Value
-								end
-							else
-								local category = SheetManager:GetEntryByGeneratedID(data.GroupID, "AbilityCategory")
-								if category and category.Visible then
-									groupName = category:GetDisplayName(player)
-									groupID = category.GeneratedID
-								else
-									visible = false
-								end
+					if type(groupID) == "number" then
+						if groupID <= 5 then
+							---@type string|TranslatedString
+							local groupNameEntry = SheetManager.Abilities.Data.GroupDisplayName[groupID]
+							if groupNameEntry then
+								groupName = groupNameEntry.Value
 							end
-						elseif t == "string" then
-							local category = SheetManager:GetEntryByID(groupID, data.GroupMod, "AbilityCategory")
+						else
+							local category = SheetManager:GetEntryByGeneratedID(groupID, "AbilityCategory")
 							if category and category.Visible then
 								groupName = category:GetDisplayName(player)
-								groupID = category.GeneratedID
 							else
 								visible = false
 							end
