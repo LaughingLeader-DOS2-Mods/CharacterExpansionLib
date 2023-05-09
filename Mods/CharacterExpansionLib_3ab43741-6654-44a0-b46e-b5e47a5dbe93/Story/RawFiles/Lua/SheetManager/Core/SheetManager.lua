@@ -134,10 +134,10 @@ local function LoadData()
 	--Set abilities using custom categories to use the generated ID
 	for modId,entries in pairs(SheetManager.Data.Abilities) do
 		for id,entry in pairs(entries) do
-			if not StringHelpers.IsNullOrEmpty(entry.CustomGroup) then
-				local category = SheetManager:GetEntryByID(entry.CustomGroup, entry.GroupMod, "AbilityCategory")
+			if not StringHelpers.IsNullOrEmpty(entry.CustomCategory) then
+				local category = SheetManager:GetEntryByID(entry.CustomCategory, entry.CategoryMod, "AbilityCategory")
 				if category then
-					entry.GroupID = category.GeneratedID
+					entry.CategoryID = category.GeneratedID
 				end
 			end
 		end

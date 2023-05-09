@@ -351,7 +351,7 @@ if _ISCLIENT then
 					local visible = true
 
 					local groupName = ""
-					local groupID = data.GroupID
+					local groupID = data.CategoryID
 
 					if type(groupID) == "number" then
 						if groupID <= 5 then

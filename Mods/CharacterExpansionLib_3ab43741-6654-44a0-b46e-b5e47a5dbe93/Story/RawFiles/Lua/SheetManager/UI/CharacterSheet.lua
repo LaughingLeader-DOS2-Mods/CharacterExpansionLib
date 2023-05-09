@@ -176,7 +176,7 @@ CharacterSheet.TryGetEntryMovieClip = function(entry, this)
 		listHolder = "customStats_mc"
 		arrayName = "stats_array"
 	end
-	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.GroupID, arrayName)
+	return CharacterSheet.TryGetMovieClip(this, listHolder, entry.GeneratedID, entry.CategoryID, arrayName)
 end
 
 ---@param customOnly boolean
@@ -861,7 +861,7 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 				mc.am = value
 				mc.texts_mc.text_txt.htmlText = string.format("%i%s", value, entry.Suffix or "")
 				mc.statBasePoints = value
-				if not StringHelpers.IsNullOrEmpty(entry.CustomGroup) then
+				if not StringHelpers.IsNullOrEmpty(entry.CustomCategory) then
 					recountGroup = entry.IsCivil and "Civil" or "Combat"
 				end
 				-- mc.statPoints = 0

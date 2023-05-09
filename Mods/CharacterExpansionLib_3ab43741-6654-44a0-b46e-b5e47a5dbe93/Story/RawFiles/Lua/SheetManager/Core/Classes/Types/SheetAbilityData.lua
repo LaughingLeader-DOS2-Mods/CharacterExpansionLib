@@ -9,11 +9,11 @@ local SheetAbilityData = {
 	Icon = "",
 	IconWidth = 128,
 	IconHeight = 128,
-	GroupID = 0,
+	CategoryID = 0,
 	---Used for new ability categories
-	CustomGroup = "",
+	CustomCategory = "",
 	---For new categories, this is the mod Guid to use when retrieving it.
-	GroupMod = "",
+	CategoryMod = "",
 	IsCivil = false,
 }
 
@@ -30,9 +30,9 @@ end
 SheetAbilityData.PropertyMap = {
 	MAXVALUE = {Name="MaxValue", Type = "integer"},
 	ISCIVIL = {Name="IsCivil", Type = "boolean"},
-	GROUPMOD = {Name="GroupMod", Type = "string"},
-	CUSTOMGROUP = {Name="CustomGroup", Type = "string"},
-	GROUPID = {Name="GroupID", Type = "enum", Parse = function(val,t)
+	CATEGORYMOD = {Name="CategoryMod", Type = "string"},
+	CUSTOMCATEGORY = {Name="CustomCategory", Type = "string"},
+	CATEGORYID = {Name="CategoryID", Type = "enum", Parse = function(val,t)
 		if t == "string" then
 			local id = string.lower(val)
 			for k,v in pairs(SheetManager.Abilities.Data.GroupID) do
@@ -54,7 +54,7 @@ SheetAbilityData.PropertyMap = {
 TableHelpers.AddOrUpdate(SheetAbilityData.PropertyMap, Classes.SheetBaseData.PropertyMap, true)
 
 local defaults = {
-	GroupID = 0,
+	CategoryID = 0,
 	IsCivil = false,
 	Icon = "",
 	IconWidth = SheetAbilityData.IconWidth,
