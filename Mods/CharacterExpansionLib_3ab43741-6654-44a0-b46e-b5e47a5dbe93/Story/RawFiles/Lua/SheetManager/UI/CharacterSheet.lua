@@ -766,12 +766,6 @@ local function OnEntryAdded(ui, call, isCustom, statID, listProperty, groupID)
 			end
 		end
 		if mc then
-			-- print(statID, Lib.serpent.block({
-			-- 	Type = mc.type or "nil",
-			-- 	name = mc.name,
-			-- 	["plus_mc.visible"] = mc.plus_mc == nil and "nil" or mc.plus_mc.visible,
-			-- 	["minus_mc.visible"] = mc.minus_mc == nil and "nil" or mc.minus_mc.visible,
-			-- }))
 			if mc.type == "SecondaryStat" or mc.type == "InfoStat" then
 				if main.isGameMasterChar then
 					this.setupSecondaryStatsButtons(mc.statID,true,true,true,mc.statID == 44 and 9 or 5)
@@ -883,19 +877,6 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 				end
 			elseif entry.StatType == SheetManager.StatType.Custom then
 				local visible = true
-				--[[ ---@type SubscribableEventInvokeResult<SheetManagerCanChangeEntryAnyTypeEventArgs>
-				local invokeResult = SheetManager.Events.CanChangeEntry:Invoke({
-					EntryType = entry.Type,
-					ID = entry.ID,
-					Value = entry:GetValue(character),
-					Character = character,
-					Stat = entry,
-					Result = visible,
-					Action = "Visibility",
-				})
-				if invokeResult.ResultCode ~= "Error" then
-					visible = invokeResult.Args.Result ~= false
-				end ]]
 				if visible then
 					mc.am = value
 
