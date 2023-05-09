@@ -1,16 +1,6 @@
 ---@class CharacterCreationWizard
 local CharacterCreationWizard = {}
 
----@private
----@class CCAbilityChangeEntry
----@field Ability string
----@field AmountIncreased integer
-
----@private
----@class CCAttributeChangeEntry
----@field Attribute string
----@field AmountIncreased integer
-
 ---@class CCWizardTalents
 ---@field ItemMovement boolean
 ---@field ItemCreation boolean

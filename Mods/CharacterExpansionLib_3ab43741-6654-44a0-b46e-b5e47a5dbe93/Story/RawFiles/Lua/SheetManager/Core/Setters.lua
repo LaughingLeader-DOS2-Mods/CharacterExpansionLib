@@ -22,16 +22,16 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 				---@cast characterId GUID
 				if stat.StatType == "Talent" then
 					if not string.find(stat.BoostAttribute, "TALENT_") then
-						NRD_CharacterSetPermanentBoostTalent(characterId, stat.BoostAttribute, value)
+						Osi.NRD_CharacterSetPermanentBoostTalent(characterId, stat.BoostAttribute, value)
 					else
-						NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
+						Osi.NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
 					end
-					CharacterAddAttribute(characterId, "Dummy", 0)
+					Osi.CharacterAddAttribute(characterId, "Dummy", 0)
 					--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
 				else
-					NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
+					Osi.NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
 					-- Sync boost changes
-					CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+					Osi.CharacterAddAttribute(character.MyGuid, "Dummy", 0)
 					--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
 				end
 				-- local success = character.Stats.DynamicStats[2][stat.BoostAttribute] == value
@@ -86,7 +86,7 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 		end
 	else
 		if _ISCLIENT or (stat.StatType ~= "Custom" or not SheetManager.CustomStats:GMStatsEnabled()) then
-			SheetManager.Save.SetEntryValue(characterId, stat, value, skipSessionCheck)
+			SheetManager.Save.SetEntryValue(character, stat, value, skipSessionCheck)
 		elseif type(value) == "number" then
 			---@cast value integer
 			if StringHelpers.IsNullOrWhitespace(stat.UUID) and not _ISCLIENT then
@@ -109,7 +109,7 @@ end
 function SheetManager:SetEntryValue(stat, characterId, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
 	local characterId = GameHelpers.GetObjectID(characterId)
 	local last = stat:GetValue(characterId)
-	local character = GameHelpers.GetCharacter(characterId)
+	local character = GameHelpers.GetCharacter(characterId, "EsvCharacter")
 	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(characterId)
 
 	if _ISCLIENT and not force then
@@ -196,60 +196,47 @@ function SheetManager:SetValueByID(character, id, value, modGUID, statType, skip
 	end
 end
 
----@param uuid GUID
+---@param player EsvCharacter|EclCharacter
 ---@param entryType StatSheetStatType
 ---@param isCivil boolean|nil
 ---@return integer
-local function _GetPoints(uuid, entryType, isCivil)
-	if not _ISCLIENT then
+local function _GetPoints(player, entryType, isCivil)
+	if player.PlayerUpgrade then
 		if entryType == "PrimaryStat" then
-			return CharacterGetAttributePoints(uuid) or 0
+			return player.PlayerUpgrade.AttributePoints
 		elseif entryType == "Ability" then
 			if isCivil == true then
-				return CharacterGetCivilAbilityPoints(uuid) or 0
+				return player.PlayerUpgrade.CivilAbilityPoints
 			else
-				return CharacterGetAbilityPoints(uuid) or 0
+				return player.PlayerUpgrade.CombatAbilityPoints
 			end
 		elseif entryType == "Talent" then
-			return CharacterGetTalentPoints(uuid) or 0
+			return player.PlayerUpgrade.TalentPoints
 		end
 	end
 	return 0
 end
 
----@param characterId GUID
+---@param player EclCharacter|EsvCharacter
 ---@param entryType StatSheetStatType
 ---@param isCivil boolean|nil
 ---@param amount integer
 ---@param pointID string
-local function _SetPoints(characterId, entryType, isCivil, amount, pointID)
-	if not _ISCLIENT then
+local function _SetPoints(player, entryType, isCivil, amount, pointID)
+	if player.PlayerUpgrade then
 		if entryType == "PrimaryStat" then
-			CharacterAddAttributePoint(characterId, amount)
+			player.PlayerUpgrade.AttributePoints = player.PlayerUpgrade.AttributePoints + amount
 		elseif entryType == "Ability" then
 			if isCivil == true then
-				CharacterAddCivilAbilityPoint(characterId, amount)
+				player.PlayerUpgrade.CivilAbilityPoints = player.PlayerUpgrade.CivilAbilityPoints + amount
 			else
-				CharacterAddAbilityPoint(characterId, amount)
+				player.PlayerUpgrade.CombatAbilityPoints = player.PlayerUpgrade.CombatAbilityPoints + amount
 			end
 		elseif entryType == "Talent" then
-			CharacterAddTalentPoint(characterId, amount)
-		elseif entryType == "Custom" then
-			if SheetManager.CustomAvailablePoints[characterId] == nil then
-				SheetManager.CustomAvailablePoints[characterId] = {}
-			end
-			SheetManager.CustomAvailablePoints[characterId][pointID] = amount
+			player.PlayerUpgrade.TalentPoints = player.PlayerUpgrade.TalentPoints + amount
 		end
-		SheetManager.Sync.CustomAvailablePoints(characterId)
-	else
-		Ext.Net.PostMessageToServer("CEL_SheetManager_RequestChangeAvailablePoints", Common.JsonStringify({
-			Target = characterId,
-			PointID = pointID,
-			Value = amount
-		}))
 	end
 end
-
 
 ---Changes available points by a value, such as adding -1 to attribute points.
 ---@param entry SheetStatData|SheetAbilityData|SheetTalentData|SheetCustomStatData
@@ -296,16 +283,31 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 			if entryType == "Custom" then
 				pointID = entry:GetAvailablePointsID()
 				points = entry:GetAvailablePoints(character)
+				if not _ISCLIENT then
+					if SheetManager.CustomAvailablePoints[characterId] == nil then
+						SheetManager.CustomAvailablePoints[characterId] = {}
+					end
+					SheetManager.CustomAvailablePoints[characterId][pointID] = amount
+					SheetManager.Sync.CustomAvailablePoints(characterId)
+				end
 			else
-				points = _GetPoints(characterId, entryType, isCivil)
+				points = _GetPoints(character, entryType, isCivil)
+				if not _ISCLIENT then
+					_SetPoints(character, entryType, isCivil, amount, pointID)
+				else
+					Ext.Net.PostMessageToServer("CEL_SheetManager_RequestChangeAvailablePoints", Common.JsonStringify({
+						Target = characterId,
+						PointID = pointID,
+						Value = amount
+					}))
+				end
 			end
-			_SetPoints(characterId, entryType, isCivil, amount, pointID)
 			if not _ISCLIENT then
 				local updatedPoints = 0
 				if entryType == "Custom" then
 					updatedPoints = entry:GetAvailablePoints(character)
 				else
-					updatedPoints = _GetPoints(characterId, entryType, isCivil)
+					updatedPoints = _GetPoints(character, entryType, isCivil)
 				end
 				assert(points ~= updatedPoints, errorMessage("Failed to alter character(%s)'s (%s) points.", characterId, (entryType and isCivil) and "CivilAbility" or entryType))
 			end

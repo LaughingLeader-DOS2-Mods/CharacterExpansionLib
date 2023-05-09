@@ -112,13 +112,12 @@ end
 --region Get/Set Values
 
 ---Get the pending value from character creation, if any.
----@param characterId CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean|nil
 ---@return table<SheetEntryId, integer>|nil modData #The mod data table containing all stats.
-function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
-	characterId = GameHelpers.GetObjectID(characterId)
-	local sessionData = SessionManager:GetSession(characterId)
+function SheetManager.Save.GetPendingValue(character, entry, tableName)
+	local sessionData = SessionManager:GetSession(character)
 	local pendingValues = sessionData and sessionData.PendingChanges or nil
 	if pendingValues then
 		tableName = tableName or SheetManager.Save.GetTableNameForType(entry.StatType)
@@ -135,10 +134,10 @@ function SheetManager.Save.GetPendingValue(characterId, entry, tableName)
 	return nil
 end
 
----@param characterId CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@return integer|boolean|nil
-function SheetManager.Save.GetEntryValue(characterId, entry)
+function SheetManager.Save.GetEntryValue(character, entry)
 	local t = type(entry)
 	assert(t == "table", string.format("[SheetManager.Save.GetEntryValue] Entry type invalid (%s). Must be one of the following types: SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData", t))
 	if entry then
@@ -148,9 +147,9 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 			---@cast defaultValue boolean
 			defaultValue = false
 		end
-		characterId = GameHelpers.GetObjectID(characterId)
+		local characterId = GameHelpers.GetObjectID(character)
 		local data = self.CurrentValues[characterId]
-		local sessionData = SessionManager:GetSession(characterId)
+		local sessionData = SessionManager:GetSession(character)
 		if sessionData then
 			data = sessionData.PendingChanges
 			assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
@@ -177,16 +176,16 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 	return nil
 end
 
----@param characterId CharacterParam
+---@param character EsvCharacter|EclCharacter
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param value integer|boolean
 ---@param skipSessionCheck ?boolean
 ---@return boolean
-function SheetManager.Save.SetEntryValue(characterId, entry, value, skipSessionCheck)
-	characterId = GameHelpers.GetObjectID(characterId)
+function SheetManager.Save.SetEntryValue(character, entry, value, skipSessionCheck)
+	local characterId = GameHelpers.GetObjectID(character)
 	local data = nil
 	if skipSessionCheck ~= true then
-		local sessionData = SessionManager:GetSession(characterId)
+		local sessionData = SessionManager:GetSession(character)
 		if sessionData then
 			data = sessionData.PendingChanges
 			assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))

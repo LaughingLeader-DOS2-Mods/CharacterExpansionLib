@@ -533,9 +533,10 @@ local function TryGetSheetCharacter(this)
 	end
 end
 
----@return EclCharacter|nil
+---@return EclCharacter
 function CharacterSheet.GetCharacter()
 	if Ext.GetGameState() ~= "Running" or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
+		---@diagnostic disable-next-line
 		return nil
 	end
 	local this = CharacterSheet.Root
@@ -554,7 +555,7 @@ end
 ---@param params SheetUpdateTargets
 function CharacterSheet.Update(ui, method, params)
 	updating = true
-	---@type CharacterSheetMainTimeline
+	---@type CharacterSheetMainTimeline|table
 	local this = self.Root
 
 	if not this or this.isExtended ~= true then
