@@ -57,7 +57,6 @@ local defaults = {
 	IconHeight = SheetCustomStatBase.IconWidth,
 }
 
----@protected
 function SheetCustomStatBase.SetDefaults(data)
 	for k,v in pairs(defaults) do
 		if data[k] == nil then

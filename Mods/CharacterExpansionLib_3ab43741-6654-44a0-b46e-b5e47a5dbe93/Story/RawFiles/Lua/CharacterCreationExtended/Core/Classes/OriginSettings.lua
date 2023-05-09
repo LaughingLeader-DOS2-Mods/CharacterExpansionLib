@@ -61,7 +61,7 @@ function OriginSettings:ApplySettings(character)
 			if skillset then
 				for j=1,#skillset.Skills do
 					if not isClient then
-						CharacterAddSkill(character.MyGuid, skillset.Skills[j], 0)
+						Osi.CharacterAddSkill(character.MyGuid, skillset.Skills[j], 0)
 					elseif isInCC then
 						
 					end

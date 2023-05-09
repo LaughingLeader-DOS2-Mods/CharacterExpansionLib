@@ -62,7 +62,7 @@ if not _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			local character = GameHelpers.GetCharacter(GetCurrentCharacter(data.UserId))
+			local character = GameHelpers.GetCharacter(Osi.GetCurrentCharacter(data.UserId))
 			if character then
 				local applyChanges = data.ApplyChanges
 				if applyChanges == nil then

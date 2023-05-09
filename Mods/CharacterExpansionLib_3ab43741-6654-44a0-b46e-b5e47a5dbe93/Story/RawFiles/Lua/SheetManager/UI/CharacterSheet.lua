@@ -70,6 +70,7 @@ local function TryGetMovieClip(this, listHolder, id, groupID, arrayName)
 				return mc,array,i
 			end
 		end
+		---@diagnostic disable-next-line
 	end
 end
 
@@ -93,7 +94,9 @@ end
 ---@param listHolder string
 ---@param id number
 ---@param groupID integer|nil
----@return FlashMovieClip,FlashArray,integer
+---@return FlashMovieClip|nil
+---@return FlashArray|nil
+---@return integer|nil
 CharacterSheet.TryGetMovieClip = function(this, listHolder, id, groupID, arrayName)
 	local func = TryGetMovieClip
 	if Vars.ControllerEnabled then
@@ -105,6 +108,7 @@ CharacterSheet.TryGetMovieClip = function(this, listHolder, id, groupID, arrayNa
 		return nil
 	end
 	table.remove(result, 1)
+	---@diagnostic disable-next-line
 	return table.unpack(result)
 end
 
@@ -202,6 +206,7 @@ function CharacterSheet.GetAllEntries(customOnly, this)
 		i = i + 1
 		if i <= count then
 			return movieclips[i]
+			---@diagnostic disable-next-line
 		end
 	end
 end
@@ -602,7 +607,7 @@ function CharacterSheet.Update(ui, method, params)
 				if not Vars.ControllerEnabled then
 					if stat.StatType == SheetManager.Stats.Data.StatType.PrimaryStat then
 						targetsUpdated.PrimaryStats = true
-						this.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value, stat.GeneratedID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame or -1, stat.IconClipName or "")
+						this.stats_mc.addPrimaryStat(stat.GeneratedID, stat.DisplayName, stat.Value.Label, stat.GeneratedID, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.Frame or -1, stat.IconClipName or "")
 						if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 							ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
 						end
@@ -611,7 +616,7 @@ function CharacterSheet.Update(ui, method, params)
 						if stat.StatType == SheetManager.Stats.Data.StatType.Spacing then
 							this.stats_mc.addSpacing(stat.GeneratedID, stat.SpacingHeight)
 						else
-							this.stats_mc.addSecondaryStat(stat.SecondaryStatTypeInteger, stat.DisplayName, stat.Value, stat.GeneratedID, stat.Frame, stat.BoostValue, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.IconClipName or "")
+							this.stats_mc.addSecondaryStat(stat.SecondaryStatTypeInteger, stat.DisplayName, stat.Value.Label, stat.GeneratedID, stat.Frame, stat.BoostValue, stat.CanAdd, stat.CanRemove, stat.IsCustom, stat.IconClipName or "")
 							if not StringHelpers.IsNullOrWhitespace(stat.IconClipName) then
 								ui:SetCustomIcon(stat.IconDrawCallName, stat.Icon, stat.IconWidth, stat.IconHeight)
 							end
@@ -646,7 +651,7 @@ function CharacterSheet.Update(ui, method, params)
 		for ability in SheetManager.Abilities.GetVisible(player, {IsGM=isGM, Stats=stats, CivilOnly=updateTargets.Civil}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 			if ability.Visible then
-				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, tostring(ability.Value), ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
+				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, ability.Value.Label, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
 				if ability.IsCivil then
 					targetsUpdated.Civil = true
 				else

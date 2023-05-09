@@ -6,7 +6,7 @@ local _ISCLIENT = Ext.IsClient()
 ---@param id string
 ---@param mod string|nil
 ---@param statType SheetEntryType|nil Stat type.
----@return SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
+---@return SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData|nil
 function SheetManager:GetEntryByID(id, mod, statType)
 	local targetTable = nil
 	if statType then
@@ -232,32 +232,21 @@ function SheetManager:GetAvailablePoints(characterId, pointType, customStatPoint
 		return SessionManager.CharacterCreationWizard.AvailablePoints[pointType]
 	end
 
-	if _ISCLIENT or not Ext.Osiris.IsCallable() then
-		local character = GameHelpers.GetCharacter(characterId)
-		if character.PlayerUpgrade then
-			if pointType == "Attribute" then
-				return character.PlayerUpgrade.AttributePoints or 0
-			elseif pointType == "Ability" then
-				return character.PlayerUpgrade.CombatAbilityPoints or 0
-			elseif pointType == "Civil" then
-				return character.PlayerUpgrade.CivilAbilityPoints or 0
-			elseif pointType == "Talent" then
-				return character.PlayerUpgrade.TalentPoints or 0
-			end
-		end
-		if SheetManager.CustomAvailablePoints[characterId] then
-			return SheetManager.CustomAvailablePoints[characterId][pointType] or 0
-		end
-	else
+	local character = GameHelpers.GetCharacter(characterId, "EsvCharacter")
+	---@cast character +EclCharacter
+	if character.PlayerUpgrade then
 		if pointType == "Attribute" then
-			return CharacterGetAttributePoints(characterId) or 0
+			return character.PlayerUpgrade.AttributePoints or 0
 		elseif pointType == "Ability" then
-			return CharacterGetAbilityPoints(characterId) or 0
+			return character.PlayerUpgrade.CombatAbilityPoints or 0
 		elseif pointType == "Civil" then
-			return CharacterGetCivilAbilityPoints(characterId) or 0
+			return character.PlayerUpgrade.CivilAbilityPoints or 0
 		elseif pointType == "Talent" then
-			return CharacterGetTalentPoints(characterId) or 0
+			return character.PlayerUpgrade.TalentPoints or 0
 		end
+	end
+	if SheetManager.CustomAvailablePoints[characterId] then
+		return SheetManager.CustomAvailablePoints[characterId][pointType] or 0
 	end
 	return 0
 end
@@ -304,16 +293,10 @@ function SheetManager:GetAllEntries(boostOnly, includeCustom)
 		end
 	end
 
-	if includeCustom then
-		for t,tbl in pairs(self.CustomStats.Stats) do
+	if includeCustom and not boostOnly then
+		for t,tbl in pairs(SheetManager.Data.CustomStats) do
 			for id,entry in pairs(tbl) do
-				if boostOnly then
-					if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
-						entries[#entries+1] = entry
-					end
-				else
-					entries[#entries+1] = entry
-				end
+				entries[#entries+1] = entry
 			end
 		end
 	end
@@ -324,6 +307,7 @@ function SheetManager:GetAllEntries(boostOnly, includeCustom)
 		i = i + 1
 		if i <= total then
 			return entries[i]
+			---@diagnostic disable-next-line
 		end
 	end
 end

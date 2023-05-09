@@ -7,8 +7,32 @@ local CharacterCreation = Classes.UIWrapper:CreateFromType(Data.UIType.character
 local self = CharacterCreation
 
 ---@class FlashCharacterCreationTalentsMC:FlashMovieClip
----@field addTalentElement fun(talentID:integer, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean)
----@field addCustomTalentElement fun(customID:string, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean)
+---@field addTalentElement fun(talentID:integer, talentLabel:string, isUnlocked:boolean, isChoosable:boolean, isRacial:boolean, isCustom:boolean|nil)
+---@field positionLists function
+
+---@private
+---@class tagsTalentsPanel_26:FlashMovieClip
+---@field icon_mc FlashMovieClip
+---@field seperator_mc FlashMovieClip
+---@field root_mc FlashMovieClip
+---@field currentList FlashMovieClip
+---@field listHolder_mc FlashEmpty
+---@field racialHolder_mc FlashEmpty
+---@field freePoints_txt FlashTextField
+---@field contentList FlashScrollList
+---@field racialList FlashListDisplay
+---@field canLoop boolean
+---@field lastSelected integer
+---@field racialDefaultSize uint32 2
+---@field talentListFrameHeight uint32 548
+---@field spacing uint32 10
+---@field onInit fun(root_mc:FlashMovieClip, iconFrame:integer)
+---@field setAvailablePoints fun(text:string)
+---@field addContent fun(mc:FlashMovieClip, isRacial:boolean)
+---@field setupLists fun(sort?:boolean)
+
+---@class FlashCharacterCreationTalentsMC_Controller:FlashCharacterCreationTalentsMC
+---@field talents_mc tagsTalentsPanel_26
 
 local updateSessionPoints = {}
 local PresetData = {}
@@ -79,9 +103,7 @@ end
 -- 	end
 -- end, "Before")
 
----@private
----@param ui UIObject
-function CharacterCreation.UpdateTalents(self, e, ui, method)
+function CharacterCreation:UpdateTalents()
 	local this = self.Root
 	if not this or not this.isExtended then
 		return
@@ -130,6 +152,7 @@ function CharacterCreation.UpdateTalents(self, e, ui, method)
 	if not Vars.ControllerEnabled then
 		talentsMC.positionLists()
 	else
+		---@cast talentsMC FlashCharacterCreationTalentsMC_Controller
 		talentsMC.talents_mc.setupLists()
 	end
 
@@ -138,9 +161,7 @@ end
 
 CharacterCreation.Register:Invoke("updateTalents", CharacterCreation.UpdateTalents, "Before", "All")
 
----@private
----@param ui UIObject
-function CharacterCreation.UpdateAbilities(self, e, ui, method)
+function CharacterCreation:UpdateAbilities()
 	local this = self.Root
 	if not this or not this.isExtended then
 		return
@@ -186,7 +207,7 @@ function CharacterCreation.UpdateAbilities(self, e, ui, method)
 		end
 		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 		if ability.Visible then
-			abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
+			abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 			if updateClassContent and ability.Delta > 0 then
 				abilitiesWithDelta[#abilitiesWithDelta+1] = {
 					ID = ability.GeneratedID,
@@ -220,9 +241,7 @@ end
 
 CharacterCreation.Register:Invoke("updateAbilities", CharacterCreation.UpdateAbilities, "Before", "All")
 
----@private
----@param ui UIObject
-function CharacterCreation.UpdateAttributes(self, e, ui, method)
+function CharacterCreation:UpdateAttributes()
 	local this = CharacterCreation.Root
 	if not this or not this.isExtended then
 		return
@@ -266,7 +285,7 @@ function CharacterCreation.UpdateAttributes(self, e, ui, method)
 		end
 		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = stat.Mod, ID=stat.ID, EntryType="SheetStatData", Stat=stat, Character=player, CharacterID=player.NetID})
 		if stat.Visible then
-			attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
+			attributes_mc.addAttribute(stat.GeneratedID, stat.DisplayName, stat.Description, stat.Value.Value, stat.Delta, stat.Frame, stat.IsCustom, stat.IconClipName or "", -3, -3, 0.5, stat.CallbackID or -1)
 			if updateClassContent and stat.Delta > 0 then
 				attributesWithDelta[#attributesWithDelta+1] = {
 					ID = stat.GeneratedID,
@@ -301,7 +320,7 @@ end
 
 CharacterCreation.Register:Invoke("updateAttributes", CharacterCreation.UpdateAttributes, "Before", "All")
 
-function CharacterCreation.Started(self, e, ui, call)
+function CharacterCreation:Started(e, ui, call)
 	CharacterCreation.IsOpen = true
 	if SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION then
 		local this = self.Root
@@ -313,7 +332,7 @@ end
 
 CharacterCreation.Register:Call("characterCreationStarted", CharacterCreation.Started, "Before", "All")
 
-function CharacterCreation.CreationDone(self, e, ui, method, startText, backText, visible)
+function CharacterCreation:CreationDone(e, ui, method, startText, backText, visible)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
 		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
 	end

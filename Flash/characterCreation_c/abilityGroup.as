@@ -112,7 +112,7 @@ package
 			val4.scrollIntoView(val2,this.elementHeight * 2);
 		}
 		
-		public function addAbility(statID:uint, label:String, value:int, delta:int) : *
+		public function addAbility(statID:uint, label:String, value:Number, delta:int) : *
 		{
 			var ability_mc:MovieClip = this.abilityList.getElementByNumber("statID",statID);
 			if(!ability_mc)

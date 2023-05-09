@@ -31,7 +31,7 @@ if not _ISCLIENT then
 	---@param respec boolean
 	---@param skipSync boolean|nil
 	function SessionManager:CreateSession(character, respec, skipSync)
-		character = GameHelpers.GetCharacter(character)
+		character = GameHelpers.GetCharacter(character, "EsvCharacter")
 		local characterId = character.MyGuid
 
 		if respec == nil then
@@ -135,7 +135,7 @@ else -- _ISCLIENT
 
 	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, userid)
 		userid = tonumber(userid)
-		local player = GameHelpers.GetCharacter(GetCurrentCharacter(userid))
+		local player = GameHelpers.GetCharacter(Osi.GetCurrentCharacter(userid))
 		SessionManager:ApplySession(player)
 	end)
 end

@@ -189,7 +189,7 @@ if _ISCLIENT then
 	---@field GroupDisplayName string
 	---@field AddPointsTooltip string
 	---@field RemovePointsTooltip string
-	---@field Value integer
+	---@field Value {Value:integer, Label:string}
 	---@field Delta integer
 	---@field CanAdd boolean
 	---@field CanRemove boolean
@@ -274,7 +274,7 @@ if _ISCLIENT then
 						GroupID = groupID,
 						GroupDisplayName = groupName,
 						IsCustom = false,
-						Value = statVal,
+						Value = {Value=statVal, Label=tostring(statVal)},
 						Delta = delta,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
@@ -320,7 +320,7 @@ if _ISCLIENT then
 						GroupID = data.GroupID,
 						GroupDisplayName = groupName,
 						IsCustom = true,
-						Value = string.format("%s", value) .. data.Suffix,
+						Value = {Value=value, Label=string.format("%s%s", value, data.Suffix or "")},
 						Delta = value - startValue,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
@@ -339,6 +339,7 @@ if _ISCLIENT then
 			i = i + 1
 			if i <= count then
 				return entries[i]
+				---@diagnostic disable-next-line
 			end
 		end
 	end

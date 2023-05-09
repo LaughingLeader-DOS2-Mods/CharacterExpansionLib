@@ -22,7 +22,7 @@ Mods.CharacterExpansionLib = {
 ---@alias SheetAbilityGroupID string |"Weapons"|"Defense"|"Skills"|"Personality"|"Craftsmanship"|"NastyDeeds"
 ---@alias SheetEntryDataType "SheetAbilityData"|"SheetCustomStatData"|"SheetCustomStatCategoryData"|"SheetStatData"|"SheetTalentData"
 ---@alias SheetEntryType "PrimaryStat"|"SecondaryStat"|"Ability"|"CivilAbility"|"Talent"|"Custom"|"CustomCategory"
----@alias StatSheetSecondaryStatType "Info"|"Normal"|"Resistance"
+---@alias StatSheetSecondaryStatType "Info"|"Stat"|"Resistance"|"Experience"
 ---@alias StatSheetStatType "PrimaryStat"|"SecondaryStat"|"Spacing"
 ---@alias PersistentVarsStatTypeTableName "Stats"|"Abilities"|"Talents"|"CustomStats"
 ---@alias SheetBuiltinType "Attribute"|"Ability"|"Talent"

@@ -256,7 +256,7 @@ end
 ---@param character EsvCharacter|Guid|NETID
 ---@param amount integer
 ---@param availablePoints table|nil
----@return boolean
+---@return boolean success
 function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, availablePoints)
 	if amount == 0 then
 		return true
@@ -289,7 +289,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 				local current = entry:GetAvailablePoints(character)
 				availablePoints[pointID] = current + amount
 			end
-			return true, availablePoints
+			return true
 		else
 			local points = 0
 			local pointID = ""

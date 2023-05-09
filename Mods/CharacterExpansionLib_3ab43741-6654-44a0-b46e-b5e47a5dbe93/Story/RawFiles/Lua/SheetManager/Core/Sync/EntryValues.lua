@@ -142,8 +142,10 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 	local t = type(entry)
 	assert(t == "table", string.format("[SheetManager.Save.GetEntryValue] Entry type invalid (%s). Must be one of the following types: SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData", t))
 	if entry then
+		---@type integer|boolean
 		local defaultValue = 0
 		if entry.ValueType == "boolean" then
+			---@cast defaultValue boolean
 			defaultValue = false
 		end
 		characterId = GameHelpers.GetObjectID(characterId)
@@ -363,15 +365,15 @@ else
 			assert(character ~= nil, string.format("Failed to get character for NetID (%s).", data.NetID))
 			
 			if data.StatType == "Attribute" then
-				NRD_PlayerSetBaseAttribute(character.MyGuid, data.ID, CharacterGetBaseAttribute(character.MyGuid, data.ID) + data.ModifyBy)
+				Osi.NRD_PlayerSetBaseAttribute(character.MyGuid, data.ID, Osi.CharacterGetBaseAttribute(character.MyGuid, data.ID) + data.ModifyBy)
 			elseif data.StatType == "Ability" then
-				NRD_PlayerSetBaseAbility(character.MyGuid, data.ID, CharacterGetBaseAbility(character.MyGuid, data.ID) + data.ModifyBy)
+				Osi.NRD_PlayerSetBaseAbility(character.MyGuid, data.ID, Osi.CharacterGetBaseAbility(character.MyGuid, data.ID) + data.ModifyBy)
 			elseif data.StatType == "Talent" then
-				NRD_PlayerSetBaseTalent(character.MyGuid, data.ID, data.ModifyBy)
+				Osi.NRD_PlayerSetBaseTalent(character.MyGuid, data.ID, data.ModifyBy)
 			end
 
 			--Force PlayerUpgrade sync
-			CharacterAddCivilAbilityPoint(character.MyGuid, 0)
+			Osi.CharacterAddCivilAbilityPoint(character.MyGuid, 0)
 
 			_CheckTalentRequirements(character)
 		end

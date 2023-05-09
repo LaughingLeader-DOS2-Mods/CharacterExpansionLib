@@ -55,9 +55,9 @@ package
 			}
 		}
 		
-		public function setAbility(label:String, valueAmount:int, deltaAmount:int) : *
+		public function setAbility(label:String, valueAmount:Number, deltaAmount:int) : *
 		{
-			this.isAltered = param3 > 0;
+			this.isAltered = deltaAmount > 0;
 			this.label_txt.htmlText = label;
 			this.value_txt.htmlText = String(valueAmount);
 			this.value = valueAmount;

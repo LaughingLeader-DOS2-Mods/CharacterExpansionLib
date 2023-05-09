@@ -1,12 +1,24 @@
+---@class FlashScrollListGrouped:FlashScrollList
+---@class FlashHorizontalScrollList:FlashHorizontalList
+---@class BtnCreateCustomStat:FlashMovieClip
+---@class FlashComboBox:FlashMovieClip
+---@class FlashEmpty:FlashMovieClip
+---@class mcPlus_Anim_69:FlashMovieClip
+---@class larTween:FlashMovieClip
+---@class btnDeleteCustomStat:FlashMovieClip
+---@class btnEditCustomStat:FlashMovieClip
+---@class deleteBtn:FlashMovieClip
+---@class FlashFocusEvent:FlashEvent
+
 ---@class abilitiesholder_9
----@field listHolder_mc empty
----@field list scrollListGrouped
+---@field listHolder_mc FlashEmpty
+---@field list FlashScrollListGrouped
 ---@field init function
 
 ---@class customStatsHolder_14
----@field create_mc btnCreateCustomStat
----@field listHolder_mc empty
----@field list scrollListGrouped
+---@field create_mc BtnCreateCustomStat
+---@field listHolder_mc FlashEmpty
+---@field list FlashScrollListGrouped
 ---@field stats_array table
 ---@field groups_array table
 ---@field init function
@@ -102,7 +114,7 @@
 ---@field onEventResolution fun(width:number, height:number)
 ---@field onEventInit function
 ---@field setPossessedState fun(param1:boolean)
----@field getGlobalPositionOfMC fun(mc:FlashMovieClip):Point
+---@field getGlobalPositionOfMC fun(mc:FlashMovieClip):FlashPoint
 ---@field showTooltipForMC fun(mc:FlashMovieClip, externalCall:string)
 ---@field showCustomTooltipForMC fun(mc:FlashMovieClip, externalCall:string, statID:number)
 ---@field setActionsDisabled fun(disabled:boolean)
@@ -111,7 +123,7 @@
 ---@field setHelmetOptionTooltip fun(text:string)
 ---@field setPlayerInfo fun(text:string)
 ---@field setAvailableLabels fun(text:string)
----@field pointsTextfieldChanged fun(tf:TextField)
+---@field pointsTextfieldChanged fun(tf:FlashTextField)
 ---@field selectCharacter fun(id:number)
 ---@field setText fun(tabId:number, text:string)
 ---@field setTitle fun(text:string)
@@ -178,10 +190,10 @@
 ---@field callbackStr string
 ---@field tooltip string
 ---@field currentTooltip string
----@field onMouseOver fun(param1:MouseEvent)
----@field onMouseOut fun(param1:MouseEvent)
----@field onDown fun(param1:MouseEvent)
----@field onUp fun(param1:MouseEvent)
+---@field onMouseOver fun(param1:FlashMouseEvent)
+---@field onMouseOut fun(param1:FlashMouseEvent)
+---@field onDown fun(param1:FlashMouseEvent)
+---@field onUp fun(param1:FlashMouseEvent)
 
 ---@class plusButton_62
 ---@field bg_mc FlashMovieClip
@@ -191,27 +203,27 @@
 ---@field callbackStr string
 ---@field tooltip string
 ---@field currentTooltip string
----@field onMouseOver fun(param1:MouseEvent)
----@field onMouseOut fun(param1:MouseEvent)
----@field onDown fun(param1:MouseEvent)
----@field onUp fun(param1:MouseEvent)
+---@field onMouseOver fun(param1:FlashMouseEvent)
+---@field onMouseOut fun(param1:FlashMouseEvent)
+---@field onDown fun(param1:FlashMouseEvent)
+---@field onUp fun(param1:FlashMouseEvent)
 
 ---@class pointsAvailable_56
----@field civilAbilPoints_txt TextField
----@field combatAbilPoints_txt TextField
----@field label_txt TextField
----@field statPoints_txt TextField
----@field talentPoints_txt TextField
----@field customStatPoints_txt TextField
+---@field civilAbilPoints_txt FlashTextField
+---@field combatAbilPoints_txt FlashTextField
+---@field label_txt FlashTextField
+---@field statPoints_txt FlashTextField
+---@field talentPoints_txt FlashTextField
+---@field customStatPoints_txt FlashTextField
 ---@field setTab fun(tabIndex:integer)
 
 ---@class stats_1
----@field aiSel_mc comboBox
----@field alignments_mc comboBox
+---@field aiSel_mc FlashComboBox
+---@field alignments_mc FlashComboBox
 ---@field attrPointsWrn_mc FlashMovieClip
 ---@field bg_mc FlashMovieClip
 ---@field charInfo_mc FlashMovieClip
----@field charList_mc empty
+---@field charList_mc FlashEmpty
 ---@field civicAbilityHolder_mc FlashMovieClip
 ---@field civilAbilityPointsWrn_mc FlashMovieClip
 ---@field close_mc FlashMovieClip
@@ -219,10 +231,10 @@
 ---@field combatAbilityPointsWrn_mc FlashMovieClip
 ---@field customStats_mc customStatsHolder_14
 ---@field customStatsPointsWrn_mc mcPlus_Anim_69
----@field customStatsPoints_txt TextField
+---@field customStatsPoints_txt FlashTextField
 ---@field dragHit_mc FlashMovieClip
 ---@field equip_mc FlashMovieClip
----@field equipment_txt TextField
+---@field equipment_txt FlashTextField
 ---@field hitArea_mc FlashMovieClip
 ---@field invTabHolder_mc FlashMovieClip
 ---@field leftCycleBtn_mc FlashMovieClip
@@ -232,14 +244,14 @@
 ---@field panelBg2_mc FlashMovieClip
 ---@field pointsFrame_mc FlashMovieClip
 ---@field rightCycleBtn_mc FlashMovieClip
----@field scrollbarHolder_mc empty
+---@field scrollbarHolder_mc FlashEmpty
 ---@field skillTabHolder_mc FlashMovieClip
----@field tabTitle_txt TextField
----@field tabsHolder_mc empty
+---@field tabTitle_txt FlashTextField
+---@field tabsHolder_mc FlashEmpty
 ---@field tagsHolder_mc FlashMovieClip
 ---@field talentHolder_mc FlashMovieClip
 ---@field talentPointsWrn_mc FlashMovieClip
----@field title_txt TextField
+---@field title_txt FlashTextField
 ---@field visualHolder_mc FlashMovieClip
 ---@field myText string
 ---@field closeCenterX number
@@ -250,13 +262,13 @@
 ---@field cellSize number
 ---@field statholderListPosY number
 ---@field listOffsetY number
----@field tabsList horizontalList
----@field charList horizontalScrollList
----@field primaryStatList listDisplay
----@field secondaryStatList listDisplay
----@field expStatList listDisplay
----@field resistanceStatList listDisplay
----@field infoStatList listDisplay
+---@field tabsList FlashHorizontalList
+---@field charList FlashHorizontalScrollList
+---@field primaryStatList FlashListDisplay
+---@field secondaryStatList FlashListDisplay
+---@field expStatList FlashListDisplay
+---@field resistanceStatList FlashListDisplay
+---@field infoStatList FlashListDisplay
 ---@field secELSpacing number
 ---@field currentOpenPanel number
 ---@field panelArray table
@@ -273,7 +285,7 @@
 ---@field customStatIconOffsetY number
 ---@field pointWarningOffsetX number
 ---@field customStatPointsTextOffsetX number
----@field mainStatsList scrollListGrouped
+---@field mainStatsList FlashScrollListGrouped
 ---@field GROUP_MAIN_ATTRIBUTES integer
 ---@field GROUP_MAIN_STATS integer
 ---@field GROUP_MAIN_EXPERIENCE integer
@@ -339,9 +351,9 @@
 ---@field getVisual fun(contentID:number):FlashMovieClip
 ---@field clearCustomStatsOptions function
 ---@field addCustomStat fun(doubleHandle:number, labelText:string, valueText:string)
----@field justEatClick fun(param1:MouseEvent)
----@field onBGOut fun(param1:MouseEvent)
----@field closeUIOnClick fun(param1:MouseEvent)
+---@field justEatClick fun(param1:FlashMouseEvent)
+---@field onBGOut fun(param1:FlashMouseEvent)
+---@field closeUIOnClick fun(param1:FlashMouseEvent)
 ---@field closeUI function
 ---@field addIcon fun(param1:FlashMovieClip, param2:string, param3:number)
 ---@field updateAIs fun(param1:table)
@@ -351,10 +363,10 @@
 
 ---@class talentsHolder_11
 ---@field bgGlow_mc FlashMovieClip
----@field listHolder_mc empty
----@field list scrollList
+---@field listHolder_mc FlashEmpty
+---@field list FlashScrollList
 ---@field init function
----@field updateBGPos fun(e:Event)
+---@field updateBGPos fun(e:FlashEvent)
 
 ---@class AbilityEl
 ---@field abilTooltip_mc FlashMovieClip
@@ -367,21 +379,21 @@
 ---@field callbackStr string
 ---@field isCustom boolean
 ---@field MakeCustom fun(id:number, b:boolean)
----@field onOver fun(param1:MouseEvent)
----@field onOut fun(e:MouseEvent)
----@field onHLOver fun(e:MouseEvent)
----@field onHLOut fun(e:MouseEvent)
+---@field onOver fun(param1:FlashMouseEvent)
+---@field onOut fun(e:FlashMouseEvent)
+---@field onHLOver fun(e:FlashMouseEvent)
+---@field onHLOut fun(e:FlashMouseEvent)
 ---@field hlInvis function
 
 ---@class FlashCustomStat
 ---@field delete_mc btnDeleteCustomStat
 ---@field edit_mc btnEditCustomStat
 ---@field hl_mc FlashMovieClip
----@field label_txt TextField
+---@field label_txt FlashTextField
 ---@field line_mc FlashMovieClip
 ---@field minus_mc FlashMovieClip
 ---@field plus_mc FlashMovieClip
----@field text_txt TextField
+---@field text_txt FlashTextField
 ---@field timeline larTween
 ---@field base FlashMovieClip
 ---@field tooltip string
@@ -390,8 +402,8 @@
 ---@field id integer
 ---@field statIndex integer
 ---@field init function
----@field onOver fun(param1:MouseEvent)
----@field onOut fun(param1:MouseEvent)
+---@field onOver fun(param1:FlashMouseEvent)
+---@field onOut fun(param1:FlashMouseEvent)
 ---@field onEditBtnClicked function
 ---@field onDeleteBtnClicked function
 
@@ -408,16 +420,16 @@
 ---@field callbackStr string
 ---@field isCustom boolean
 ---@field MakeCustom fun(statID:number, b:boolean)
----@field onOver fun(e:MouseEvent)
----@field onOut fun(e:MouseEvent)
+---@field onOver fun(e:FlashMouseEvent)
+---@field onOut fun(e:FlashMouseEvent)
 ---@field hlInvis function
 
 ---@class SecStat
----@field editText_txt TextField
+---@field editText_txt FlashTextField
 ---@field hl_mc FlashMovieClip
 ---@field icon_mc FlashMovieClip
 ---@field minus_mc FlashMovieClip
----@field mod_txt TextField
+---@field mod_txt FlashTextField
 ---@field plus_mc FlashMovieClip
 ---@field texts_mc FlashMovieClip
 ---@field timeline larTween
@@ -429,10 +441,10 @@
 ---@field isCustom boolean
 ---@field MakeCustom fun(statID:number, b:boolean)
 ---@field setupButtons fun(param1:boolean, minusVisible:boolean, plusVisible:boolean, maxChars:number)
----@field onTextPress fun(e:MouseEvent)
----@field onValueAccept fun(e:FocusEvent)
----@field onOver fun(e:MouseEvent)
----@field onOut fun(param1:MouseEvent)
+---@field onTextPress fun(e:FlashMouseEvent)
+---@field onValueAccept fun(e:FlashFocusEvent)
+---@field onOver fun(e:FlashMouseEvent)
+---@field onOut fun(param1:FlashMouseEvent)
 ---@field hlInvis function
 
 ---@class skillEl
@@ -441,24 +453,24 @@
 ---@field removeSkillBtn_mc deleteBtn
 ---@field root_mc FlashMovieClip
 ---@field dragTreshHold integer
----@field mousePosDown Point
+---@field mousePosDown FlashPoint
 ---@field _canBeRemoved boolean
 ---@field onInit fun(param1:FlashMovieClip)
 ---@field canBeRemoved fun(b:boolean):boolean
 ---@field onRemoveSkillButtonPressed fun(param1:FlashMovieClip)
----@field onOver fun(param1:MouseEvent)
----@field onOut fun(param1:MouseEvent)
----@field onDown fun(param1:MouseEvent)
----@field onUp fun(param1:MouseEvent)
----@field onDragging fun(param1:MouseEvent)
+---@field onOver fun(param1:FlashMouseEvent)
+---@field onOut fun(param1:FlashMouseEvent)
+---@field onDown fun(param1:FlashMouseEvent)
+---@field onUp fun(param1:FlashMouseEvent)
+---@field onDragging fun(param1:FlashMouseEvent)
 
 ---@class Stat
 ---@field hl_mc FlashMovieClip
 ---@field icon_mc FlashMovieClip
----@field label_txt TextField
+---@field label_txt FlashTextField
 ---@field minus_mc FlashMovieClip
 ---@field plus_mc FlashMovieClip
----@field text_txt TextField
+---@field text_txt FlashTextField
 ---@field timeline larTween
 ---@field base FlashMovieClip
 ---@field statID number
@@ -466,30 +478,30 @@
 ---@field callbackStr string
 ---@field isCustom boolean
 ---@field MakeCustom fun(statID:number, b:boolean)
----@field onOver fun(param1:MouseEvent)
----@field onOut fun(param1:MouseEvent)
+---@field onOver fun(param1:FlashMouseEvent)
+---@field onOut fun(param1:FlashMouseEvent)
 
 ---@class StatCategory
----@field amount_txt TextField
+---@field amount_txt FlashTextField
 ---@field bg_mc FlashMovieClip
----@field listContainer_mc empty
----@field title_txt TextField
+---@field listContainer_mc FlashEmpty
+---@field title_txt FlashTextField
 ---@field isOpen boolean
 ---@field hidePoints boolean
 ---@field texty number
 ---@field groupName string
 ---@field setIsOpen fun(b:boolean)
----@field onMouseOver fun(e:MouseEvent)
----@field onMouseOut fun(e:MouseEvent)
----@field onDown fun(e:MouseEvent)
----@field onUp fun(e:MouseEvent)
+---@field onMouseOver fun(e:FlashMouseEvent)
+---@field onMouseOut fun(e:FlashMouseEvent)
+---@field onDown fun(e:FlashMouseEvent)
+---@field onUp fun(e:FlashMouseEvent)
 ---@field length fun():number
 ---@field content_array fun():table
 
 ---@class Talent
 ---@field bullet_mc FlashMovieClip
 ---@field hl_mc FlashMovieClip
----@field label_txt TextField
+---@field label_txt FlashTextField
 ---@field minus_mc FlashMovieClip
 ---@field plus_mc FlashMovieClip
 ---@field timeline larTween
@@ -498,5 +510,5 @@
 ---@field callbackStr string
 ---@field isCustom boolean
 ---@field MakeCustom fun(statID:number, b:boolean)
----@field onOver fun(e:MouseEvent)
----@field onOut fun(e:MouseEvent)
+---@field onOver fun(e:FlashMouseEvent)
+---@field onOut fun(e:FlashMouseEvent)

@@ -101,6 +101,7 @@ function CustomStats:GetAllCategories(skipSort)
 		i = i + 1
 		if i <= count then
 			return categories[i]
+			---@diagnostic disable-next-line
 		end
 	end
 end
@@ -159,7 +160,7 @@ function CustomStats:GetTotalStatsInCategory(categoryId, visibleOnly)
 	if StringHelpers.IsNullOrWhitespace(categoryId) then
 		categoryId = "MISC"
 	end
-	local character = _ISCLIENT and Client:GetCharacter() or GameHelpers.GetCharacter(CharacterGetHostCharacter())
+	local character = _ISCLIENT and Client:GetCharacter() or GameHelpers.Character.GetHost()
 	for mod,stats in pairs(SheetManager.Data.CustomStats) do
 		for id,stat in pairs(stats) do
 			local isRegistered = not SheetManager.CustomStats:GMStatsEnabled() or not StringHelpers.IsNullOrWhitespace(stat.UUID)
@@ -351,6 +352,7 @@ if _ISCLIENT then
 			if ui then
 				local this = ui:GetRoot()
 				if not this then
+					---@diagnostic disable-next-line
 					return function() end
 				end
 				findAll = false
@@ -390,6 +392,7 @@ if _ISCLIENT then
 			i = i + 1
 			if i <= count then
 				return allStats[i]
+				---@diagnostic disable-next-line
 			end
 		end
 	end

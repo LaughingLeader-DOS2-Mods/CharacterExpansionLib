@@ -50,24 +50,29 @@ SheetManager.Data = {
 			---@type table<integer, SheetAbilityData>
 			Entries = {}
 		},
-		---@type table<integer, SheetTalentData>
+		AbilityCategories = {
+			NEXT_ID = 6,
+			---@type table<integer, SheetAbilityCategoryData>
+			Entries = {}
+		},
 		Talents = {
 			NEXT_ID = 4999,
+			---@type table<integer, SheetTalentData>
 			Entries = {}
 		},
-		---@type table<integer, SheetStatData>
 		Stats = {
 			NEXT_ID = 1999,
+			---@type table<integer, SheetStatData>
 			Entries = {}
 		},
-		---@type table<integer, SheetCustomStatData>
 		CustomStats = {
 			NEXT_ID = -1,
+			---@type table<integer, SheetCustomStatData>
 			Entries = {}
 		},
-		---@type table<integer, SheetCustomStatCategoryData>
 		CustomStatCategories = {
 			NEXT_ID = -1,
+			---@type table<integer, SheetCustomStatCategoryData>
 			Entries = {}
 		},
 	}

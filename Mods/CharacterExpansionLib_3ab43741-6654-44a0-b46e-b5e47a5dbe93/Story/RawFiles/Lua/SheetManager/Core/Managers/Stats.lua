@@ -416,8 +416,11 @@ if _ISCLIENT then
 	---@class SheetManager.StatsUIEntry
 	---@field ID string
 	---@field GeneratedID integer
+	---@field CallbackID integer|nil If set, add/remove etc callbacks in Flash will use this value instead of GeneratedID. For character creation only.
 	---@field DisplayName string
-	---@field Value string
+	---@field Description string
+	---@field Value {Value:integer, Label:string}
+	---@field BoostValue number Used when editing secondary stats in the character sheet (GM mode?)
 	---@field StatType string
 	---@field SecondaryStatType string
 	---@field SecondaryStatTypeInteger integer
@@ -462,7 +465,7 @@ if _ISCLIENT then
 		local points = options.AvailablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, options.IsCharacterCreation)
 		local maxAttribute = GameHelpers.GetExtraData("AttributeSoftCap", 40)
 		local startAttribute = GameHelpers.GetExtraData("AttributeBaseValue", 10)
-		
+
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
 			local data = SheetManager.Stats.Data.Default.Entries[id]
@@ -524,7 +527,8 @@ if _ISCLIENT then
 							GeneratedID = data.StatID,
 							DisplayName = name,
 							Description = "",
-							Value = valueLabel,
+							Value = {Value=value, Label=valueLabel},
+							BoostValue = 0,
 							Delta = delta,
 							CanAdd = canAdd,
 							CanRemove = canRemove,
@@ -579,7 +583,7 @@ if _ISCLIENT then
 							GeneratedID = data.GeneratedID,
 							DisplayName = name,
 							Description = data:GetDescription(player, TooltipExpander.IsExpanded()),
-							Value = valueLabel,
+							Value = {Value=value, Label=valueLabel},
 							Delta = value - data.BaseValue,
 							CanAdd = SheetManager:GetIsPlusVisible(data, player, defaultCanAdd, value),
 							CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
@@ -613,6 +617,7 @@ if _ISCLIENT then
 			i = i + 1
 			if i <= count then
 				return entries[i]
+				---@diagnostic disable-next-line
 			end
 		end
 	end

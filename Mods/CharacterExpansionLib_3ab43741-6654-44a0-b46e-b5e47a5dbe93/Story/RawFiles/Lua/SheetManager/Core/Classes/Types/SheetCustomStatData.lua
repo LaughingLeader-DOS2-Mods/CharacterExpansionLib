@@ -7,6 +7,8 @@ local STAT_DISPLAY_MODE = {
 }
 
 ---@class SheetCustomStatData:SheetCustomStatBase
+---@field UUID Guid|nil If this is an actual custom stat (GM mode), this is the UUID.
+---@field Double number|nil If this is an actual custom stat (GM mode), this is the double handle used by the engine code.
 local SheetCustomStatData = {
 	Type="SheetCustomStatData",
 	StatType = "Custom",
@@ -19,7 +21,7 @@ local SheetCustomStatData = {
 	---An ID to use for a common pool of available points.
 	PointID = "",
 	---@private
-	---@type table<NETID,table<string,integer>>
+	---@type table<NetId|Guid,integer>
 	LastValue = {},
 	---Alternative display modes for a stat, such as percentage display.
 	DisplayMode = STAT_DISPLAY_MODE.Default,
@@ -67,7 +69,6 @@ TableHelpers.AddOrUpdate(SheetCustomStatData.PropertyMap, Classes.SheetCustomSta
 local defaults = {
 	Create = SheetCustomStatData.Create,
 	--Category = SheetCustomStatData.Category,
-	GeneratedID = SheetCustomStatData.GeneratedID,
 	PointID = SheetCustomStatData.PointID,
 	LastValue = {},
 	DisplayMode = SheetCustomStatData.DisplayMode,
@@ -78,7 +79,6 @@ local defaults = {
 
 local ID_MAP = 0
 
----@protected
 ---@param data SheetCustomStatData|table
 function SheetCustomStatData.SetDefaults(data)
 	Classes.SheetCustomStatBase.SetDefaults(data)
@@ -137,7 +137,8 @@ function SheetCustomStatData:GetLastValue(character)
 	else
 		characterId = GameHelpers.GetNetID(character)
 	end
-	return self.LastValue[characterId] or false
+	local last = self.LastValue[characterId]
+	return last or false
 end
 
 local STAT_VALUE_MAX = 2147483647
@@ -189,13 +190,12 @@ function SheetCustomStatData:GetAvailablePoints(character)
 	return SheetManager:GetAvailablePoints(character, SheetManager.StatType.Custom, self:GetAvailablePointsID())
 end
 
----@protected
 ---Sets the stat's last value for a character.
 ---@param character CharacterParam
 function SheetCustomStatData:UpdateLastValue(character)
 	local characterId = GameHelpers.GetObjectID(character)
 	local value = self:GetValue(characterId)
-	if value then
+	if characterId and value then
 		if Vars.DebugMode and Vars.Print.CustomStats then
 			--fprint(LOGLEVEL.WARNING, "[SheetCustomStatData:UpdateLastValue:%s] Set LastValue for (%s) to (%s) [%s]", self.Type, characterId, value, Ext.IsServer() and "SERVER" or "CLIENT")
 		end

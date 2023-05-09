@@ -130,7 +130,7 @@ package
 			this.editText_txt.removeEventListener(FocusEvent.FOCUS_OUT,this.onValueAccept);
 			this.editText_txt.visible = false;
 			this.texts_mc.text_txt.visible = true;
-			if(this.statID != null)
+			if(!isNaN(this.statID))
 			{
 				!isCustom ? ExternalInterface.call("changeSecStat",this.statID,int(this.editText_txt.text)) : ExternalInterface.call("changeSecStatCustom",this.statID,int(this.editText_txt.text));
 			}

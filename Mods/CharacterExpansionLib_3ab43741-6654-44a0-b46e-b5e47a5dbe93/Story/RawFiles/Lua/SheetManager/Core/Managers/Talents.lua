@@ -479,6 +479,7 @@ function SheetManager.Talents.GetCharactersWithTalent(talentId, mod)
 		i = i + 1
 		if i <= count then
 			return entries[i]
+			---@diagnostic disable-next-line
 		end
 	end, count
 end
