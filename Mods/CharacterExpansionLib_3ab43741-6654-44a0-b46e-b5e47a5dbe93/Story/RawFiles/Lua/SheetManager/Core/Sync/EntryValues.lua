@@ -521,14 +521,14 @@ if _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_EntryValueChanged", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
-			local characterId = GameHelpers.GetObjectID(data.NetID)
+			local character = GameHelpers.GetCharacter(data.NetID, "EclCharacter")
 			local stat = SheetManager:GetEntryByID(data.ID, data.Mod, data.StatType)
-			if characterId and stat then
+			if character and stat then
 				local skipInvoke = data.SkipInvoke
 				if skipInvoke == nil then
 					skipInvoke = false
 				end
-				SheetManager:SetEntryValue(stat, characterId, data.Value, skipInvoke, true, true)
+				SheetManager:SetEntryValue(stat, character, data.Value, skipInvoke, true, true)
 				--SheetManager.Save.SetEntryValue(characterId, stat, data.Value)
 			end
 		end
