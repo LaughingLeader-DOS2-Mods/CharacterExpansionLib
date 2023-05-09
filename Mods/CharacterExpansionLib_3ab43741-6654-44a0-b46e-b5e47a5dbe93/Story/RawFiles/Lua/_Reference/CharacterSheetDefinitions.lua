@@ -35,6 +35,7 @@
 ---@field addCustomStat fun(doubleHandle:number, labelText:string, valueText:string, groupId:number, plusVisible:boolean, minusVisible:boolean, isCustom:boolean)
 
 ---@class CharacterSheetMainTimeline:FlashMainTimeline
+---@field isExtended boolean Set by CEL
 ---@field stats_mc stats_1
 ---@field initDone boolean
 ---@field events table
