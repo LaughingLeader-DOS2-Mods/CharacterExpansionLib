@@ -29,12 +29,17 @@
 			"SheetIcon": "statIcons_Immune_Physical"
 		}
 	},
+	"AbilityCategories": {
+		"AdvancedMagic": {
+			"DisplayName": "Advanced Magic"
+		}
+	},
 	"Abilities": {
 		"Sourcery": {
 			"DisplayName": "[Handle:ha8b343fbg4ebbg4e72gb58fg633850ad0580:Sourcery]",
 			"Description": "Sourcery empowers your ability to cast source abilities and grants passive source regeneration.",
 			"Icon": "Ability_Necromancy",
-			"CategoryID": "Skills",
+			"CustomCategory": "AdvancedMagic",
 			"BoostAttribute": "Sourcery",
 			"UsePoints": true
 		},
