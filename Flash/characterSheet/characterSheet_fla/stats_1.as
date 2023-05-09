@@ -757,12 +757,12 @@ package characterSheet_fla
 		
 		public function getAbility(isCivil:Boolean, groupId:Number, statID:Number, isCustom:Boolean=false) : MovieClip
 		{
-			var holder:MovieClip = this.combatAbilityHolder_mc;
+			var groupHolder:MovieClip = this.combatAbilityHolder_mc;
 			if(isCivil)
 			{
-				holder = this.civicAbilityHolder_mc;
+				groupHolder = this.civicAbilityHolder_mc;
 			}
-			var group_mc:MovieClip = holder.list.getElementByNumber("groupId",groupId);
+			var group_mc:MovieClip = groupHolder.list.getElementByNumber("groupId",groupId);
 			if(group_mc)
 			{
 				return group_mc.list.getElementByNumber("statID",statID);
@@ -782,33 +782,33 @@ package characterSheet_fla
 		
 		public function setVisibilityAbilityButtons(isCivil:Boolean, isVisible:Boolean) : *
 		{
-			var val4:uint = 0;
-			var val5:MovieClip = null;
-			var val6:uint = 0;
-			var val7:MovieClip = null;
-			var val3:MovieClip = this.combatAbilityHolder_mc;
+			var i:uint = 0;
+			var category_mc:MovieClip = null;
+			var j:uint = 0;
+			var ability_mc:MovieClip = null;
+			var groupHolder:MovieClip = this.combatAbilityHolder_mc;
 			if(isCivil)
 			{
-				val3 = this.civicAbilityHolder_mc;
+				groupHolder = this.civicAbilityHolder_mc;
 			}
-			if(val3.list.content_array)
+			if(groupHolder.list.content_array)
 			{
-				val4 = 0;
-				while(val4 < val3.list.length)
+				i = 0;
+				while(i < groupHolder.list.length)
 				{
-					val5 = val3.list.getAt(val4);
-					val6 = 0;
-					while(val6 < val5.list.length)
+					category_mc = groupHolder.list.getAt(i);
+					j = 0;
+					while(j < category_mc.list.length)
 					{
-						val7 = val5.list.getAt(val6);
-						if(val7)
+						ability_mc = category_mc.list.getAt(j);
+						if(ability_mc)
 						{
-							val7.texts_mc.plus_mc.visible = isVisible;
-							val7.texts_mc.minus_mc.visible = isVisible;
+							ability_mc.texts_mc.plus_mc.visible = isVisible;
+							ability_mc.texts_mc.minus_mc.visible = isVisible;
 						}
-						val6++;
+						j++;
 					}
-					val4++;
+					i++;
 				}
 			}
 		}
@@ -958,17 +958,17 @@ package characterSheet_fla
 			var group_list:listDisplay = null;
 			var amount:Number = NaN;
 			var group_index:uint = 0;
-			var holder:MovieClip = this.combatAbilityHolder_mc;
+			var groupHolder:MovieClip = this.combatAbilityHolder_mc;
 			if(isCivil)
 			{
-				holder = this.civicAbilityHolder_mc;
+				groupHolder = this.civicAbilityHolder_mc;
 			}
-			if(holder.list.length > 0)
+			if(groupHolder.list.length > 0)
 			{
 				i = 0;
-				while(i < holder.list.length)
+				while(i < groupHolder.list.length)
 				{
-					group_mc = holder.list.content_array[i];
+					group_mc = groupHolder.list.content_array[i];
 					if(group_mc && group_mc.list)
 					{
 						group_list = group_mc.list;
