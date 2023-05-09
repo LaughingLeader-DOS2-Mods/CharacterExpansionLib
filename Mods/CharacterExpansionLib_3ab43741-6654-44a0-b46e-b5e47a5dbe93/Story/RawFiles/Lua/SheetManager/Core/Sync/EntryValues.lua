@@ -147,13 +147,11 @@ function SheetManager.Save.GetEntryValue(characterId, entry)
 			defaultValue = false
 		end
 		characterId = GameHelpers.GetObjectID(characterId)
-		local data = nil
+		local data = self.CurrentValues[characterId]
 		local sessionData = SessionManager:GetSession(characterId)
 		if sessionData then
 			data = sessionData.PendingChanges
 			assert(data ~= nil, string.format("Failed to get character creation session data for (%s)", characterId))
-		else
-			data = self.CurrentValues[characterId]
 		end
 		if data then
 			local tableName = SheetManager.Save.GetTableNameForType(entry.StatType)

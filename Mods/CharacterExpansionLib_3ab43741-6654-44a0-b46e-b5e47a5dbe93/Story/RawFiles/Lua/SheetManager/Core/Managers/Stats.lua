@@ -462,7 +462,7 @@ if _ISCLIENT then
 		local points = options.AvailablePoints or SheetManager:GetAvailablePoints(player, "Attribute", nil, options.IsCharacterCreation)
 		local maxAttribute = GameHelpers.GetExtraData("AttributeSoftCap", 40)
 		local startAttribute = GameHelpers.GetExtraData("AttributeBaseValue", 10)
-
+		
 		for i=1,#SheetManager.Stats.Data.Default.Order do
 			local id = SheetManager.Stats.Data.Default.Order[i]
 			local data = SheetManager.Stats.Data.Default.Entries[id]

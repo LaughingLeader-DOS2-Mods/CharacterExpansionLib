@@ -1,4 +1,4 @@
-local isClient = Ext.IsClient()
+local _ISCLIENT = Ext.IsClient()
 
 if SheetManager.Save == nil then SheetManager.Save = {} end
 
@@ -8,7 +8,7 @@ function SheetManager.IsInCharacterCreation(characterId)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
 		return true
 	end
-	if isClient then
+	if _ISCLIENT then
 		if Client.Character then
 			if characterId == Client.Character.NetID and Client.Character.IsInCharacterCreation then
 				return true
@@ -43,13 +43,13 @@ end
 ---@param applyChanges boolean
 function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	local player = GameHelpers.GetCharacter(characterId)
-	if not isClient then
+	if not _ISCLIENT then
 		if applyChanges == true then
 			SessionManager:ApplySession(player)
 		else
 			SessionManager:ClearSession(player, true)
 		end
-		SheetManager:SyncData()
+		SheetManager:SyncData(player)
 	else
 		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_CharacterCreationDone", {
 			UserId = Client.Character.ID,
@@ -58,7 +58,7 @@ function SheetManager.Save.CharacterCreationDone(characterId, applyChanges)
 	end
 end
 
-if not isClient then
+if not _ISCLIENT then
 	RegisterNetListener("CEL_SheetManager_CharacterCreationDone", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then

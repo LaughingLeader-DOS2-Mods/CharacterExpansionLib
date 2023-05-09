@@ -46,15 +46,10 @@ if not _ISCLIENT then
 			Respec = respec
 		}
 
-		-- for k,v in pairs(Data.AttributeEnum) do
-		-- 	data.Stats[k] = character.Stats[k]
-		-- end
-		-- for k,v in pairs(Data.AbilityEnum) do
-		-- 	data.Stats[k] = character.Stats[k]
-		-- end
-		-- for k,v in pairs(Data.TalentEnum) do
-		-- 	data.Stats["TALENT_" .. k] = character.Stats["TALENT_" .. k]
-		-- end
+		local currentValues = SheetManager.CurrentValues[characterId]
+		if currentValues then
+			TableHelpers.AddOrUpdate(data.PendingChanges, currentValues)
+		end
 
 		self.Sessions[character.ReservedUserID] = data
 
@@ -70,11 +65,15 @@ if not _ISCLIENT then
 	---@param character  EsvCharacter
 	function SessionManager:SyncSession(character)
 		local player = GameHelpers.GetCharacter(character)
-		if self.Sessions[player.ReservedUserID] then
-			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_SyncCharacterData", {
-				NetID = player.NetID,
-				Data = self.Sessions[player.ReservedUserID],
-			})
+		if player then
+			if self.Sessions[player.ReservedUserID] then
+				GameHelpers.Net.PostToUser(player, "CEL_SessionManager_SyncCharacterData", {
+					NetID = player.NetID,
+					Data = self.Sessions[player.ReservedUserID],
+				})
+			else
+				GameHelpers.Net.PostToUser(player, "CEL_SessionManager_ClearCharacterData", player.NetID)
+			end
 		end
 	end
 
@@ -110,42 +109,28 @@ if not _ISCLIENT then
 		end
 	end)
 
-	--Fallback in case none of the UI listeners notify the server that CC is done
-	-- Ext.Osiris.RegisterListener("CharacterCreationFinished", 1, "after", function(character)
-	-- 	if not StringHelpers.IsNullOrEmpty(character) then
-	-- 		Timer.StartOneshot("", 900, function()
-	-- 			SheetManager.Save.CharacterCreationDone(character, true)
-	-- 		end)
-	-- 	else
-	-- 		for player in GameHelpers.Character.GetPlayers(false) do
-	-- 			SheetManager.Save.CharacterCreationDone(player, true)
-	-- 		end
-	-- 	end
-	-- end)
-
-	--[[ Ext.Osiris.RegisterListener("CharacterCreationFinished", 1, "after", function(character)
-		if character ~= StringHelpers.NULL_UUID then
-
-		else
-
-		end
-	end) ]]
-else
-	RegisterNetListener("CEL_SessionManager_SyncCharacterData", function(cmd, payload)
-		local data = Common.JsonParse(payload)
-		if data then
-			self.Sessions[data.NetID] = data.Data
-			if SheetManager.UI.CharacterCreation.IsOpen then
-				SheetManager.UI.CharacterCreation:UpdateAttributes()
-				SheetManager.UI.CharacterCreation:UpdateAbilities()
-				SheetManager.UI.CharacterCreation:UpdateTalents()
+else -- _ISCLIENT
+	GameHelpers.Net.Subscribe("CEL_SessionManager_SyncCharacterData", function(e, data)
+		if data.NetID then
+			local player = GameHelpers.GetCharacter(data.NetID, "EclCharacter")
+			if player then
+				self.Sessions[player.Handle] = data.Data
+				if SheetManager.UI.CharacterCreation.IsOpen then
+					SheetManager.UI.CharacterCreation:UpdateAttributes()
+					SheetManager.UI.CharacterCreation:UpdateAbilities()
+					SheetManager.UI.CharacterCreation:UpdateTalents()
+				end
 			end
 		end
 	end)
 
-	RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netid)
-		netid = tonumber(netid)
-		SessionManager:ClearSession(netid, true)
+	RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netIDStr)
+		local netID = tonumber(netIDStr)
+		local character = GameHelpers.GetCharacter(netID, "EclCharacter")
+		if character and SessionManager.Sessions[character.Handle] ~= nil then
+			SessionManager.Sessions[character.Handle] = nil
+			fprint(LOGLEVEL.TRACE, "[CEL:SessionManager:Client] Cleared session data for (%s).", GameHelpers.GetDisplayName(character))
+		end
 	end)
 
 	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, userid)
@@ -176,7 +161,7 @@ end
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec, isInCharacterCreation)
 	character = GameHelpers.GetCharacter(character)
-	local id = _ISCLIENT and character.NetID or character.ReservedUserID
+	local id = _ISCLIENT and character.Handle or character.ReservedUserID
 	local respec = respec or SessionManager.Sessions[id] and SessionManager.Sessions[id].Respec
 	SessionManager.Sessions[id] = nil
 	if not _ISCLIENT then
@@ -215,21 +200,6 @@ function SessionManager:ApplySession(character)
 		if sessionData then
 			if sessionData.PendingChanges then
 				fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
-				-- local data = SheetManager.CurrentValues[characterId] or SheetManager.Save.CreateCharacterData(characterId)
-				-- for statType,mods in pairs(sessionData.PendingChanges) do
-				-- 	if not data[statType] then
-				-- 		data[statType] = {}
-				-- 	end
-				-- 	for modId,entries in pairs(mods) do
-				-- 		if data[statType][modId] == nil then
-				-- 			data[statType][modId] = entries
-				-- 		else
-				-- 			for id,value in pairs(entries) do
-				-- 				data[statType][modId][id] = value
-				-- 			end
-				-- 		end
-				-- 	end
-				-- end
 				for statType,mods in pairs(sessionData.PendingChanges) do
 					for modId,entries in pairs(mods) do
 						for id,value in pairs(entries) do
@@ -257,7 +227,7 @@ function SessionManager:GetSession(character)
 	if not _ISCLIENT then
 		return self.Sessions[character.ReservedUserID]
 	else
-		return self.Sessions[character.NetID]
+		return self.Sessions[character.Handle]
 	end
 end
 
