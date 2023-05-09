@@ -117,6 +117,10 @@ if _ISCLIENT then
 	---@field EntryType "SheetAbilityData"
 	---@field Stat SheetManager.AbilitiesUIEntry
 
+	---@class SheetManagerOnEntryUpdatingAbilityCategoryEventArgs:SheetManagerOnEntryUpdatingBaseEventArgs
+	---@field EntryType "SheetAbilityCategoryData"
+	---@field Stat SheetManager.AbilityCategoryUIEntry
+
 	---@class SheetManagerOnEntryUpdatingTalentEventArgs:SheetManagerOnEntryUpdatingBaseEventArgs
 	---@field EntryType "SheetTalentData"
 	---@field Stat SheetManager.TalentsUIEntry
@@ -125,7 +129,7 @@ if _ISCLIENT then
 	---@field EntryType "SheetCustomStatData"
 	---@field Stat SheetManager.CustomStatsUIEntry
 
-	---@alias SheetManagerOnEntryUpdatingAnyTypeEventArgs SheetManagerOnEntryUpdatingStatEventArgs|SheetManagerOnEntryUpdatingAbilityEventArgs|SheetManagerOnEntryUpdatingTalentEventArgs|SheetManagerOnEntryUpdatingCustomStatEventArgs
+	---@alias SheetManagerOnEntryUpdatingAnyTypeEventArgs SheetManagerOnEntryUpdatingStatEventArgs|SheetManagerOnEntryUpdatingAbilityEventArgs|SheetManagerOnEntryUpdatingTalentEventArgs|SheetManagerOnEntryUpdatingCustomStatEventArgs|SheetManagerOnEntryUpdatingAbilityCategoryEventArgs
 
 	---Called when a visible sheet entry is about to be added to the UI.  
 	---🔧**Client-Only**🔧  

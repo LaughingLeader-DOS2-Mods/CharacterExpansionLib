@@ -648,7 +648,12 @@ function CharacterSheet.Update(ui, method, params)
 	end
 
 	if updateTargets.Abilities then
-		--this.clearAbilities()
+		for category in SheetManager.Abilities.GetVisibleCategories(player, {IsGM=isGM, Stats=stats, CivilOnly=updateTargets.Civil}) do
+			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = category.Mod, ID=category.ID, EntryType="SheetAbilityCategoryData", Stat=category, Character=player, CharacterID=player.NetID})
+			if category.Visible then
+				this.stats_mc.addAbilityGroup(category.IsCivil, category.GeneratedID, category.DisplayName)
+			end
+		end
 		for ability in SheetManager.Abilities.GetVisible(player, {IsGM=isGM, Stats=stats, CivilOnly=updateTargets.Civil}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 			if ability.Visible then

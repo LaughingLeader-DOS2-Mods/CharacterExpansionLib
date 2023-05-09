@@ -180,6 +180,14 @@ if _ISCLIENT then
 		end
 	end
 
+	---@class SheetManager.AbilityCategoryUIEntry
+	---@field ID string
+	---@field Mod Guid
+	---@field GeneratedID integer
+	---@field DisplayName string
+	---@field IsCivil boolean
+	---@field Visible boolean
+
 	---@class SheetManager.AbilitiesUIEntry
 	---@field ID string
 	---@field GeneratedID integer
@@ -216,6 +224,44 @@ if _ISCLIENT then
 	---@private
 	---@param player EclCharacter
 	---@param opts? SheetManagerAbilitiesGetVisibleOptions
+	---@return fun():SheetManager.AbilityCategoryUIEntry
+	function SheetManager.Abilities.GetVisibleCategories(player, opts)
+		local options = TableHelpers.SetDefaultOptions(opts, DefaultOptions)
+		---@type SheetManager.AbilityCategoryUIEntry[]
+		local entries = {}
+		local len = 0
+
+		local civilOnly = options.CivilOnly == true
+
+		for mod,dataTable in pairs(SheetManager.Data.AbilityCategories) do
+			for id,data in pairs(dataTable) do
+				if data.Visible and data.IsCivil == civilOnly then
+					len = len + 1
+					entries[len] = {
+						ID = data.ID,
+						Mod = data.Mod,
+						GeneratedID = data.GeneratedID,
+						DisplayName = data:GetDisplayName(player),
+						IsCivil = data.IsCivil,
+						Visible = true
+					}
+				end
+			end
+		end
+
+		local i = 0
+		return function ()
+			i = i + 1
+			if i <= len then
+				return entries[i]
+				---@diagnostic disable-next-line
+			end
+		end
+	end
+
+	---@private
+	---@param player EclCharacter
+	---@param opts? SheetManagerAbilitiesGetVisibleOptions
 	---@return fun():SheetManager.AbilitiesUIEntry
 	function SheetManager.Abilities.GetVisible(player, opts)
 		local options = TableHelpers.SetDefaultOptions(opts, DefaultOptions)
@@ -225,7 +271,7 @@ if _ISCLIENT then
 		local entries = {}
 		local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 
-		local civilOnly = options.CivilOnly
+		local civilOnly = options.CivilOnly == true
 		local abilityPoints = options.AvailableAbilityPoints or SheetManager:GetAvailablePoints(player, "Ability", nil, options.IsCharacterCreation)
 		local civilPoints = options.AvailableCivilPoints or SheetManager:GetAvailablePoints(player, "Civil", nil, options.IsCharacterCreation)
 		
@@ -302,13 +348,50 @@ if _ISCLIENT then
 						canAddPoints = abilityPoints > 0 and value < maxVal
 					end
 
-					---@type string|TranslatedString
-					local groupName = SheetManager.Abilities.Data.GroupDisplayName[data.GroupID]
-					if groupName then
-						groupName = groupName.Value
-					else
-						groupName = ""
+					local visible = true
+
+					local groupName = ""
+					local groupID = data.GroupID 
+
+					if groupID then
+						local t = type(groupID)
+						if t == "number" then
+							if groupID <= 5 then
+								---@type string|TranslatedString
+								local groupNameEntry = SheetManager.Abilities.Data.GroupDisplayName[groupID]
+								if groupNameEntry then
+									groupName = groupNameEntry.Value
+								end
+							else
+								local category = SheetManager:GetEntryByGeneratedID(data.GroupID, "AbilityCategory")
+								if category and category.Visible then
+									groupName = category:GetDisplayName(player)
+									groupID = category.GeneratedID
+								else
+									visible = false
+								end
+							end
+						elseif t == "string" then
+							local category = SheetManager:GetEntryByID(groupID, data.GroupMod, "AbilityCategory")
+							if category and category.Visible then
+								groupName = category:GetDisplayName(player)
+								groupID = category.GeneratedID
+							else
+								visible = false
+							end
+						end
 					end
+
+					--Fallback category
+					--[[ if groupName == "" then
+						if options.CivilOnly then
+							groupName = SheetManager.Abilities.Data.GroupDisplayName[5].Value -- Nasty Deeds
+							groupID = 5
+						else
+							groupName = SheetManager.Abilities.Data.GroupDisplayName[3].Value -- Skills
+							groupID = 3
+						end
+					end ]]
 
 					---@type SheetManager.AbilitiesUIEntry
 					local uiEntry = {
@@ -326,7 +409,7 @@ if _ISCLIENT then
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),
 						CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
-						Visible = true
+						Visible = visible
 					}
 					entries[#entries+1] = uiEntry
 				end

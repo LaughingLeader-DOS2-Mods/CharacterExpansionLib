@@ -198,8 +198,17 @@ function CharacterCreation:UpdateAbilities()
 
 	local abilitiesWithDelta = {}
 	local updateClassContent = SharedData.RegionData.LevelType == LEVELTYPE.CHARACTER_CREATION
+
+	local opts = {IsCharacterCreation=true, AvailableAbilityPoints=points.Ability, AvailableCivilPoints=points.Civil}
+
+	for category in SheetManager.Abilities.GetVisibleCategories(player, opts) do
+		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = category.Mod, ID=category.ID, EntryType="SheetAbilityCategoryData", Stat=category, Character=player, CharacterID=player.NetID})
+		if category.Visible then
+			abilities_mc.findGroup(category.GeneratedID, category.DisplayName, category.IsCivil)
+		end
+	end
 	
-	for ability in SheetManager.Abilities.GetVisible(player, {IsCharacterCreation=true, AvailableAbilityPoints=points.Ability, AvailableCivilPoints=points.Civil}) do
+	for ability in SheetManager.Abilities.GetVisible(player, opts) do
 		local updateData = engineValues[ability.ID]
 		if updateData then
 			ability.Value = updateData.Value

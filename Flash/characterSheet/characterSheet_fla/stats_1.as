@@ -895,8 +895,11 @@ package characterSheet_fla
 			{
 				groupHolder = this.civicAbilityHolder_mc;
 			}
-			groupHolder.list.addGroup(groupId,labelText);
 			var group_mc:MovieClip = groupHolder.list.getElementByNumber("groupId",groupId);
+			if (group_mc == null)
+			{
+				group_mc = groupHolder.list.addGroup(groupId,labelText);
+			}
 			if (group_mc != null)
 			{
 				group_mc.groupName = labelText;

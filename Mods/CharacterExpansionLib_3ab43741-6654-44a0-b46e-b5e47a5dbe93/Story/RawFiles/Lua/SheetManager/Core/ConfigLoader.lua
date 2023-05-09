@@ -128,12 +128,14 @@ end
 
 local function LoadConfig(uuid, config)
 	local loaded = {}
+	---Setting the keys to nil near for reference
 	local defaults = {
 		Stats = nil,
 		Abilities = nil,
+		AbilityCategories = nil,
 		Talents = nil,
 		CustomStats = nil,
-		CustomStatCategories = nil
+		CustomStatCategories = nil,
 	}
 	if config ~= nil then
 		if config.Defaults then
@@ -142,6 +144,9 @@ local function LoadConfig(uuid, config)
 			end
 			if config.Defaults.Abilities then
 				defaults.Abilities = config.Defaults.Abilities
+			end
+			if config.Defaults.AbilityCategories then
+				defaults.AbilityCategories = config.Defaults.AbilityCategories
 			end
 			if config.Defaults.Talents then
 				defaults.Talents = config.Defaults.Talents
@@ -155,9 +160,10 @@ local function LoadConfig(uuid, config)
 		end
 		local stats = parseTable(config.Stats, Classes.SheetStatData.PropertyMap, uuid, defaults.Stats, Classes.SheetStatData, SheetManager.Data.ID_MAP.Stats)
 		local abilities = parseTable(config.Abilities, Classes.SheetAbilityData.PropertyMap, uuid, defaults.Abilities, Classes.SheetAbilityData, SheetManager.Data.ID_MAP.Abilities)
+		local abilityCategories = parseTable(config.AbilityCategories, Classes.SheetAbilityCategoryData.PropertyMap, uuid, defaults.AbilityCategories, Classes.SheetAbilityCategoryData, SheetManager.Data.ID_MAP.AbilityCategories)
 		local talents = parseTable(config.Talents, Classes.SheetTalentData.PropertyMap, uuid, defaults.Talents, Classes.SheetTalentData, SheetManager.Data.ID_MAP.Talents)
 		local customStats = parseTable(config.CustomStats, Classes.SheetCustomStatData.PropertyMap, uuid, defaults.CustomStats, Classes.SheetCustomStatData, SheetManager.Data.ID_MAP.CustomStats)
-		local categories = parseTable(config.CustomStatCategories, Classes.SheetCustomStatCategoryData.PropertyMap, uuid, defaults.CustomStatCategories, Classes.SheetCustomStatCategoryData, SheetManager.Data.ID_MAP.CustomStatCategories)
+		local customStatCategories = parseTable(config.CustomStatCategories, Classes.SheetCustomStatCategoryData.PropertyMap, uuid, defaults.CustomStatCategories, Classes.SheetCustomStatCategoryData, SheetManager.Data.ID_MAP.CustomStatCategories)
 
 		if stats then
 			loaded.Stats = stats
@@ -171,12 +177,16 @@ local function LoadConfig(uuid, config)
 			loaded.Abilities = abilities
 			loaded.Success = true
 		end
+		if abilityCategories then
+			loaded.AbilityCategories = abilityCategories
+			loaded.Success = true
+		end
 		if customStats then
 			loaded.CustomStats = customStats
 			loaded.Success = true
 		end
-		if categories then
-			loaded.CustomStatCategories = categories
+		if customStatCategories then
+			loaded.CustomStatCategories = customStatCategories
 			loaded.Success = true
 		end
 	end
@@ -195,7 +205,7 @@ local function TryFindOldCustomStatsConfig(info)
 	return file
 end
 
----@return table<string, table<string, SheetCustomStatBase>>
+---@return table
 local function LoadConfigFiles()
 	local entries = {}
 	local order = Ext.Mod.GetLoadOrder()

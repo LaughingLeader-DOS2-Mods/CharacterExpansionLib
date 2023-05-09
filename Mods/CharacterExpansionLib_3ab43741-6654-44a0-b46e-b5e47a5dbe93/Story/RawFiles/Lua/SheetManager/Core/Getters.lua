@@ -18,8 +18,10 @@ function SheetManager:GetEntryByID(id, mod, statType)
 			targetTable = self.Data.Talents
 		elseif statType == self.StatType.Custom or statType == "CustomStats" then
 			targetTable = self.Data.CustomStats
-		elseif statType == "CustomStatCategories" then
+		elseif statType == self.StatType.CustomCategory or statType == "CustomStatCategories" then
 			targetTable = self.Data.CustomStatCategories
+		elseif statType == self.StatType.AbilityCategory then
+			targetTable = self.Data.AbilityCategories
 		end
 	end
 	if targetTable then
@@ -43,14 +45,16 @@ function SheetManager:GetEntryByGeneratedID(generatedId, statType)
 	if statType then
 		if statType == "Stat" or statType == "PrimaryStat" or statType == "SecondaryStat" or statType == "InfoStat" then
 			return self.Data.ID_MAP.Stats.Entries[generatedId]
-		elseif statType == "Ability" then
+		elseif statType == self.StatType.Ability then
 			return self.Data.ID_MAP.Abilities.Entries[generatedId]
-		elseif statType == "Talent" then
+		elseif statType == self.StatType.Talent then
 			return self.Data.ID_MAP.Talents.Entries[generatedId]
-		elseif statType == "Custom" or statType == "CustomStat" then
+		elseif statType == self.StatType.Custom or statType == "CustomStat" then
 			return self.Data.ID_MAP.CustomStats.Entries[generatedId]
-		elseif statType == "CustomCategory" then
+		elseif statType == self.StatType.CustomCategory then
 			return self.Data.ID_MAP.CustomStatCategories.Entries[generatedId]
+		elseif statType == self.StatType.AbilityCategory then
+			return self.Data.ID_MAP.AbilityCategories.Entries[generatedId]
 		end
 		return nil
 	end

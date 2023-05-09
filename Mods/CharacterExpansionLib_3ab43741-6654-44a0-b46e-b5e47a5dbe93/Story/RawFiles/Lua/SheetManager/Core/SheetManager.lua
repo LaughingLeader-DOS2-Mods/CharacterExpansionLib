@@ -17,7 +17,11 @@ SheetManager.StatType = {
 	---@type SheetEntryType
 	Talent = "Talent",
 	---@type SheetEntryType
-	Custom = "Custom"
+	Custom = "Custom",
+	---@type SheetEntryType
+	CustomCategory = "CustomCategory",
+	---@type SheetEntryType
+	AbilityCategory = "AbilityCategory",
 }
 
 local _ISCLIENT = Ext.IsClient()
@@ -36,6 +40,8 @@ Ext.Require("SheetManager/Core/Setters.lua")
 SheetManager.Data = {
 	---@type table<ModGuid, table<SheetEntryId, SheetAbilityData>>
 	Abilities = {},
+	---@type table<ModGuid, table<SheetEntryId, SheetAbilityCategoryData>>
+	AbilityCategories = {},
 	---@type table<ModGuid, table<SheetEntryId, SheetTalentData>>
 	Talents = {},
 	---@type table<ModGuid, table<SheetEntryId, SheetStatData>>
@@ -79,16 +85,22 @@ SheetManager.Data = {
 }
 
 ---@type fun():table<string, table<string, SheetAbilityData|SheetTalentData|SheetStatData>>
-local loader = Ext.Require("SheetManager/Core/ConfigLoader.lua")
+local _Loader = Ext.Require("SheetManager/Core/ConfigLoader.lua")
 
 local function LoadData()
-	local b,data = xpcall(loader, debug.traceback)
+	local b,data = xpcall(_Loader, debug.traceback)
 	if b and data then
 		for modId,entryData in pairs(data) do
 			if not SheetManager.Data.Abilities[modId] then
 				SheetManager.Data.Abilities[modId] = entryData.Abilities or {}
 			elseif entryData.Abilities then
 				TableHelpers.AddOrUpdate(SheetManager.Data.Abilities[modId], entryData.Abilities)
+			end
+
+			if not SheetManager.Data.AbilityCategories[modId] then
+				SheetManager.Data.AbilityCategories[modId] = entryData.AbilityCategories or {}
+			elseif entryData.AbilityCategories then
+				TableHelpers.AddOrUpdate(SheetManager.Data.AbilityCategories[modId], entryData.AbilityCategories)
 			end
 
 			if not SheetManager.Data.Talents[modId] then
