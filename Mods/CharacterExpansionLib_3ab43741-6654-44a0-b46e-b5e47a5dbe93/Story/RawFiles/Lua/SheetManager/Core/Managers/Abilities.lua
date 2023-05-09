@@ -8,7 +8,7 @@ SheetManager.Abilities = {
 	---@type table<AbilityType, integer>
 	HiddenBuiltinAbilities = {},
 	Data = {
-		GroupID = {
+		CategoryID = {
 			Weapons = 0,
 			Defense = 1,
 			Skills = 2,
@@ -16,7 +16,7 @@ SheetManager.Abilities = {
 			Craftsmanship = 4,
 			NastyDeeds = 5,
 		},
-		GroupDisplayName = {
+		CategoryIDDisplayName = {
 			[0] = ts:Create("h5fb2ef9cg4258g446eg9522gd6be58f3ab23", "Weapons"), -- May be a different handle
 			[1] = ts:Create("ha65cecedg819dg4d17g9f0ag1bf646ec4f6c", "Defence"),
 			[2] = ts:Create("hb5277ad5gafbcg4f31g8022gaeedf7a516aa", "Skills"), -- May be a different handle
@@ -24,7 +24,7 @@ SheetManager.Abilities = {
 			[4] = ts:Create("h2890aceag6c58g41a7gb286g5044fc11d7f1", "Craftsmanship"), -- or h7cc0941cg4b22g43a6gae93g3f3b240741cd
 			[5] = ts:Create("he920062fg4553g4b1eg9935gec94a4c1aa59", "Nasty Deeds"), -- or hc92a5451g8a18g40f4g9a80g40bb23b98a8a
 		},
-		GroupIDInteger = {
+		CategoryIDInteger = {
 			[0] = "Weapons",
 			[1] = "Defense",
 			[2] = "Skills",
@@ -33,48 +33,48 @@ SheetManager.Abilities = {
 			[5] = "NastyDeeds",
 		},
 		Abilities = {
-			SingleHanded = {Group=0, Civil=false},
-			TwoHanded = {Group=0, Civil=false},
-			Ranged = {Group=0, Civil=false},
-			DualWielding = {Group=0, Civil=false},
-			PainReflection = {Group=1, Civil=false},
-			Leadership = {Group=1, Civil=false},
-			Perseverance = {Group=1, Civil=false},
-			WarriorLore = {Group=2, Civil=false},
-			RangerLore = {Group=2, Civil=false},
-			RogueLore = {Group=2, Civil=false},
-			FireSpecialist = {Group=2, Civil=false},
-			WaterSpecialist = {Group=2, Civil=false},
-			AirSpecialist = {Group=2, Civil=false},
-			EarthSpecialist = {Group=2, Civil=false},
-			Necromancy = {Group=2, Civil=false},
-			Summoning = {Group=2, Civil=false},
-			Polymorph = {Group=2, Civil=false},
-			Barter = {Group=3, Civil=true},
-			Persuasion = {Group=3, Civil=true},
-			Luck = {Group=3, Civil=true},
-			Telekinesis = {Group=4, Civil=true},
-			Loremaster = {Group=4, Civil=true},
-			Sneaking = {Group=5, Civil=true},
-			Thievery = {Group=5, Civil=true},
+			SingleHanded = {CategoryID=0, Civil=false},
+			TwoHanded = {CategoryID=0, Civil=false},
+			Ranged = {CategoryID=0, Civil=false},
+			DualWielding = {CategoryID=0, Civil=false},
+			PainReflection = {CategoryID=1, Civil=false},
+			Leadership = {CategoryID=1, Civil=false},
+			Perseverance = {CategoryID=1, Civil=false},
+			WarriorLore = {CategoryID=2, Civil=false},
+			RangerLore = {CategoryID=2, Civil=false},
+			RogueLore = {CategoryID=2, Civil=false},
+			FireSpecialist = {CategoryID=2, Civil=false},
+			WaterSpecialist = {CategoryID=2, Civil=false},
+			AirSpecialist = {CategoryID=2, Civil=false},
+			EarthSpecialist = {CategoryID=2, Civil=false},
+			Necromancy = {CategoryID=2, Civil=false},
+			Summoning = {CategoryID=2, Civil=false},
+			Polymorph = {CategoryID=2, Civil=false},
+			Barter = {CategoryID=3, Civil=true},
+			Persuasion = {CategoryID=3, Civil=true},
+			Luck = {CategoryID=3, Civil=true},
+			Telekinesis = {CategoryID=4, Civil=true},
+			Loremaster = {CategoryID=4, Civil=true},
+			Sneaking = {CategoryID=5, Civil=true},
+			Thievery = {CategoryID=5, Civil=true},
 		},
 		DOSAbilities = {
-			Shield = {Group=0, Civil=false},
-			Reflexes = {Group=1, Civil=false},
-			PhysicalArmorMastery = {Group=1, Civil=false},
-			Sourcery = {Group=2, Civil=false},
-			Sulfurology = {Group=2, Civil=false},
-			Repair = {Group=1, Civil=true},
-			Crafting = {Group=1, Civil=true},
-			Charm = {Group=3, Civil=true},
-			Intimidate = {Group=3, Civil=true},
-			Reason = {Group=3, Civil=true},
-			Wand = {Group=0, Civil=false},
-			MagicArmorMastery = {Group=1, Civil=false},
-			VitalityMastery = {Group=1, Civil=false},
-			Runecrafting = {Group=4, Civil=true},
-			Brewmaster = {Group=4, Civil=true},
-			Pickpocket = {Group=5, Civil=true},
+			Shield = {CategoryID=0, Civil=false},
+			Reflexes = {CategoryID=1, Civil=false},
+			PhysicalArmorMastery = {CategoryID=1, Civil=false},
+			Sourcery = {CategoryID=2, Civil=false},
+			Sulfurology = {CategoryID=2, Civil=false},
+			Repair = {CategoryID=1, Civil=true},
+			Crafting = {CategoryID=1, Civil=true},
+			Charm = {CategoryID=3, Civil=true},
+			Intimidate = {CategoryID=3, Civil=true},
+			Reason = {CategoryID=3, Civil=true},
+			Wand = {CategoryID=0, Civil=false},
+			MagicArmorMastery = {CategoryID=1, Civil=false},
+			VitalityMastery = {CategoryID=1, Civil=false},
+			Runecrafting = {CategoryID=4, Civil=true},
+			Brewmaster = {CategoryID=4, Civil=true},
+			Pickpocket = {CategoryID=5, Civil=true},
 		}
 	}
 }
@@ -164,16 +164,16 @@ if _ISCLIENT then
 				if not data.Civil then
 					local canAddPoints = abilityPoints > 0 and character.Stats[abilityName] < maxAbility
 					if not Vars.ControllerEnabled then
-						main.stats_mc.setAbilityPlusVisible(false, data.Group, abilityID, abilityPoints > 0)
+						main.stats_mc.setAbilityPlusVisible(false, data.CategoryID, abilityID, abilityPoints > 0)
 					else
-						main.mainpanel_mc.stats_mc.combatAbilities_mc.setBtnVisible(data.Group, abilityID, true, canAddPoints)
+						main.mainpanel_mc.stats_mc.combatAbilities_mc.setBtnVisible(data.CategoryID, abilityID, true, canAddPoints)
 					end
 				else
 					local canAddPoints = civilPoints > 0 and character.Stats[abilityName] < maxCivil
 					if not Vars.ControllerEnabled then
-						main.stats_mc.setAbilityPlusVisible(true, data.Group, abilityID, civilPoints > 0)
+						main.stats_mc.setAbilityPlusVisible(true, data.CategoryID, abilityID, civilPoints > 0)
 					else
-						main.mainpanel_mc.stats_mc.civilAbilities_mc.setBtnVisible(data.Group, abilityID, true, canAddPoints)
+						main.mainpanel_mc.stats_mc.civilAbilities_mc.setBtnVisible(data.CategoryID, abilityID, true, canAddPoints)
 					end
 				end
 			end
@@ -193,8 +193,8 @@ if _ISCLIENT then
 	---@field GeneratedID integer
 	---@field DisplayName string
 	---@field IsCivil boolean
-	---@field GroupID integer
-	---@field GroupDisplayName string
+	---@field CategoryID integer
+	---@field CategoryDisplayName string
 	---@field AddPointsTooltip string
 	---@field RemovePointsTooltip string
 	---@field Value {Value:integer, Label:string}
@@ -299,11 +299,11 @@ if _ISCLIENT then
 					end
 					local name = GameHelpers.GetAbilityName(id)
 					local isCivil = data.Civil == true
-					local groupID = data.Group
+					local groupID = data.CategoryID
 					local delta = statVal - startValue
 
 					---@type string|TranslatedString
-					local groupName = SheetManager.Abilities.Data.GroupDisplayName[groupID]
+					local groupName = SheetManager.Abilities.Data.CategoryIDDisplayName[groupID]
 					if groupName then
 						groupName = groupName.Value
 					else
@@ -317,8 +317,8 @@ if _ISCLIENT then
 						GeneratedID = Data.AbilityEnum[id],
 						DisplayName = name,
 						IsCivil = isCivil,
-						GroupID = groupID,
-						GroupDisplayName = groupName,
+						CategoryID = groupID,
+						CategoryDisplayName = groupName,
 						IsCustom = false,
 						Value = {Value=statVal, Label=tostring(statVal)},
 						Delta = delta,
@@ -356,7 +356,7 @@ if _ISCLIENT then
 					if type(groupID) == "number" then
 						if groupID <= 5 then
 							---@type string|TranslatedString
-							local groupNameEntry = SheetManager.Abilities.Data.GroupDisplayName[groupID]
+							local groupNameEntry = SheetManager.Abilities.Data.CategoryIDDisplayName[groupID]
 							if groupNameEntry then
 								groupName = groupNameEntry.Value
 							end
@@ -369,18 +369,7 @@ if _ISCLIENT then
 							end
 						end
 					end
-
-					--Fallback category
-					--[[ if groupName == "" then
-						if options.CivilOnly then
-							groupName = SheetManager.Abilities.Data.GroupDisplayName[5].Value -- Nasty Deeds
-							groupID = 5
-						else
-							groupName = SheetManager.Abilities.Data.GroupDisplayName[3].Value -- Skills
-							groupID = 3
-						end
-					end ]]
-
+					
 					---@type SheetManager.AbilitiesUIEntry
 					local uiEntry = {
 						ID = data.ID,
@@ -388,8 +377,8 @@ if _ISCLIENT then
 						GeneratedID = data.GeneratedID,
 						DisplayName = data:GetDisplayName(),
 						IsCivil = data.IsCivil,
-						GroupID = groupID,
-						GroupDisplayName = groupName,
+						CategoryID = groupID,
+						CategoryDisplayName = groupName,
 						IsCustom = true,
 						Value = {Value=value, Label=string.format("%s%s", value, data.Suffix or "")},
 						Delta = value - startValue,

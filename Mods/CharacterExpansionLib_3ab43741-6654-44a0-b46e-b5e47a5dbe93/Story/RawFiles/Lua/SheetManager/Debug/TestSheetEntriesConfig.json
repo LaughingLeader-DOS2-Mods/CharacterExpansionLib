@@ -42,20 +42,20 @@
 			"DisplayName": "Debug Defense",
 			"Description": "This is a test ability!",
 			"Icon": "Tag_Elf_inv",
-			"GroupID": "Defense"
+			"CategoryID": "Defense"
 		},
 		"TestSkillAbility1": {
 			"DisplayName": "Debug Combat",
 			"Description": "This is a test ability!",
 			"Icon": "Tag_Barbarian_inv",
-			"GroupID": "Skills"
+			"CategoryID": "Skills"
 		},
 		"TestCivilAbility1": {
 			"DisplayName": "Brewmaster",
 			"Description": "Hardy har, ya be brewin",
 			"BoostAttribute": "Brewmaster",
 			"Icon": "Tag_ChampionFortJoy_inv",
-			"GroupID": "Craftsmanship",
+			"CategoryID": "Craftsmanship",
 			"IsCivil": true
 		}
 	},

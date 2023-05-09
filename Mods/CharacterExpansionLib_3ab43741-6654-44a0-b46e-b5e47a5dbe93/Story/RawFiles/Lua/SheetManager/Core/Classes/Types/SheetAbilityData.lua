@@ -35,21 +35,23 @@ SheetAbilityData.PropertyMap = {
 	CATEGORYID = {Name="CategoryID", Type = "enum", Parse = function(val,t)
 		if t == "string" then
 			local id = string.lower(val)
-			for k,v in pairs(SheetManager.Abilities.Data.GroupID) do
+			for k,v in pairs(SheetManager.Abilities.Data.CategoryID) do
 				if string.lower(k) == id then
 					return v
 				end
 			end
 		elseif t == "number" then
-			local id = SheetManager.Abilities.Data.GroupID[val]
+			local id = SheetManager.Abilities.Data.CategoryID[val]
 			if id then
 				return val
 			end
 		end
-		--fprint(LOGLEVEL.WARNING, "[SheetManager:ConfigLoader] Property value type [%s](%s) is incorrect for property Ability GroupID. Using default.", t, val)
-		return SheetManager.Abilities.Data.GroupID.Skills
+		return SheetManager.Abilities.Data.CategoryID.Skills
 	end},
 }
+---For compatibility.
+---@deprecated
+SheetAbilityData.PropertyMap.GROUPID = SheetAbilityData.PropertyMap.CATEGORYID
 
 TableHelpers.AddOrUpdate(SheetAbilityData.PropertyMap, Classes.SheetBaseData.PropertyMap, true)
 
@@ -63,8 +65,8 @@ local defaults = {
 
 ---@protected
 function SheetAbilityData.SetDefaults(data)
-	if not data.GroupMod and type(data.GroupID) == "string" and not SheetManager.Abilities.Data.GroupID[data.GroupID] then
-		data.GroupMod = data.Mod
+	if not data.CategoryMod and type(data.CustomCategory) == "string" then
+		data.CategoryMod = data.Mod
 	end
 	Classes.SheetBaseData.SetDefaults(data)
 	for k,v in pairs(defaults) do

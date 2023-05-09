@@ -216,7 +216,7 @@ function CharacterCreation:UpdateAbilities()
 		end
 		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 		if ability.Visible then
-			abilities_mc.addAbility(ability.GroupID, ability.GroupDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
+			abilities_mc.addAbility(ability.CategoryID, ability.CategoryDisplayName, ability.GeneratedID, ability.DisplayName, ability.Value.Value, ability.Delta, ability.IsCivil, ability.IsCustom)
 			if updateClassContent and ability.Delta > 0 then
 				abilitiesWithDelta[#abilitiesWithDelta+1] = {
 					ID = ability.GeneratedID,

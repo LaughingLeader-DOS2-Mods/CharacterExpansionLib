@@ -19,7 +19,7 @@ Mods.CharacterExpansionLib = {
 ---@alias AnyStatEntryDataType SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData|SheetCustomStatCategoryData|SheetAbilityCategoryData
 ---@alias AvailablePointsType "Attribute"|"Ability"|"Civil"|"Talent"|"Custom"
 ---@alias SetCharacterCreationOriginSkillsCallback fun(player:EclCharacter, origin:string, race:string, skills:string[]):string[]
----@alias SheetAbilityGroupID string |"Weapons"|"Defense"|"Skills"|"Personality"|"Craftsmanship"|"NastyDeeds"
+---@alias SheetAbilityCategoryID string |"Weapons"|"Defense"|"Skills"|"Personality"|"Craftsmanship"|"NastyDeeds"
 ---@alias SheetEntryDataType "SheetAbilityData"|"SheetCustomStatData"|"SheetCustomStatCategoryData"|"SheetStatData"|"SheetTalentData"
 ---@alias SheetEntryType "PrimaryStat"|"SecondaryStat"|"Ability"|"CivilAbility"|"Talent"|"Custom"|"CustomCategory"|"AbilityCategory"
 ---@alias StatSheetSecondaryStatType "Info"|"Stat"|"Resistance"|"Experience"

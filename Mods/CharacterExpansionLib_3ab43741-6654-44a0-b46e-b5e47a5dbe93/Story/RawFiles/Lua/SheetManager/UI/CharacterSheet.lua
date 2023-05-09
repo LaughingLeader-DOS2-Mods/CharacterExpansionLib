@@ -398,7 +398,7 @@ local function GetArrayValues(this,baseChanges,modChanges)
 				IsCivil = isCivil,
 				DisplayName = arr[i+3],
 				Value = arr[i+4],
-				GroupID = arr[i+1],
+				CategoryID = arr[i+1],
 				AddPointsTooltip = arr[i+5],
 				RemovePointsTooltip = arr[i+6],
 			}
@@ -516,7 +516,7 @@ local function ParseArrayValues(this, skipSort)
 			targetsUpdated.Abilities = true
 		end
 		if not Vars.ControllerEnabled then
-			this.stats_mc.addAbility(entry.IsCivil, entry.GroupID, id, entry.DisplayName, entry.Value, entry.AddPointsTooltip, entry.RemovePointsTooltip, entry.CanAdd or false, entry.CanRemove or false)
+			this.stats_mc.addAbility(entry.IsCivil, entry.CategoryID, id, entry.DisplayName, entry.Value, entry.AddPointsTooltip, entry.RemovePointsTooltip, entry.CanAdd or false, entry.CanRemove or false)
 		end
 	end
 
@@ -657,7 +657,7 @@ function CharacterSheet.Update(ui, method, params)
 		for ability in SheetManager.Abilities.GetVisible(player, {IsGM=isGM, Stats=stats, CivilOnly=updateTargets.Civil}) do
 			SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = ability.Mod, ID=ability.ID, EntryType="SheetAbilityData", Stat=ability, Character=player, CharacterID=player.NetID})
 			if ability.Visible then
-				this.stats_mc.addAbility(ability.IsCivil, ability.GroupID, ability.GeneratedID, ability.DisplayName, ability.Value.Label, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
+				this.stats_mc.addAbility(ability.IsCivil, ability.CategoryID, ability.GeneratedID, ability.DisplayName, ability.Value.Label, ability.AddPointsTooltip, ability.RemovePointsTooltip, ability.CanAdd, ability.CanRemove, ability.IsCustom)
 				if ability.IsCivil then
 					targetsUpdated.Civil = true
 				else
