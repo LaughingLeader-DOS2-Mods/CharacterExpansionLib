@@ -351,7 +351,7 @@ if _ISCLIENT then
 					local visible = true
 
 					local groupName = ""
-					local groupID = data.GroupID 
+					local groupID = data.GroupID
 
 					if groupID then
 						local t = type(groupID)
@@ -400,7 +400,7 @@ if _ISCLIENT then
 						GeneratedID = data.GeneratedID,
 						DisplayName = data:GetDisplayName(),
 						IsCivil = data.IsCivil,
-						GroupID = data.GroupID,
+						GroupID = groupID,
 						GroupDisplayName = groupName,
 						IsCustom = true,
 						Value = {Value=value, Label=string.format("%s%s", value, data.Suffix or "")},
