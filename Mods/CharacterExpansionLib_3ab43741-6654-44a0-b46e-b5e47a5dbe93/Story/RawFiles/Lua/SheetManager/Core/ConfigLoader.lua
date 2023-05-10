@@ -80,8 +80,18 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 									data[propData.Name] = propData.Parse(value,t)
 								elseif (propData.Type == "any" or t == propData.Type) then
 									data[propData.Name] = value
-								elseif t == "number" and propData.Type == "integer" then
-									data[propData.Name] = Ext.Utils.Round(value)
+								elseif t == "number" then
+									if propData.Type == "integer" then
+										data[propData.Name] = Ext.Utils.Round(value)
+									else
+										if t == "string" then
+											data[propData.Name] = tostring(value)
+										elseif t == "number" then
+											data[propData.Name] = value
+										else
+											fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:ConfigLoader] Bad number type(%s) for property (%s)", t, propData.Name)
+										end
+									end
 								end
 							else
 								--fprint(LOGLEVEL.WARNING, "[CharacterExpansionLib:SheetManager.ConfigLoader] Defaults for stat(%s) has unknown property (%s) with value type(%s)", k, property, t)
@@ -99,6 +109,18 @@ local function parseTable(tbl, propertyMap, modId, defaults, class, id_map)
 								data[propData.Name] = _GetTranslatedString(t, value)
 							elseif propData.Type == "enum" then
 								data[propData.Name] = propData.Parse(value,t)
+							elseif t == "number" then
+								if propData.Type == "integer" then
+									data[propData.Name] = Ext.Utils.Round(value)
+								else
+									if t == "string" then
+										data[propData.Name] = tostring(value)
+									elseif t == "number" then
+										data[propData.Name] = value
+									else
+										fprint(LOGLEVEL.ERROR, "[CharacterExpansionLib:ConfigLoader] Bad number type(%s) for property (%s)", t, propData.Name)
+									end
+								end
 							elseif (propData.Type == "any" or t == propData.Type) then
 								data[propData.Name] = value
 							end
@@ -267,7 +289,8 @@ local function LoadConfigFiles()
 
 	-- if Vars.DebugMode and Vars.LeaderDebugMode then
 	-- 	--local data = LoadConfig(ModuleUUID, Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig.json", "data"))
-	-- 	local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
+	-- 	--local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestSheetEntriesConfig2.json", "data")
+	-- 	local dataStr = Ext.IO.LoadFile("Mods/"..ModuleFolder.."/Story/RawFiles/Lua/SheetManager/Debug/TestAbilityEntriesConfig.json", "data")
 	-- 	if dataStr then
 	-- 		local data = LoadConfig(ModuleUUID, Common.JsonParse(dataStr))
 	-- 		if data and data.Success then

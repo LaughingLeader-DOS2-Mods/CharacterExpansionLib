@@ -9,6 +9,7 @@ local STAT_DISPLAY_MODE = {
 ---@class SheetCustomStatData:SheetCustomStatBase
 ---@field UUID Guid|nil If this is an actual custom stat (GM mode), this is the UUID.
 ---@field Double number|nil If this is an actual custom stat (GM mode), this is the double handle used by the engine code.
+---@field MaxValue number|nil If set, the add button logic will check the current amount against this value when determining if the stat can be added to.
 local SheetCustomStatData = {
 	Type="SheetCustomStatData",
 	StatType = "Custom",
@@ -28,9 +29,6 @@ local SheetCustomStatData = {
 	DisplayValueInTooltip = false,
 	---Enum values for DisplayMode.
 	STAT_DISPLAY_MODE = STAT_DISPLAY_MODE,
-	---If set, the add button logic will check the current amount against this value when determining if the stat can be added to.
-	---@type integer
-	MaxAmount = nil,
 	---Text to append to the value display, such as a percentage sign.
 	Suffix = "",
 	AutoAddAvailablePointsOnRemove = true,
@@ -61,8 +59,10 @@ SheetCustomStatData.PropertyMap = {
 	VISIBLE = {Name="Visible", Type = "boolean"},
 	--Defaults to true. AvailablePoints are added to when a stat is reduced in the UI.
 	AUTOADDAVAILABLEPOINTSONREMOVE = {Name="AutoAddAvailablePointsOnRemove", Type = "boolean"},
-	MAXAMOUNT = {Name="MaxAmount", Type = "number"},
+	MAXVALUE = {Name="MaxValue", Type = "number"},
 }
+---@deprecated
+SheetCustomStatData.PropertyMap.MAXAMOUNT = SheetCustomStatData.PropertyMap.MAXVALUE
 
 TableHelpers.AddOrUpdate(SheetCustomStatData.PropertyMap, Classes.SheetCustomStatBase.PropertyMap)
 
@@ -72,7 +72,7 @@ local defaults = {
 	PointID = SheetCustomStatData.PointID,
 	LastValue = {},
 	DisplayMode = SheetCustomStatData.DisplayMode,
-	MaxAmount = SheetCustomStatData.MaxAmount,
+	MaxValue = SheetCustomStatData.MaxValue,
 	Suffix = SheetCustomStatData.Suffix,
 	AutoAddAvailablePointsOnRemove = SheetCustomStatData.AutoAddAvailablePointsOnRemove,
 }

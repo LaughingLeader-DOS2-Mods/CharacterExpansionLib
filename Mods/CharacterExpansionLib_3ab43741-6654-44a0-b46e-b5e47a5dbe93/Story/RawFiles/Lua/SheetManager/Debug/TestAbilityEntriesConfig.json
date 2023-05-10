@@ -1,0 +1,34 @@
+{
+	"AbilityCategories": {
+		"AdvancedMagic": {
+			"DisplayName": "Advanced Magic"
+		}
+	},
+	"Abilities": {
+		"Sourcery": {
+			"DisplayName": ["ha8b343fbg4ebbg4e72gb58fg633850ad0580", "Sourcery"],
+			"Description": "Sourcery empowers your ability to cast source abilities and grants passive source regeneration.",
+			"Icon": "Ability_Necromancy",
+			"CustomCategory": "AdvancedMagic",
+			"BoostAttribute": "Sourcery",
+			"UsePoints": true
+		},
+		"FastCasting": {
+			"DisplayName": "Fast Casting",
+			"Description": "Cast spells faster.",
+			"Icon": "Ability_Necromancy",
+			"CustomCategory": "AdvancedMagic",
+			"UsePoints": true,
+			"MaxValue": 20
+		},
+		"Brewmaster": {
+			"DisplayName": "[Handle:hab7acde6g5af6g47a7ga65dgc633aef193cf:Brew Master]",
+			"Description": "Hardy har, ya be brewin",
+			"BoostAttribute": "Brewmaster",
+			"Icon": "Ability_Perseverance",
+			"CategoryID": "Craftsmanship",
+			"IsCivil": true,
+			"UsePoints": true
+		}
+	}
+}

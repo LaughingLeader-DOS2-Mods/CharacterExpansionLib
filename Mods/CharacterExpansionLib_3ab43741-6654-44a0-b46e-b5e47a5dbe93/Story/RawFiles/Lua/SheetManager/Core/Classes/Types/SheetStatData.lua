@@ -29,7 +29,7 @@ SheetStatData.__index = function(t,k)
 end
 
 SheetStatData.PropertyMap = {
-	MAXVALUE = {Name="MaxValue", Type = "integer"},
+	MAXVALUE = {Name="MaxValue", Type = "number"},
 	STATTYPE = {Name="StatType", Type = "enum", Parse = function(val,t)
 		if t == "string" then
 			local id = string.lower(val)
