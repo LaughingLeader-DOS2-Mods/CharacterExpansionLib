@@ -219,6 +219,25 @@ end
 
 ---@param player EclCharacter|EsvCharacter
 ---@param entryType StatSheetStatType
+---@param isCivil? boolean
+local function _TriggerSync(player, entryType, isCivil)
+	if _OSIRIS() then
+		if entryType == "PrimaryStat" then
+			Osi.CharacterAddAttributePoint(player.MyGuid, 0)
+		elseif entryType == "Ability" then
+			if isCivil == true then
+				Osi.CharacterAddCivilAbilityPoint(player.MyGuid, 0)
+			else
+				Osi.CharacterAddAbilityPoint(player.MyGuid, 0)
+			end
+		elseif entryType == "Talent" then
+			Osi.CharacterAddTalentPoint(player.MyGuid, 0)
+		end
+	end
+end
+
+---@param player EclCharacter|EsvCharacter
+---@param entryType StatSheetStatType
 ---@param isCivil boolean|nil
 ---@param amount integer
 ---@param pointID string
@@ -235,6 +254,7 @@ local function _SetPoints(player, entryType, isCivil, amount, pointID)
 		elseif entryType == "Talent" then
 			player.PlayerUpgrade.TalentPoints = player.PlayerUpgrade.TalentPoints + amount
 		end
+		_TriggerSync(player, entryType, isCivil)
 	end
 end
 
@@ -259,7 +279,7 @@ function SheetManager:ModifyAvailablePointsForEntry(entry, character, amount, av
 	local character = GameHelpers.GetCharacter(character)
 	local characterId = GameHelpers.GetObjectID(character)
 	
-	if characterId then
+	if character and characterId then
 		if availablePoints then
 			if entryType == "PrimaryStat" then
 				availablePoints.Attribute = availablePoints.Attribute + amount

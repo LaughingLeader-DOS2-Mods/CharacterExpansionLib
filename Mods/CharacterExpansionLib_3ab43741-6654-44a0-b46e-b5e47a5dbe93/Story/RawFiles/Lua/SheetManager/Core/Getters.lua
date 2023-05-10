@@ -415,3 +415,25 @@ function SheetManager:IsEntryVisible(entry, character, entryValue, isCharacterCr
 	end
 	return bResult
 end
+
+---@param entry SheetStatData|SheetAbilityData|SheetTalentData
+---@return integer|nil
+function SheetManager:GetMaxValue(entry)
+	local entryType = entry.StatType
+	if entryType == "Talent" then
+		return nil
+	end
+	if entry.MaxValue then
+		return entry.MaxValue
+	end
+	if entryType == "PrimaryStat" then
+		return GameHelpers.GetExtraData("AttributeSoftCap", 40)
+	elseif entryType == "Ability" then
+		if entry.IsCivil then
+			return GameHelpers.GetExtraData("CivilAbilityCap", 5)
+		else
+			return GameHelpers.GetExtraData("CombatAbilityCap", 10)
+		end
+	end
+	return nil
+end

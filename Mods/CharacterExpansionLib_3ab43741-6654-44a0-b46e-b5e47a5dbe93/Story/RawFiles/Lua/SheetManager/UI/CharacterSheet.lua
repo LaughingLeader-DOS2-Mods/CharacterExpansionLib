@@ -827,9 +827,18 @@ function CharacterSheet.UpdateEntry(entry, character, value)
 	if this and this.isExtended then
 		character = character or CharacterSheet.GetCharacter()
 		value = value or entry:GetValue(character)
+		local maxValue = SheetManager:GetMaxValue(entry)
 		local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 		local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
-		local defaultCanAdd = ((entry.UsePoints and points > 0) or isGM)
+		local defaultCanAdd = isGM == true
+		if not defaultCanAdd then
+			local hasPoints = (entry.UsePoints and points > 0)
+			if maxValue then
+				defaultCanAdd = value < maxValue and hasPoints
+			else
+				defaultCanAdd = hasPoints
+			end
+		end
 		local defaultCanRemove = entry.UsePoints and isGM
 
 		local recountGroup = ""
@@ -918,11 +927,20 @@ function CharacterSheet.UpdateAllEntries()
 		for mc in CharacterSheet.GetAllEntries(true) do
 			local entry = SheetManager:GetEntryByGeneratedID(mc.statID, mc.type)
 			if entry then
+				local maxValue = SheetManager:GetMaxValue(entry)
 				local value = entry:GetValue(character)
 				local points = SheetManager:GetBuiltinAvailablePointsForEntry(entry, character)
 				local isGM = GameHelpers.Client.IsGameMaster(CharacterSheet.Instance, this)
-				local defaultCanAdd = (entry.UsePoints and points > 0) or isGM
 				local defaultCanRemove = isGM
+				local defaultCanAdd = isGM == true
+				if not defaultCanAdd then
+					local hasPoints = (entry.UsePoints and points > 0)
+					if maxValue then
+						defaultCanAdd = value < maxValue and hasPoints
+					else
+						defaultCanAdd = hasPoints
+					end
+				end
 
 				local plusVisible = SheetManager:GetIsPlusVisible(entry, character, defaultCanAdd, value)
 				local minusVisible = SheetManager:GetIsMinusVisible(entry, character, defaultCanRemove, value)

@@ -275,9 +275,9 @@ if _ISCLIENT then
 		local abilityPoints = options.AvailableAbilityPoints or SheetManager:GetAvailablePoints(player, "Ability", nil, options.IsCharacterCreation)
 		local civilPoints = options.AvailableCivilPoints or SheetManager:GetAvailablePoints(player, "Civil", nil, options.IsCharacterCreation)
 		
-		local maxAbility = GameHelpers.GetExtraData("CombatAbilityCap", 10)
-		local maxCivil = GameHelpers.GetExtraData("CivilAbilityCap", 5)
-		local startValue = GameHelpers.GetExtraData("AbilityBaseValue", 0)
+		local MAX_ABILITY = GameHelpers.GetExtraData("CombatAbilityCap", 10)
+		local MAX_CIVIL = GameHelpers.GetExtraData("CivilAbilityCap", 5)
+		local BASE_ABILITY = GameHelpers.GetExtraData("AbilityBaseValue", 0)
 		
 		local defaultCanRemove = options.IsCharacterCreation or options.IsGM
 		local targetStats = options.Stats
@@ -292,15 +292,15 @@ if _ISCLIENT then
 					local canAddPoints = options.IsGM
 					if not canAddPoints then
 						if civilOnly then
-							canAddPoints = civilPoints > 0 and baseVal < maxCivil
+							canAddPoints = civilPoints > 0 and baseVal < MAX_CIVIL
 						else
-							canAddPoints = abilityPoints > 0 and baseVal < maxAbility
+							canAddPoints = abilityPoints > 0 and baseVal < MAX_ABILITY
 						end
 					end
 					local name = GameHelpers.GetAbilityName(id)
 					local isCivil = data.Civil == true
 					local groupID = data.CategoryID
-					local delta = statVal - startValue
+					local delta = statVal - BASE_ABILITY
 
 					---@type string|TranslatedString
 					local groupName = SheetManager.Abilities.Data.CategoryIDDisplayName[groupID]
@@ -338,7 +338,7 @@ if _ISCLIENT then
 				local value = data:GetValue(player)
 				if SheetManager:IsEntryVisible(data, player, value) then
 					local canAddPoints = false
-					local maxVal = civilOnly and maxCivil or maxAbility
+					local maxVal = civilOnly and MAX_CIVIL or MAX_ABILITY
 					if data.MaxValue then
 						maxVal = data.MaxValue
 					end
@@ -381,7 +381,7 @@ if _ISCLIENT then
 						CategoryDisplayName = groupName,
 						IsCustom = true,
 						Value = {Value=value, Label=string.format("%s%s", value, data.Suffix or "")},
-						Delta = value - startValue,
+						Delta = value - BASE_ABILITY,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),
