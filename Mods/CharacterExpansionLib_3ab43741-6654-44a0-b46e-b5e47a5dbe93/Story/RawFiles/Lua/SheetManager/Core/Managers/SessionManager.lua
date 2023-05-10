@@ -50,7 +50,11 @@ if not _ISCLIENT then
 
 		local currentValues = SheetManager.CurrentValues[characterId]
 		if currentValues then
-			TableHelpers.AddOrUpdate(data.PendingChanges, currentValues)
+			for k,v in pairs(currentValues) do
+				if k ~= "CustomStats" then
+					data.PendingChanges[k] = TableHelpers.Clone(v)
+				end
+			end
 		end
 
 		self.Sessions[character.Handle] = data
