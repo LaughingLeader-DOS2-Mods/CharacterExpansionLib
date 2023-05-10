@@ -464,10 +464,6 @@ else
 			for modid,entries in pairs(mods) do
 				for id,value in pairs(entries) do
 					local entry = SheetManager:GetEntryByID(id, modid, entryType)
-					if entry == nil then
-						Ext.Utils.PrintWarning(entryType, SheetManager.Loaded, Ext.DumpExport(entries))
-						Ext.Utils.PrintWarning(SheetManager.Data.CustomStats[modid])
-					end
 					assert(entry ~= nil, string.format("Failed to get sheet entry from id(%s) mod(%s) entryType(%s)", id, modid, entryType))
 					local last = entryType == "Talents" and false or 0
 					if lastValues and lastValues[entryType] and lastValues[entryType][modid] and lastValues[entryType][modid][id] then
