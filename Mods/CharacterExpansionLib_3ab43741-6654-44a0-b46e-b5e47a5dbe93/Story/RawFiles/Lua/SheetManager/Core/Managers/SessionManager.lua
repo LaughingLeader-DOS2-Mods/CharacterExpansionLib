@@ -137,7 +137,13 @@ else -- _ISCLIENT
 		end
 	end)
 
-	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, userid)
+	RegisterNetListener("CEL_SessionManager_ApplyCharacterData", function(cmd, netid)
+		netid = tonumber(netid)
+		local player = GameHelpers.GetCharacter(netid)
+		SessionManager:ApplySession(player)
+	end)
+
+	RegisterNetListener("CEL_SessionManager_ApplyCharacterData_User", function(cmd, userid)
 		userid = tonumber(userid)
 		local player = GameHelpers.GetCharacter(Osi.GetCurrentCharacter(userid))
 		SessionManager:ApplySession(player)
@@ -192,7 +198,12 @@ end
 ---@param character EsvCharacter|EclCharacter
 function SessionManager:ApplySession(character)
 	if _ISCLIENT then
-		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.ReservedUserID)
+		---@cast character EclCharacter
+		if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
+			GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData_User", Client:GetCharacterData().ID)
+		else
+			GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
+		end
 	else
 		local sessionData = self:GetSession(character)
 		if sessionData then
@@ -266,4 +277,21 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 	else
 		return character.Stats
 	end
+end
+
+if not _ISCLIENT then
+	Ext.Events.SessionLoaded:Subscribe(function ()
+		Events.Osiris.CharacterCreationFinished:Subscribe(function (e)
+			if e.Character then
+				local handle = e.Character.Handle
+				Timer.StartOneshot("", 250, function ()
+					if SessionManager.Sessions[handle] ~= nil then
+						local player = GameHelpers.GetObjectFromHandle(handle, "EsvCharacter")
+						fprint(LOGLEVEL.WARNING, "[SessionManager] CC session not cleared for character (%s)[%s]", GameHelpers.GetDisplayName(player), player.MyGuid)
+						SessionManager:ClearSession(player)
+					end
+				end)
+			end
+		end)
+	end)
 end
