@@ -31,8 +31,8 @@ OUTPUT = DOS2DE_PUBLIC.joinpath("CharacterExpansionLib_3ab43741-6654-44a0-b46e-b
 targets = [
     "characterCreation",
     "characterSheet",
-    # "statsPanel_c",
-    # "characterCreation_c",
+    "statsPanel_c",
+    "characterCreation_c",
 ]
 
 package_pattern = re.compile("package ([^\s]+)", re.IGNORECASE | re.MULTILINE)

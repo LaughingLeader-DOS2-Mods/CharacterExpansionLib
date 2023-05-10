@@ -204,7 +204,12 @@ function CharacterCreation:UpdateAbilities()
 	for category in SheetManager.Abilities.GetVisibleCategories(player, opts) do
 		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = category.Mod, ID=category.ID, EntryType="SheetAbilityCategoryData", Stat=category, Character=player, CharacterID=player.NetID})
 		if category.Visible then
-			abilities_mc.findGroup(category.GeneratedID, category.DisplayName, category.IsCivil)
+			if abilities_mc.addAbilityGroup then
+				abilities_mc.addAbilityGroup(category.GeneratedID, category.DisplayName, category.IsCivil)	
+			else
+				--Flash type 12 spam
+				abilities_mc.findGroup(category.GeneratedID, category.DisplayName, category.IsCivil)			
+			end
 		end
 	end
 	

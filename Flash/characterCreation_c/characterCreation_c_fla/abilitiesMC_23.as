@@ -184,6 +184,11 @@ package characterCreation_c_fla
 			var abilityGroup_mc:MovieClip = this.findGroup(groupID,groupTitle,isCivil);
 			abilityGroup_mc.addCustomAbility(customID,abilityLabel,abilityValue,abilityDelta,isCivil);
 		}
+
+		public function addAbilityGroup(groupID:uint, title:String, isCivil:Boolean) : void
+		{
+			this.findGroup(groupID, title, isCivil);
+		}
 		
 		public function findGroup(groupID:uint, groupTitle:String, isCivil:Boolean) : MovieClip
 		{
