@@ -57,7 +57,7 @@ if not _ISCLIENT then
 			end
 		end
 
-		self.Sessions[character.Handle] = data
+		self.Sessions[character.ReservedUserID] = data
 
 		SessionManager.HasSessionData = true
 
@@ -70,13 +70,14 @@ if not _ISCLIENT then
 
 	---@param player EsvCharacter
 	function SessionManager:SyncSession(player)
-		if self.Sessions[player.Handle] then
+		if self.Sessions[player.ReservedUserID] then
 			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_SyncCharacterData", {
+				UserID = player.ReservedUserID,
 				NetID = player.NetID,
-				Data = self.Sessions[player.Handle],
+				Data = self.Sessions[player.ReservedUserID],
 			})
 		else
-			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_ClearCharacterData", player.NetID)
+			GameHelpers.Net.PostToUser(player, "CEL_SessionManager_ClearCharacterData", player.ReservedUserID)
 		end
 	end
 
@@ -116,28 +117,26 @@ if not _ISCLIENT then
 
 else -- _ISCLIENT
 	---@class CEL_SessionManager_SyncCharacterData
+	---@field UserID integer
 	---@field NetID integer
 	---@field Data table
+
 	GameHelpers.Net.Subscribe("CEL_SessionManager_SyncCharacterData", function(e, data)
 		if data.NetID then
-			local player = GameHelpers.GetCharacter(data.NetID, "EclCharacter")
-			if player then
-				self.Sessions[player.Handle] = data.Data
-				if SheetManager.UI.CharacterCreation.IsOpen then
-					SheetManager.UI.CharacterCreation:UpdateAttributes()
-					SheetManager.UI.CharacterCreation:UpdateAbilities()
-					SheetManager.UI.CharacterCreation:UpdateTalents()
-				end
+			self.Sessions[data.UserID] = data.Data
+			if SheetManager.UI.CharacterCreation.IsOpen then
+				SheetManager.UI.CharacterCreation:UpdateAttributes()
+				SheetManager.UI.CharacterCreation:UpdateAbilities()
+				SheetManager.UI.CharacterCreation:UpdateTalents()
 			end
 		end
 	end)
 
-	RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, netIDStr)
-		local netID = tonumber(netIDStr)
-		local character = GameHelpers.GetCharacter(netID, "EclCharacter")
-		if character and SessionManager.Sessions[character.Handle] ~= nil then
-			SessionManager.Sessions[character.Handle] = nil
-			fprint(LOGLEVEL.TRACE, "[CEL:SessionManager:Client] Cleared session data for (%s).", GameHelpers.GetDisplayName(character))
+	RegisterNetListener("CEL_SessionManager_ClearCharacterData", function(cmd, userIDStr)
+		local userID = tonumber(userIDStr)
+		if userID and SessionManager.Sessions[userID] ~= nil then
+			SessionManager.Sessions[userID] = nil
+			fprint(LOGLEVEL.TRACE, "[CEL:SessionManager:Client] Cleared session data for (%s).", userID)
 		end
 	end)
 
@@ -158,7 +157,7 @@ end
 ---@param skipSync ?boolean
 function SessionManager:ClearSession(character, skipSync)
 	if not _ISCLIENT then
-		SessionManager.Sessions[character.Handle] = nil
+		SessionManager.Sessions[character.ReservedUserID] = nil
 		--fprint(LOGLEVEL.TRACE, "[SessionManager:ClearSession:%s] Cleared session data for (%s)[%s]", isClient and "CLIENT" or "SERVER", character.DisplayName, characterId)
 		if skipSync ~= true and not _ISCLIENT then
 			GameHelpers.Net.PostToUser(character, "CEL_SessionManager_ClearCharacterData", character.NetID)
@@ -172,17 +171,19 @@ end
 ---@param skipSync ?boolean
 ---@param respec ?boolean
 function SessionManager:ResetSession(character, skipSync, respec)
+	local id = not _ISCLIENT and character.ReservedUserID or Client:GetCharacterData().ID
 	local respec = respec
-	if respec == nil and SessionManager.Sessions[character.Handle] then
-		respec = SessionManager.Sessions[character.Handle].Respec == true
+	if respec == nil and SessionManager.Sessions[id] then
+		respec = SessionManager.Sessions[id].Respec == true
 	end
-	SessionManager.Sessions[character.Handle] = nil
+	SessionManager.Sessions[id] = nil
 	if not _ISCLIENT then
 		if skipSync ~= true then
 			SessionManager:CreateSession(character, respec, skipSync)
 		end
 	else
 		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ResetCharacterData", {
+			UserID = id,
 			NetID = character.NetID,
 			SkipSync = skipSync,
 			Respec = respec
@@ -236,7 +237,11 @@ end
 ---@param character EsvCharacter|EclCharacter
 ---@return CharacterCreationSessionData
 function SessionManager:GetSession(character)
-	return self.Sessions[character.Handle]
+	if _ISCLIENT then
+		return self.Sessions[Client:GetCharacterData().ID]
+	else
+		return self.Sessions[character.ReservedUserID]
+	end
 end
 
 ---@type CharacterCreationWizard
