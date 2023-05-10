@@ -66,3 +66,24 @@ end
 
 Ext.Require("SheetManager/Init.lua")
 Ext.Require("CharacterSheetExtended/VisualTab.lua")
+
+Ext.Events.SessionLoaded:Subscribe(function (e)
+	local type = type
+	local GetDamageBoostByType = Ext.Stats.Math.GetDamageBoostByType
+	--- @param character CDivinityStatsCharacter
+	--- @param damageType string See DamageType enum
+	Game.Math.GetDamageBoostByType = function(character, damageType)
+		if type(character) == "table" then
+			local boostFunc = Game.Math.DamageBoostTable[damageType]
+			if boostFunc ~= nil then
+				return boostFunc(character) * 0.01
+			end
+		else
+			local boost = GetDamageBoostByType(character, damageType)
+			if boost then
+				return boost * 0.01
+			end
+		end
+		return 0
+	end
+end)
