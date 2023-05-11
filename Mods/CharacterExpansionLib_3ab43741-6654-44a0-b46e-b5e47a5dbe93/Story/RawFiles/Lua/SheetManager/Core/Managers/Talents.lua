@@ -894,7 +894,7 @@ if _ISCLIENT then
 		end
 		for mod,dataTable in pairs(SheetManager.Data.Talents) do
 			for id,data in pairs(dataTable) do
-				local hasTalent = data:GetValue(player) == true
+				local hasTalent = SheetManager:GetValueByEntry(data, player)
 				if SheetManager:IsEntryVisible(data, player, hasTalent, options.IsCharacterCreation, options.IsGM) then
 					local talentState = data:GetState(player)
 					local name = string.format(SheetManager.Talents.GetTalentStateFontFormat(talentState), data:GetDisplayName(player))

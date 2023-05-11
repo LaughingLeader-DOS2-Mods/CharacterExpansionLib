@@ -555,7 +555,7 @@ if _ISCLIENT then
 		for mod,dataTable in pairs(SheetManager.Data.Stats) do
 			for id,data in pairs(dataTable) do
 				if data.StatType == "PrimaryStat" then
-					local value = data:GetValue(player) or 0
+					local value = SheetManager:GetValueByEntry(data, player)
 					if SheetManager:IsEntryVisible(data, player, value) then
 						local defaultCanAdd = false
 						if data.StatType == "PrimaryStat" then

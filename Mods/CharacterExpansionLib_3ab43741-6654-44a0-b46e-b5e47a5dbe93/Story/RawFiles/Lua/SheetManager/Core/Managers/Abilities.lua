@@ -335,7 +335,7 @@ if _ISCLIENT then
 
 		for mod,dataTable in pairs(SheetManager.Data.Abilities) do
 			for id,data in pairs(dataTable) do
-				local value = data:GetValue(player)
+				local value = SheetManager:GetValueByEntry(data, player)
 				if SheetManager:IsEntryVisible(data, player, value) then
 					local canAddPoints = false
 					local maxVal = civilOnly and MAX_CIVIL or MAX_ABILITY

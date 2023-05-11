@@ -35,6 +35,48 @@ local function _UpdatePlayerUpgradeBoosts(player, statType, boostAttribute, valu
 	end
 end
 
+local function _UpdatePresetClass(character, stat, value)
+	local state = SessionManager.CharacterCreationWizard.GetWizCustomizationForCharacter(character)
+	if state then
+		if Data.Ability[stat.BoostAttribute] then
+			---@cast value integer
+			for i,v in pairs(state.Class.AbilityChanges) do
+				if v.Ability == stat.BoostAttribute then
+					v.AmountIncreased = value
+					return
+				end
+			end
+			table.insert(state.Class.AbilityChanges, {
+				Ability = stat.BoostAttribute,
+				AmountIncreased = value
+			})
+		elseif Data.Attribute[stat.BoostAttribute] then
+			---@cast value integer
+			for i,v in pairs(state.Class.AttributeChanges) do
+				if v.Attribute == stat.BoostAttribute then
+					v.AmountIncreased = value
+					return
+				end
+			end
+			table.insert(state.Class.AttributeChanges, {
+				Attribute = stat.BoostAttribute,
+				AmountIncreased = value
+			})
+		elseif Data.Talents[stat.BoostAttribute] then
+			---@cast value boolean
+			for i,v in pairs(state.Class.TalentsAdded) do
+				if v == stat.BoostAttribute then
+					if value == false then
+						table.remove(state.Class.TalentsAdded, i)
+					end
+					return
+				end
+			end
+			table.insert(state.Class.TalentsAdded, stat.BoostAttribute)
+		end
+	end
+end
+
 ---@param characterId GUID|NETID
 ---@param character EsvCharacter|EclCharacter
 ---@param stat SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
@@ -42,84 +84,39 @@ end
 ---@param isInCharacterCreation boolean|nil
 ---@param skipSessionCheck boolean|nil
 local function SetValue(characterId, character, stat, value, isInCharacterCreation, skipSessionCheck)
-	if not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
+	if not isInCharacterCreation and not StringHelpers.IsNullOrWhitespace(stat.BoostAttribute) then
 		if character and character.Stats then
-			if isInCharacterCreation then
-				_UpdatePlayerUpgradeBoosts(character, stat.StatType, stat.BoostAttribute, value)
-			else
-				if not _ISCLIENT then
-					if stat.StatType == "Talent" then
-						if not string.find(stat.BoostAttribute, "TALENT_") then
-							Osi.NRD_CharacterSetPermanentBoostTalent(characterId, stat.BoostAttribute, value)
-						else
-							Osi.NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
-						end
-						Osi.CharacterAddAttribute(characterId, "Dummy", 0)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+			if not _ISCLIENT then
+				if stat.StatType == "Talent" then
+					if not string.find(stat.BoostAttribute, "TALENT_") then
+						Osi.NRD_CharacterSetPermanentBoostTalent(characterId, stat.BoostAttribute, value)
 					else
-						Osi.NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
-						-- Sync boost changes
-						Osi.CharacterAddAttribute(character.MyGuid, "Dummy", 0)
-						--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+						Osi.NRD_CharacterSetPermanentBoostTalent(characterId, string.gsub(stat.BoostAttribute, "TALENT_", ""), value)
+					end
+					Osi.CharacterAddAttribute(characterId, "Dummy", 0)
+					--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+				else
+					Osi.NRD_CharacterSetPermanentBoostInt(characterId, stat.BoostAttribute, value)
+					-- Sync boost changes
+					Osi.CharacterAddAttribute(character.MyGuid, "Dummy", 0)
+					--character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+				end
+			else
+				if stat.StatType == "Talent" then
+					if string.find(stat.BoostAttribute, "TALENT_") then
+						character.Stats.DynamicStats[2][stat.BoostAttribute] = value
+					else
+						character.Stats.DynamicStats[2]["TALENT_"..stat.BoostAttribute] = value
 					end
 				else
-					if stat.StatType == "Talent" then
-						if string.find(stat.BoostAttribute, "TALENT_") then
-							character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-						else
-							character.Stats.DynamicStats[2]["TALENT_"..stat.BoostAttribute] = value
-						end
-					else
-						character.Stats.DynamicStats[2][stat.BoostAttribute] = value
-					end
+					character.Stats.DynamicStats[2][stat.BoostAttribute] = value
 				end
 			end
-			-- local state = SessionManager.CharacterCreationWizard.GetWizCustomizationForCharacter(character)
-			-- if state then
-			-- 	if Data.Ability[stat.BoostAttribute] then
-			-- 		---@cast value integer
-			-- 		for i,v in pairs(state.Class.AbilityChanges) do
-			-- 			if v.Ability == stat.BoostAttribute then
-			-- 				v.AmountIncreased = value
-			-- 				return
-			-- 			end
-			-- 		end
-			-- 		table.insert(state.Class.AbilityChanges, {
-			-- 			Ability = stat.BoostAttribute,
-			-- 			AmountIncreased = value
-			-- 		})
-			-- 	elseif Data.Attribute[stat.BoostAttribute] then
-			-- 		---@cast value integer
-			-- 		for i,v in pairs(state.Class.AttributeChanges) do
-			-- 			if v.Attribute == stat.BoostAttribute then
-			-- 				v.AmountIncreased = value
-			-- 				return
-			-- 			end
-			-- 		end
-			-- 		table.insert(state.Class.AttributeChanges, {
-			-- 			Attribute = stat.BoostAttribute,
-			-- 			AmountIncreased = value
-			-- 		})
-			-- 	elseif Data.Talents[stat.BoostAttribute] then
-			-- 		---@cast value boolean
-			-- 		for i,v in pairs(state.Class.TalentsAdded) do
-			-- 			if v == stat.BoostAttribute then
-			-- 				if value == false then
-			-- 					table.remove(state.Class.TalentsAdded, i)
-			-- 				end
-			-- 				return
-			-- 			end
-			-- 		end
-			-- 		table.insert(state.Class.TalentsAdded, stat.BoostAttribute)
-			-- 	end
-			-- end
 		else
 			fprint(LOGLEVEL.ERROR, "[%s][SetEntryValue:%s] Failed to get character from id (%s)", _ISCLIENT and "CLIENT" or "SERVER", stat.ID, characterId)
 		end
 	else
-		if _ISCLIENT or (stat.StatType ~= "Custom" or not SheetManager.CustomStats:GMStatsEnabled()) then
-			SheetManager.Save.SetEntryValue(character, stat, value, skipSessionCheck)
-		elseif type(value) == "number" then
+		if not _ISCLIENT and stat.StatType == "Custom" and SheetManager.CustomStats:GMStatsEnabled() then
 			---@cast value integer
 			if StringHelpers.IsNullOrWhitespace(stat.UUID) and not _ISCLIENT then
 				stat.UUID = Ext.CustomStat.Create(stat.DisplayName, stat.Description)
@@ -127,6 +124,8 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 			if StringHelpers.IsNullOrWhitespace(stat.UUID) then
 				character:SetCustomStat(stat.UUID, value)
 			end
+		else
+			SheetManager.Save.SetEntryValue(character, stat, value, skipSessionCheck)
 		end
 	end
 end
@@ -141,14 +140,13 @@ end
 function SheetManager:SetEntryValue(stat, character, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
 	local characterId = GameHelpers.GetObjectID(character)
 	local last = stat:GetValue(character)
-	local character = GameHelpers.GetCharacter(characterId, "EsvCharacter")
 	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(character)
 
 	if _ISCLIENT and not force then
 		---@cast characterId NETID
 		self:RequestValueChange(stat, characterId, value, false)
 	else
-		SetValue(characterId, character, stat, value, isInCharacterCreation, skipSessionCheck)
+		SetValue(characterId, character, stat, value, isInCharacterCreation and not force, skipSessionCheck)
 	end
 
 	if stat.StatType == self.StatType.Custom then

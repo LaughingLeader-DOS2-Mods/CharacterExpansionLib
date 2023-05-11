@@ -4,8 +4,8 @@ local _ISCLIENT = Ext.IsClient()
 
 ---Get a sheet entry from a string id.
 ---@param id string
----@param mod string|nil
----@param statType SheetEntryType|nil Stat type.
+---@param mod? string
+---@param statType? SheetEntryType Stat type.
 ---@return SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData|nil
 function SheetManager:GetEntryByID(id, mod, statType)
 	local targetTable = nil
@@ -73,26 +73,19 @@ end
 ---@return integer|boolean
 function SheetManager:GetValueByEntry(entry, character)
 	local isInCharacterCreation = SheetManager.IsInCharacterCreation(character)
-	if not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
-		if not isInCharacterCreation then
-			if character and character.Stats then
-				local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
-				if charValue ~= nil then
-					return charValue
-				end
-			end
-		else
-			local value = SheetManager.Save.GetEntryValue(character, entry)
-			if value ~= nil then
-				return value
-			end
-			if _ISCLIENT then
-				local stats = SessionManager.CharacterCreationWizard.Stats[character]
-				if stats and stats[entry.BoostAttribute] then
-					return stats[entry.BoostAttribute]
-				end
+	if not isInCharacterCreation and not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+		if character and character.Stats then
+			local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
+			if charValue ~= nil then
+				return charValue
 			end
 		end
+		-- if _ISCLIENT then
+		-- 	local stats = SessionManager.CharacterCreationWizard.Stats[character]
+		-- 	if stats and stats[entry.BoostAttribute] then
+		-- 		return stats[entry.BoostAttribute]
+		-- 	end
+		-- end
 	else
 		local value = SheetManager.Save.GetEntryValue(character, entry)
 		if value ~= nil then

@@ -537,7 +537,7 @@ end
 function CharacterSheet.GetCharacter()
 	if Ext.GetGameState() ~= "Running" or SharedData.RegionData.LevelType ~= LEVELTYPE.GAME then
 		---@diagnostic disable-next-line
-		return nil
+		return GameHelpers.Client.GetCharacter()
 	end
 	local this = CharacterSheet.Root
 	if this then

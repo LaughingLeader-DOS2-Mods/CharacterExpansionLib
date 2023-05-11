@@ -253,7 +253,6 @@ SessionManager.CharacterCreationWizard = CharacterCreationWizard
 ---@param character EsvCharacter|EclCharacter
 ---@return StatCharacter
 function SessionManager:CreateCharacterSessionMetaTable(character)
-	print("CreateCharacterSessionMetaTable", GameHelpers.GetDisplayName(character), character.MyGuid, character.UserID, GameHelpers.GetTemplate(character, true).Name)
 	local handle = character.Handle
 	local sessionData = SessionManager:GetSession(character)
 	if sessionData then
