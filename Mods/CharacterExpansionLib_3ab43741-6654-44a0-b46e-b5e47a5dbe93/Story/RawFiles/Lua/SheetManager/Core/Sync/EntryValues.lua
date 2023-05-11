@@ -260,6 +260,17 @@ if _ISCLIENT then
 		GameHelpers.Net.PostMessageToServer("CEL_SheetManager_RequestValueChange", data)
 	end
 
+	---@return CharacterCreationClassDesc|nil
+	local function _GetClassPreset(id)
+		local ccStats = Ext.Stats.GetCharacterCreation()
+		for _,v in pairs(ccStats.ClassPresets) do
+			if v.ClassType == id then
+				return v
+			end
+		end
+		return nil
+	end
+
 	RegisterNetListener("CEL_SheetManager_UpdateCCWizardAvailablePoints", function (cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
@@ -269,6 +280,16 @@ if _ISCLIENT then
 				ccwiz.AvailablePoints.Ability = data.Ability
 				ccwiz.AvailablePoints.Civil = data.Civil
 				ccwiz.AvailablePoints.Talent = data.Talent
+
+				--Update the "assigned" points, so they don't get extra points from getting new entries
+				local playerData = GameHelpers.CC.GetCharacterData()
+				local preset = _GetClassPreset(playerData.Customization.State.Class.ClassType)
+				if preset then
+					playerData.Customization.State.AttributePointsAssigned = math.max(0, preset.NumStartingAttributePoints - data.Attribute)
+					playerData.Customization.State.CombatAbilityPointsAssigned = math.max(0, preset.NumStartingCombatAbilityPoints - data.Ability)
+					playerData.Customization.State.CivilAbilityPointsAssigned = math.max(0, preset.NumStartingCivilAbilityPoints - data.Civil)
+					playerData.Customization.State.TalentPointsAssigned = math.max(0, preset.NumStartingTalentPoints - data.Talent)
+				end
 
 				SheetManager.UI.CharacterCreation.UpdateAvailablePoints()
 			end
