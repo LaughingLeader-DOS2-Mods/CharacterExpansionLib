@@ -437,3 +437,39 @@ function SheetManager:GetMaxValue(entry)
 	end
 	return nil
 end
+
+
+---@param character EsvCharacter|EclCharacter
+function SheetManager.IsInCharacterCreation(character)
+	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
+		return true
+	end
+	local characterId = GameHelpers.GetObjectID(character)
+	if _ISCLIENT then
+		if Client.Character then
+			if characterId == Client.Character.NetID and Client.Character.IsInCharacterCreation then
+				return true
+			end
+		end
+		local player = GameHelpers.Client.GetCharacterCreationCharacter()
+		if player then
+			return GameHelpers.GetObjectID(player) == characterId
+		end
+	elseif _OSIRIS() then
+		local db = Osi.DB_Illusionist:Get(nil,nil)
+		if db and #db > 0 then
+			local playerId = StringHelpers.GetUUID(db[1][1])
+			if playerId == characterId then
+				return true
+			end
+		end
+		local db = Osi.DB_AssignedDummyForUser:Get(nil,nil)
+		if db and #db > 0 then
+			local playerId = StringHelpers.GetUUID(db[1][2])
+			if playerId == characterId then
+				return true
+			end
+		end
+	end
+	return false
+end

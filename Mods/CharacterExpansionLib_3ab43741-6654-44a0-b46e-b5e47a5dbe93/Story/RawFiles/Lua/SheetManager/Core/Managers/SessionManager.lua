@@ -253,6 +253,7 @@ SessionManager.CharacterCreationWizard = CharacterCreationWizard
 ---@param character EsvCharacter|EclCharacter
 ---@return StatCharacter
 function SessionManager:CreateCharacterSessionMetaTable(character)
+	print("CreateCharacterSessionMetaTable", GameHelpers.GetDisplayName(character), character.MyGuid, character.UserID, GameHelpers.GetTemplate(character, true).Name)
 	local handle = character.Handle
 	local sessionData = SessionManager:GetSession(character)
 	if sessionData then
@@ -288,6 +289,25 @@ function SessionManager:CreateCharacterSessionMetaTable(character)
 	end
 end
 
+---Callback for when a character exits character creation, for applying pending changes, if any.
+---@param player EsvCharacter|EclCharacter
+---@param applyChanges boolean
+function SessionManager.CharacterCreationDone(player, applyChanges)
+	if not _ISCLIENT then
+		if applyChanges == true then
+			SessionManager:ApplySession(player)
+		else
+			SessionManager:ClearSession(player, true)
+		end
+		SheetManager:SyncData(player)
+	else
+		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_CharacterCreationDone", {
+			UserId = Client.Character.ID,
+			ApplyChanges = applyChanges
+		})
+	end
+end
+
 if not _ISCLIENT then
 	Ext.Events.SessionLoaded:Subscribe(function ()
 		Events.Osiris.CharacterCreationFinished:Subscribe(function (e)
@@ -302,5 +322,20 @@ if not _ISCLIENT then
 				end)
 			end
 		end)
+	end)
+
+	---@class CEL_SessionManager_CharacterCreationDone
+	---@field UserId integer
+	---@field ApplyChanges boolean|nil
+
+	GameHelpers.Net.Subscribe("CEL_SessionManager_CharacterCreationDone", function(e, data)
+		local character = GameHelpers.GetCharacter(Osi.GetCurrentCharacter(data.UserId))
+		if character then
+			local applyChanges = data.ApplyChanges
+			if applyChanges == nil then
+				applyChanges = false
+			end
+			SessionManager.CharacterCreationDone(character, applyChanges)
+		end
 	end)
 end

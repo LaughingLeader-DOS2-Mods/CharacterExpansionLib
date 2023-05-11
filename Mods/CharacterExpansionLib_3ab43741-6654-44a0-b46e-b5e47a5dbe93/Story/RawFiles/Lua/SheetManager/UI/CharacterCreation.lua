@@ -348,19 +348,8 @@ CharacterCreation.Register:Call("characterCreationStarted", CharacterCreation.St
 
 function CharacterCreation:CreationDone(e, ui, method, startText, backText, visible)
 	if GameHelpers.IsLevelType(LEVELTYPE.CHARACTER_CREATION) then
-		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
+		SessionManager.CharacterCreationDone(Client:GetCharacter(), true)
 	end
-	-- if visible == false then
-	-- 	-- UI is closing with no message box confirmation, which can happen if points were only spent on custom entries
-	-- 	if not MessageBox.UI.Instance and CharacterCreation.IsOpen then
-	-- 		SheetManager.Save.CharacterCreationDone(Client:GetCharacter(), true)
-	-- 		CharacterCreation.IsOpen = false
-	-- 		-- local this = self.Root
-	-- 		-- if this and not this.isExtended then
-	-- 		-- 	this.isExtended = true
-	-- 		-- end
-	-- 	end
-	-- end
 end
 --CharacterCreation.Register:Invoke("creationDone", CharacterCreation.CreationDone, "After", "All")
 
@@ -390,17 +379,22 @@ end, "Before", "All")
 -- 	end
 -- end, "Before", "All")
 
-MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
-	if isConfirmed and CharacterCreation.IsOpen then
-		SheetManager.Save.CharacterCreationDone(player, true)
-		CharacterCreation.IsOpen = false
-	end
-end)
-
-MessageBox:RegisterListener("CharacterCreationCancel", function(event, isConfirmed, player)
-	if isConfirmed and CharacterCreation.IsOpen then
-		SheetManager.Save.CharacterCreationDone(player, false)
-		CharacterCreation.IsOpen = false
+Events.RegionChanged:Subscribe(function (e)
+	if e.LevelType == LEVELTYPE.GAME and e.State == REGIONSTATE.GAME then
+		MessageBox:RegisterListener("CharacterCreationConfirm", function(event, isConfirmed, player)
+			if isConfirmed and CharacterCreation.IsOpen then
+				SessionManager.CharacterCreationDone(player, true)
+				CharacterCreation.IsOpen = false
+			end
+		end)
+		
+		MessageBox:RegisterListener("CharacterCreationCancel", function(event, isConfirmed, player)
+			if isConfirmed and CharacterCreation.IsOpen then
+				SessionManager.CharacterCreationDone(player, false)
+				CharacterCreation.IsOpen = false
+			end
+		end)
+		e:Unsubscribe()
 	end
 end)
 

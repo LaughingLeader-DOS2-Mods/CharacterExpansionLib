@@ -182,6 +182,7 @@ end
 ---@param skipSessionCheck ?boolean
 ---@return boolean
 function SheetManager.Save.SetEntryValue(character, entry, value, skipSessionCheck)
+	--Ext.Utils.PrintError("SheetManager.Save.SetEntryValue", character.NetID, GameHelpers.GetDisplayName(character))
 	local characterId = GameHelpers.GetObjectID(character)
 	local data = nil
 	if skipSessionCheck ~= true then
