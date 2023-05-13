@@ -357,13 +357,6 @@ if _ISCLIENT then
 
 					local delta = value - BASE_ABILITY
 
-					if id == "Sourcery" then
-						Ext.Utils.PrintError(id, value, delta)
-						if value == 0 then
-							Ext.Dump(SessionManager.Sessions)
-						end
-					end
-
 					local visible = true
 
 					local groupName = ""
