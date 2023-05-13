@@ -1,9 +1,10 @@
-if SheetManager == nil then
-	---@class SheetManager
-	SheetManager = {}
-end
+---@class SheetManager
+SheetManager = {
+	Utils = {
+		DisplayNameSort = function(a,b) return a.DisplayName < b.DisplayName end
+	}
+}
 
-SheetManager.__index = SheetManager
 SheetManager.Loaded = false
 
 ---@enum SheetStatType

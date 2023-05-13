@@ -249,6 +249,10 @@ if _ISCLIENT then
 			end
 		end
 
+		if len > 1 then
+			table.sort(entries, SheetManager.Utils.DisplayNameSort)
+		end
+
 		local i = 0
 		return function ()
 			i = i + 1
@@ -333,6 +337,9 @@ if _ISCLIENT then
 			end
 		end
 
+		local customEntries = {}
+		local customEntriesLen = 0
+
 		for mod,dataTable in pairs(SheetManager.Data.Abilities) do
 			for id,data in pairs(dataTable) do
 				local value = SheetManager:GetValueByEntry(data, player)
@@ -397,9 +404,17 @@ if _ISCLIENT then
 						CanRemove = SheetManager:GetIsMinusVisible(data, player, defaultCanRemove, value),
 						Visible = visible
 					}
-					entries[#entries+1] = uiEntry
+					customEntriesLen = customEntriesLen + 1
+					customEntries[customEntriesLen] = uiEntry
 				end
 			end
+		end
+
+		if customEntriesLen > 0 then
+			if customEntriesLen > 1 then
+				table.sort(customEntries, SheetManager.Utils.DisplayNameSort)
+			end
+			TableHelpers.AppendArrays(entries, customEntries)
 		end
 
 		local i = 0
