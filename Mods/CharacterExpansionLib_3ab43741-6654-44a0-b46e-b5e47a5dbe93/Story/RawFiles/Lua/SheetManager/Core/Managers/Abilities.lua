@@ -214,6 +214,8 @@ if _ISCLIENT then
 		IsGM = false,
 	}
 
+	---@param entry {CategoryID:integer, Civil:boolean}
+	---@param civilOnly? boolean
 	local function _CanDisplayBuiltin(entry, civilOnly)
 		if civilOnly == nil then
 			return true
@@ -231,11 +233,11 @@ if _ISCLIENT then
 		local entries = {}
 		local len = 0
 
-		local civilOnly = options.CivilOnly == true
+		local civilOnly = options.CivilOnly
 
 		for mod,dataTable in pairs(SheetManager.Data.AbilityCategories) do
 			for id,data in pairs(dataTable) do
-				if data.Visible and data.IsCivil == civilOnly then
+				if data.Visible and (civilOnly == nil or data.IsCivil == civilOnly) then
 					len = len + 1
 					entries[len] = {
 						ID = data.ID,
@@ -275,7 +277,6 @@ if _ISCLIENT then
 		local entries = {}
 		local tooltip = LocalizedText.UI.AbilityPlusTooltip:ReplacePlaceholders(Ext.ExtraData.CombatAbilityLevelGrowth)
 
-		local civilOnly = options.CivilOnly == true
 		local abilityPoints = options.AvailableAbilityPoints or SheetManager:GetAvailablePoints(player, "Ability", nil, options.IsCharacterCreation)
 		local civilPoints = options.AvailableCivilPoints or SheetManager:GetAvailablePoints(player, "Civil", nil, options.IsCharacterCreation)
 		
@@ -289,13 +290,13 @@ if _ISCLIENT then
 		--Defaults
 		for numId,id in Data.Ability:Get() do
 			local data = SheetManager.Abilities.Data.Abilities[id] or SheetManager.Abilities.Data.DOSAbilities[id]
-			if data ~= nil and _CanDisplayBuiltin(data, civilOnly) then
+			if data ~= nil and _CanDisplayBuiltin(data, options.CivilOnly) then
 				if Builtin.IsAbilityVisible(id) then
 					local statVal = targetStats[id] or 0
 					local baseVal = targetStats["Base"..id] or statVal
 					local canAddPoints = options.IsGM
 					if not canAddPoints then
-						if civilOnly then
+						if data.Civil then
 							canAddPoints = civilPoints > 0 and baseVal < MAX_CIVIL
 						else
 							canAddPoints = abilityPoints > 0 and baseVal < MAX_ABILITY
@@ -345,11 +346,11 @@ if _ISCLIENT then
 				local value = SheetManager:GetValueByEntry(data, player)
 				if SheetManager:IsEntryVisible(data, player, value) then
 					local canAddPoints = false
-					local maxVal = civilOnly and MAX_CIVIL or MAX_ABILITY
+					local maxVal = data.IsCivil and MAX_CIVIL or MAX_ABILITY
 					if data.MaxValue then
 						maxVal = data.MaxValue
 					end
-					if civilOnly then
+					if data.IsCivil then
 						canAddPoints = civilPoints > 0 and value < maxVal
 					else
 						canAddPoints = abilityPoints > 0 and value < maxVal
