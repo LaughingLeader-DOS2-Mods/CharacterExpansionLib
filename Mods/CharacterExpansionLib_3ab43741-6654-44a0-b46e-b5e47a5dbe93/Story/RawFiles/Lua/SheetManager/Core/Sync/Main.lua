@@ -8,6 +8,7 @@ SheetManager.Sync = {}
 
 ---@class SheetManagerSyncDataOptions
 ---@field DeleteSession boolean Delete the current SessionManager session on the client.
+---@field SetValueOptions SheetManagerSetEntryValueOptions
 local _DefaultSheetManagerSyncDataOptions = {
 	DeleteSession = false
 }
@@ -21,7 +22,7 @@ function SheetManager:SyncData(character, opts)
 		return false
 	end
 	if not _ISCLIENT then
-		SheetManager.Sync.EntryValues(character, nil, options.DeleteSession == true)
+		SheetManager.Sync.EntryValues(character, options)
 		SheetManager.Sync.CustomAvailablePoints(character)
 		if character ~= nil then
 			SessionManager:SyncSession(character)

@@ -16,6 +16,7 @@ SessionManager = {
 	---@type table<ComponentHandle,CharacterCreationSessionData>
 	Sessions = {},
 	HasSessionData = false,
+	--TODO Figure out why the last value is updated before a session is applied, preventing changed events from invoking[1]
 	---@type SheetManagerSetEntryValueOptions
 	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true, SkipListenerInvoke=false, SkipValueComparison=true}
 }
@@ -234,6 +235,7 @@ function SessionManager:ApplySession(character)
 			sessionData = TableHelpers.Clone(sessionData)
 			SessionManager:ClearSession(character)
 			if sessionData.PendingChanges then
+				--TODO Figure out why the last value is updated before a session is applied, preventing changed events from invoking[2]
 				fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 				for statType,mods in pairs(sessionData.PendingChanges) do
 					for modId,entries in pairs(mods) do
@@ -244,7 +246,7 @@ function SessionManager:ApplySession(character)
 						end
 					end
 				end
-				SheetManager:SyncData(character, {DeleteSession=true})
+				SheetManager:SyncData(character, {DeleteSession=true, SetValueOptions=SessionManager.SetValuesOptions})
 			else
 				fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] Session data is missing PendingChanges for character %s", character.DisplayName)
 			end

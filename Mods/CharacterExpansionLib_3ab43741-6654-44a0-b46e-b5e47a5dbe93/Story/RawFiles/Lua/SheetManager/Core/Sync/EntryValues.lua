@@ -441,15 +441,16 @@ end
 if not _ISCLIENT then
 	---@protected
 	---@param character Guid|EsvCharacter
-	---@param user number|string|nil Optional client to sync to if character is nil.
-	---@param deleteSession? boolean
-	function SheetManager.Sync.EntryValues(character, user, deleteSession)
+	---@param opts? SheetManagerSyncDataOptions
+	function SheetManager.Sync.EntryValues(character, opts)
 		character = GameHelpers.GetCharacter(character, "EsvCharacter")
 		if character then
+			opts = opts or {}
 			local data = {
 				ReservedUserID = character.ReservedUserID,
 				NetID = character.NetID,
-				DeleteSession = deleteSession
+				DeleteSession = opts.DeleteSession == true,
+				SetValueOptions = opts.SetValueOptions
 			}
 			local values = {
 				Stats = {},
@@ -467,36 +468,7 @@ if not _ISCLIENT then
 				end
 			end
 			data.Values = values
-			-- if PersistentVars.CharacterSheetValues[character.MyGuid] ~= nil then
-			-- 	data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
-			-- end
-			--fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
-			--GameHelpers.Net.PostToUser(character, "CEL_SheetManager_LoadCharacterSyncData", data)
 			GameHelpers.Net.PostToUser(character, "CEL_SheetManager_LoadAllCharacterEntryValues", data)
-			return true
-		else
-			--Sync all characters
-			local data = {}
-			for uuid,entries in pairs(TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues)) do
-				local netid = GameHelpers.GetNetID(uuid)
-				if netid then
-					data[netid] = entries
-				end
-			end
-
-			if user then
-				local t = type(user)
-				if t == "number" then
-					GameHelpers.Net.PostToUser(user, "CEL_SheetManager_LoadSyncData", data)
-					return true
-				elseif t == "string" then
-					GameHelpers.Net.PostToUser(GameHelpers.GetUserID(user), "CEL_SheetManager_LoadSyncData", data)
-					return true
-				else
-					--fprint(LOGLEVEL.ERROR, "[SheetManager:SyncData] Invalid type (%s)[%s] for user parameter.", t, user)
-				end
-			end
-			GameHelpers.Net.Broadcast("CEL_SheetManager_LoadSyncData", data)
 			return true
 		end
 		return false
@@ -580,6 +552,11 @@ else
 		end
 	end)
 
+	---@type SheetManagerSetEntryValueOptions
+	local _DefaultLoadAllCharacterEntryValuesSetValueOptions = {
+		SkipRequest=true, SkipSync=true, SkipListenerInvoke=false
+	}
+
 	RegisterNetListener("CEL_SheetManager_LoadAllCharacterEntryValues", function(cmd, payload)
 		local data = Common.JsonParse(payload)
 		if data then
@@ -595,7 +572,7 @@ else
 						for id,value in pairs(entries) do
 							local stat = SheetManager:GetEntryByID(id, modId, statType)
 							if stat then
-								SheetManager:SetEntryValue(stat, character, value, SessionManager.SetValuesOptions)
+								SheetManager:SetEntryValue(stat, character, value, data.SetValueOptions or _DefaultLoadAllCharacterEntryValuesSetValueOptions)
 							end
 						end
 					end
