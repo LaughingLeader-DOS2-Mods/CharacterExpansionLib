@@ -201,17 +201,17 @@ function CharacterCreation:UpdateAbilities()
 
 	local opts = {IsCharacterCreation=true, AvailableAbilityPoints=points.Ability, AvailableCivilPoints=points.Civil}
 
-	for category in SheetManager.Abilities.GetVisibleCategories(player, opts) do
-		SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = category.Mod, ID=category.ID, EntryType="SheetAbilityCategoryData", Stat=category, Character=player, CharacterID=player.NetID})
-		if category.Visible then
-			if abilities_mc.addAbilityGroup then
-				abilities_mc.addAbilityGroup(category.GeneratedID, category.DisplayName, category.IsCivil)	
-			else
-				--Flash type 12 spam
-				abilities_mc.findGroup(category.GeneratedID, category.DisplayName, category.IsCivil)			
-			end
-		end
-	end
+	-- for category in SheetManager.Abilities.GetVisibleCategories(player, opts) do
+	-- 	SheetManager.Events.OnEntryUpdating:Invoke({ModuleUUID = category.Mod, ID=category.ID, EntryType="SheetAbilityCategoryData", Stat=category, Character=player, CharacterID=player.NetID})
+	-- 	if category.Visible then
+	-- 		if abilities_mc.addAbilityGroup then
+	-- 			abilities_mc.addAbilityGroup(category.GeneratedID, category.DisplayName, category.IsCivil)	
+	-- 		else
+	-- 			--Flash type 12 spam
+	-- 			abilities_mc.findGroup(category.GeneratedID, category.DisplayName, category.IsCivil)			
+	-- 		end
+	-- 	end
+	-- end
 	
 	for ability in SheetManager.Abilities.GetVisible(player, opts) do
 		local updateData = engineValues[ability.ID]
