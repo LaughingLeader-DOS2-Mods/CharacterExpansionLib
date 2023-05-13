@@ -54,7 +54,7 @@ end
 
 ---@param character EsvCharacter|EclCharacter
 function OriginSettings:ApplySettings(character)
-	local isInCC = SheetManager.IsInCharacterCreation(character)
+	local isInCC = character.CharCreationInProgress
 	if self.SkillSets then
 		for i=1,#self.SkillSets do
 			local skillset = Ext.Stats.SkillSet.GetLegacy(self.SkillSets[i])

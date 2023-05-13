@@ -70,22 +70,16 @@ end
 
 ---@param entry SheetAbilityData|SheetStatData|SheetTalentData
 ---@param character EsvCharacter|EclCharacter
+---@param force? boolean Skip the CC check and get the boost value directly.
 ---@return integer|boolean
-function SheetManager:GetValueByEntry(entry, character)
-	local isInCharacterCreation = SheetManager.IsInCharacterCreation(character)
-	if not isInCharacterCreation and not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
+function SheetManager:GetValueByEntry(entry, character, force)
+	if (force or not character.CharCreationInProgress) and not StringHelpers.IsNullOrWhitespace(entry.BoostAttribute) then
 		if character and character.Stats then
 			local charValue = character.Stats.DynamicStats[2][entry.BoostAttribute]
 			if charValue ~= nil then
 				return charValue
 			end
 		end
-		-- if _ISCLIENT then
-		-- 	local stats = SessionManager.CharacterCreationWizard.Stats[character]
-		-- 	if stats and stats[entry.BoostAttribute] then
-		-- 		return stats[entry.BoostAttribute]
-		-- 	end
-		-- end
 	else
 		local value = SheetManager.Save.GetEntryValue(character, entry)
 		if value ~= nil then

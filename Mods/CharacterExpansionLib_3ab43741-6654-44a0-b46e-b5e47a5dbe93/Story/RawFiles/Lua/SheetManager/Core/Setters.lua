@@ -130,47 +130,63 @@ local function SetValue(characterId, character, stat, value, isInCharacterCreati
 	end
 end
 
+---@class SheetManagerSetEntryValueOptions
+---@field SkipListenerInvoke boolean If true, Listeners.OnEntryChanged invoking is skipped.
+---@field SkipSync boolean If on the client and this is true, the value change won't be sent to the server.
+---@field SkipRequest boolean kip requesting changes if on the client side.
+---@field SkipSessionCheck boolean Used by the SessionManager to write changes directly when applying changes.
+---@field SkipValueComparison boolean Skip checking if the value does not equal the last value when invoking OnEntryChanged.
+local _DefaultSheetManagerSetEntryValueOptions = {
+	SkipListenerInvoke = false,
+	SkipSync = false,
+	SkipRequest = false,
+	SkipSessionCheck = false,
+	SkipValueComparison = false,
+}
+
 ---@param stat SheetAbilityData|SheetStatData|SheetTalentData|SheetCustomStatData
 ---@param character EsvCharacter|EclCharacter
 ---@param value integer|boolean
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
----@param force boolean|nil Skip requesting changes if on the client side.
----@param skipSessionCheck boolean|nil Used by the SessionManager to write changes directly when applying changes.
-function SheetManager:SetEntryValue(stat, character, value, skipListenerInvoke, skipSync, force, skipSessionCheck)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetManager:SetEntryValue(stat, character, value, opts)
+	local options = TableHelpers.SetDefaultOptions(opts, _DefaultSheetManagerSetEntryValueOptions)
 	local characterId = GameHelpers.GetObjectID(character)
 	local last = stat:GetValue(character)
-	local isInCharacterCreation = not skipSessionCheck and SheetManager.IsInCharacterCreation(character)
+	local isInCharacterCreation = not options.SkipSessionCheck and character.CharCreationInProgress or false
 
-	if _ISCLIENT and not force then
+	local skipListenerInvoke = options.SkipListenerInvoke
+
+	if _ISCLIENT and not options.SkipRequest then
 		---@cast characterId NETID
-		self:RequestValueChange(stat, characterId, value, false)
+		self:RequestValueChange(stat, character, value, false)
 	else
-		SetValue(characterId, character, stat, value, isInCharacterCreation and not force, skipSessionCheck)
+		SetValue(characterId, character, stat, value, isInCharacterCreation and not options.SkipRequest, options.SkipSessionCheck)
 	end
 
 	if stat.StatType == self.StatType.Custom then
 		stat:UpdateLastValue(character)
 	end
 
-	if isInCharacterCreation then
+	if isInCharacterCreation and skipListenerInvoke == nil then
 		skipListenerInvoke = true
 	end
 
 	if not skipListenerInvoke then
 		value = stat:GetValue(character)
 
-		self.Events.OnEntryChanged:Invoke({
-			ModuleUUID = stat.Mod,
-			EntryType = stat.Type,
-			Stat = stat,
-			ID = stat.ID,
-			LastValue = last,
-			Value = value,
-			Character = character,
-			CharacterID = characterId,
-			IsClient = _ISCLIENT,
-		})
+		if options.SkipValueComparison or value ~= last then
+			self.Events.OnEntryChanged:Invoke({
+				ModuleUUID = stat.Mod,
+				EntryType = stat.Type,
+				Stat = stat,
+				ID = stat.ID,
+				LastValue = last,
+				Value = value,
+				Character = character,
+				CharacterID = characterId,
+				IsClient = _ISCLIENT,
+			})
+		end
 		
 		if not _ISCLIENT then
 			if stat.StatType == "Ability" then
@@ -184,7 +200,7 @@ function SheetManager:SetEntryValue(stat, character, value, skipListenerInvoke, 
 			end
 		end
 	end
-	if skipSync ~= true and not _ISCLIENT then
+	if not _ISCLIENT and options.SkipSync ~= true then
 		GameHelpers.Net.Broadcast("CEL_SheetManager_EntryValueChanged", {
 			ID = stat.ID,
 			Mod = stat.Mod,
@@ -202,12 +218,11 @@ end
 ---@param amount integer|boolean
 ---@param modGUID GUID|nil The ModuleUUID for the stat.
 ---@param statType SheetEntryType|nil Stat type.
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetManager:ModifyValueByID(character, id, amount, modGUID, statType, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetManager:ModifyValueByID(character, id, amount, modGUID, statType, opts)
 	local stat = self:GetEntryByID(id, modGUID, statType)
 	if stat then
-		stat:ModifyValue(character, amount, skipListenerInvoke, skipSync)
+		stat:ModifyValue(character, amount, opts)
 	end
 end
 
@@ -217,12 +232,11 @@ end
 ---@param value integer|boolean
 ---@param modGUID GUID|nil The ModuleUUID for the stat.
 ---@param statType SheetEntryType|nil Stat type.
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetManager:SetValueByID(character, id, value, modGUID, statType, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetManager:SetValueByID(character, id, value, modGUID, statType, opts)
 	local stat = self:GetEntryByID(id, modGUID, statType)
 	if stat then
-		stat:SetValue(character, value, skipListenerInvoke, skipSync)
+		stat:SetValue(character, value, opts)
 	end
 end
 

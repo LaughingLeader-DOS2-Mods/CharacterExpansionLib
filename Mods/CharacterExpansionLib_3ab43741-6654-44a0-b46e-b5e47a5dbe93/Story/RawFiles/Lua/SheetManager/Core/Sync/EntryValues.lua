@@ -243,7 +243,7 @@ if _ISCLIENT then
 			Value = value,
 			StatType = entry.StatType,
 			IsGameMaster = GameHelpers.Client.IsGameMaster() and not Client.Character.IsPossessed,
-			IsInCharacterCreation = isInCharacterCreation or SheetManager.IsInCharacterCreation(character)
+			IsInCharacterCreation = isInCharacterCreation or character.CharCreationInProgress
 		}
 		if data.IsInCharacterCreation then
 			local ccwiz = Ext.UI.GetCharacterCreationWizard()
@@ -296,6 +296,8 @@ if _ISCLIENT then
 		end
 	end)
 else
+	local _ProcessPointChangeOpts = {SkipListenerInvoke=true, SkipSync=true}
+
 	---@class CharacterExpansionLibProcessPointChangeOptions
 	---@field ID string
 	---@field Mod Guid
@@ -321,7 +323,7 @@ else
 		if characterId and stat then
 			--TODO CustomStat support
 			if opts.IsGameMaster or not stat.UsePoints then
-				SheetManager:SetEntryValue(stat, character, value, opts.IsInCharacterCreation, true)
+				SheetManager:SetEntryValue(stat, character, value, _ProcessPointChangeOpts)
 				return true
 			else
 				local currentValue = stat:GetValue(character)
@@ -340,12 +342,12 @@ else
 						end
 						local points = SheetManager:GetBuiltinAvailablePointsForEntry(stat, character, opts.AvailablePoints)
 						if points > 0 and SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy, opts.AvailablePoints) then
-							SheetManager:SetEntryValue(stat, character, value, opts.IsInCharacterCreation, true)
+							SheetManager:SetEntryValue(stat, character, value, _ProcessPointChangeOpts)
 							return true,opts.AvailablePoints
 						end
 					else
 						if SheetManager:ModifyAvailablePointsForEntry(stat, characterId, modifyPointsBy, opts.AvailablePoints) then
-							SheetManager:SetEntryValue(stat, character, value, opts.IsInCharacterCreation, true)
+							SheetManager:SetEntryValue(stat, character, value, _ProcessPointChangeOpts)
 							return true,opts.AvailablePoints
 						end
 					end
@@ -445,13 +447,29 @@ if not _ISCLIENT then
 		if character then
 			local data = {
 				NetID = character.NetID,
-				Values = {}
 			}
-			if PersistentVars.CharacterSheetValues[character.MyGuid] ~= nil then
-				data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
+			local values = {
+				Stats = {},
+				Abilities = {},
+				Talents = {},
+				CustomStats = {}
+			}
+			for entry in SheetManager:GetAllEntries(false, true) do
+				local value = entry:GetValue(character)
+				local statTypeTable = values[SheetManager.Save.GetTableNameForType(entry.StatType)]
+				if statTypeTable ~= nil then
+					local modTable = statTypeTable[entry.Mod] or {}
+					statTypeTable[entry.Mod] = modTable
+					modTable[entry.ID] = value
+				end
 			end
+			data.Values = values
+			-- if PersistentVars.CharacterSheetValues[character.MyGuid] ~= nil then
+			-- 	data.Values = TableHelpers.SanitizeTable(PersistentVars.CharacterSheetValues[character.MyGuid])
+			-- end
 			--fprint(LOGLEVEL.TRACE, "[SheetManager.Save.SyncEntryValues:SERVER] Syncing data for character (%s) NetID(%s) to client.", character.MyGuid, data.NetID)
-			GameHelpers.Net.PostToUser(GameHelpers.GetUserID(character), "CEL_SheetManager_LoadCharacterSyncData", data)
+			--GameHelpers.Net.PostToUser(character, "CEL_SheetManager_LoadCharacterSyncData", data)
+			GameHelpers.Net.PostToUser(character, "CEL_SheetManager_LoadAllCharacterEntryValues", data)
 			return true
 		else
 			--Sync all characters
@@ -558,6 +576,27 @@ else
 			end
 		end
 	end)
+
+	RegisterNetListener("CEL_SheetManager_LoadAllCharacterEntryValues", function(cmd, payload)
+		local data = Common.JsonParse(payload)
+		if data then
+			assert(type(data.NetID) == "number", "NetID is invalid.")
+			assert(data.Values ~= nil, "Payload has no Values table.")
+			local character = GameHelpers.GetCharacter(data.NetID)
+			if character then
+				for statType,mods in pairs(data.Values) do
+					for modId,entries in pairs(mods) do
+						for id,value in pairs(entries) do
+							local stat = SheetManager:GetEntryByID(id, modId, statType)
+							if stat then
+								SheetManager:SetEntryValue(stat, character, value, SessionManager.SetValuesOptions)
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
 end
 --endregion
 
@@ -572,7 +611,7 @@ if _ISCLIENT then
 				if skipInvoke == nil then
 					skipInvoke = false
 				end
-				SheetManager:SetEntryValue(stat, character, data.Value, skipInvoke, true, true)
+				SheetManager:SetEntryValue(stat, character, data.Value, {SkipListenerInvoke=skipInvoke, SkipSync=true, SkipRequest=true,})
 				--SheetManager.Save.SetEntryValue(characterId, stat, data.Value)
 			end
 		end

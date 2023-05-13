@@ -348,6 +348,15 @@ if _ISCLIENT then
 						canAddPoints = abilityPoints > 0 and value < maxVal
 					end
 
+					local delta = value - BASE_ABILITY
+
+					if id == "Sourcery" then
+						Ext.Utils.PrintError(id, value, delta)
+						if value == 0 then
+							Ext.Dump(SessionManager.Sessions)
+						end
+					end
+
 					local visible = true
 
 					local groupName = ""
@@ -381,7 +390,7 @@ if _ISCLIENT then
 						CategoryDisplayName = groupName,
 						IsCustom = true,
 						Value = {Value=value, Label=string.format("%s%s", value, data.Suffix or "")},
-						Delta = value - BASE_ABILITY,
+						Delta = delta,
 						AddPointsTooltip = tooltip,
 						RemovePointsTooltip = "",
 						CanAdd = SheetManager:GetIsPlusVisible(data, player, canAddPoints, value),

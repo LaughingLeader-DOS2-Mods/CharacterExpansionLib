@@ -83,29 +83,20 @@ end
 ---@param character EsvCharacter|EclCharacter
 ---@return integer
 function SheetAbilityData:GetValue(character)
-	if StringHelpers.IsNullOrWhitespace(self.ID) then
-		return 0
-	end
-	if not StringHelpers.IsNullOrWhitespace(self.BoostAttribute) then
-		return self:GetBoostValue(character, 0)
-	else
-		return SheetManager:GetValueByEntry(self, character) or 0
-	end
+	return SheetManager:GetValueByEntry(self, character) or 0
 end
 
 ---[SERVER]
 ---@param character EsvCharacter|EclCharacter
 ---@param value integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetAbilityData:SetValue(character, value, skipListenerInvoke, skipSync)
-	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetAbilityData:SetValue(character, value, opts)
+	return SheetManager:SetEntryValue(self, character, value, opts)
 end
 
 ---@param character EsvCharacter|EclCharacter
 ---@param amount integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetAbilityData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
-	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetAbilityData:ModifyValue(character, amount, opts)
+	return self:SetValue(character, self:GetValue(character) + amount, opts)
 end

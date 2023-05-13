@@ -140,23 +140,21 @@ local STAT_VALUE_MAX = 2147483647
 ---[SERVER]
 ---@param character EsvCharacter|string|number
 ---@param value integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetCustomStatData:SetValue(character, value, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetCustomStatData:SetValue(character, value, opts)
 	if value > STAT_VALUE_MAX then
 		value = STAT_VALUE_MAX
 	end
-	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
+	return SheetManager:SetEntryValue(self, character, value, opts)
 end
 
 ---[SERVER]
 ---Adds an amount to the value. Can be negative.
 ---@param character EsvCharacter|string|number
 ---@param amount integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetCustomStatData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
-	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetCustomStatData:ModifyValue(character, amount, opts)
+	return self:SetValue(character, self:GetValue(character) + amount, opts)
 end
 
 ---[SERVER]

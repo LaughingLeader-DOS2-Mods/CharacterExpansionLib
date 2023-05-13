@@ -100,18 +100,16 @@ end
 
 ---@param character EsvCharacter|EclCharacter
 ---@param value integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetStatData:SetValue(character, value, skipListenerInvoke, skipSync)
-	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetStatData:SetValue(character, value, opts)
+	return SheetManager:SetEntryValue(self, character, value, opts)
 end
 
 ---@param character EsvCharacter|EclCharacter
 ---@param amount integer
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetStatData:ModifyValue(character, amount, skipListenerInvoke, skipSync)
-	return self:SetValue(character, self:GetValue(character) + amount, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetStatData:ModifyValue(character, amount, opts)
+	return self:SetValue(character, self:GetValue(character) + amount, opts)
 end
 
 Classes.SheetStatData = SheetStatData

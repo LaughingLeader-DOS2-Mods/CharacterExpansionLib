@@ -15,7 +15,9 @@ local _ISCLIENT = Ext.IsClient()
 SessionManager = {
 	---@type table<ComponentHandle,CharacterCreationSessionData>
 	Sessions = {},
-	HasSessionData = false
+	HasSessionData = false,
+	---@type SheetManagerSetEntryValueOptions
+	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true}
 }
 
 local self = SessionManager
@@ -44,18 +46,34 @@ if not _ISCLIENT then
 			UserID = character.ReservedUserID,
 			UUID = characterId,
 			NetID = character.NetID,
-			PendingChanges = {},
 			Respec = respec
 		}
 
-		local currentValues = SheetManager.CurrentValues[characterId]
+		local values = {
+			Stats = {},
+			Abilities = {},
+			Talents = {},
+			CustomStats = {}
+		}
+		for entry in SheetManager:GetAllEntries(false, true) do
+			local value = SheetManager:GetValueByEntry(entry, character, true)
+			local statTypeTable = values[SheetManager.Save.GetTableNameForType(entry.StatType)]
+			if statTypeTable ~= nil then
+				local modTable = statTypeTable[entry.Mod] or {}
+				statTypeTable[entry.Mod] = modTable
+				modTable[entry.ID] = value
+			end
+		end
+		data.PendingChanges = values
+
+		--[[ local currentValues = SheetManager.CurrentValues[characterId]
 		if currentValues then
 			for k,v in pairs(currentValues) do
 				if k ~= "CustomStats" then
 					data.PendingChanges[k] = TableHelpers.Clone(v)
 				end
 			end
-		end
+		end ]]
 
 		self.Sessions[character.ReservedUserID] = data
 
@@ -219,7 +237,7 @@ function SessionManager:ApplySession(character)
 						for id,value in pairs(entries) do
 							local stat = SheetManager:GetEntryByID(id, modId, statType)
 							--SheetManager.Save.SetEntryValue(character.MyGuid, stat, value)
-							SheetManager:SetEntryValue(stat, character, value, false, true, true, true)
+							SheetManager:SetEntryValue(stat, character, value, SessionManager.SetValuesOptions)
 						end
 					end
 				end

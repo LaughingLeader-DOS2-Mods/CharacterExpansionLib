@@ -130,10 +130,9 @@ end
 
 ---@param character EsvCharacter|EclCharacter
 ---@param value boolean
----@param skipListenerInvoke boolean|nil If true, Listeners.OnEntryChanged invoking is skipped.
----@param skipSync boolean|nil If on the client and this is true, the value change won't be sent to the server.
-function SheetTalentData:SetValue(character, value, skipListenerInvoke, skipSync)
-	return SheetManager:SetEntryValue(self, character, value, skipListenerInvoke, skipSync)
+---@param opts? SheetManagerSetEntryValueOptions
+function SheetTalentData:SetValue(character, value, opts)
+	return SheetManager:SetEntryValue(self, character, value, opts)
 end
 
 ---@param tbl StatRequirement[]
