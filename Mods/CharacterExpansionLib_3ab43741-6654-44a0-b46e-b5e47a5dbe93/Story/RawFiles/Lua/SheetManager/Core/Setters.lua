@@ -151,7 +151,7 @@ local _DefaultSheetManagerSetEntryValueOptions = {
 function SheetManager:SetEntryValue(stat, character, value, opts)
 	local options = TableHelpers.SetDefaultOptions(opts, _DefaultSheetManagerSetEntryValueOptions)
 	local characterId = GameHelpers.GetObjectID(character)
-	local last = stat:GetValue(character)
+	local last = SheetManager:GetValueByEntry(stat, character)
 	local isInCharacterCreation = not options.SkipSessionCheck and character.CharCreationInProgress or false
 
 	local skipListenerInvoke = options.SkipListenerInvoke

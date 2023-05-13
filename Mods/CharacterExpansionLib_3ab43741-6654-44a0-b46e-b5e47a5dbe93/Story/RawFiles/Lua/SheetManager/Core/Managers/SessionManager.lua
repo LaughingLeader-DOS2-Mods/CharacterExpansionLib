@@ -17,7 +17,7 @@ SessionManager = {
 	Sessions = {},
 	HasSessionData = false,
 	---@type SheetManagerSetEntryValueOptions
-	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true}
+	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true, SkipListenerInvoke=false}
 }
 
 local self = SessionManager
@@ -227,9 +227,12 @@ function SessionManager:ApplySession(character)
 		else
 			GameHelpers.Net.PostMessageToServer("CEL_SessionManager_ApplyCharacterData", character.NetID)
 		end
+		SessionManager:ClearSession(character)
 	else
 		local sessionData = self:GetSession(character)
 		if sessionData then
+			sessionData = TableHelpers.Clone(sessionData)
+			SessionManager:ClearSession(character)
 			if sessionData.PendingChanges then
 				fprint(LOGLEVEL.TRACE, "[SessionManager:ApplySession] Applying session changes.\n%s", Lib.serpent.block(sessionData.PendingChanges))
 				for statType,mods in pairs(sessionData.PendingChanges) do
@@ -249,7 +252,6 @@ function SessionManager:ApplySession(character)
 			fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] No active session for character (%s)\n%s", character.MyGuid, Lib.serpent.block(self.Sessions))
 		end
 	end
-	SessionManager:ClearSession(character)
 end
 
 ---@param character EsvCharacter|EclCharacter

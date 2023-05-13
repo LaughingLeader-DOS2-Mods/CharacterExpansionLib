@@ -446,6 +446,7 @@ if not _ISCLIENT then
 		character = GameHelpers.GetCharacter(character, "EsvCharacter")
 		if character then
 			local data = {
+				ReservedUserID = character.ReservedUserID,
 				NetID = character.NetID,
 			}
 			local values = {
@@ -584,6 +585,9 @@ else
 			assert(data.Values ~= nil, "Payload has no Values table.")
 			local character = GameHelpers.GetCharacter(data.NetID)
 			if character then
+				if data.ReservedUserID then
+					SessionManager.Sessions[data.ReservedUserID] = nil
+				end
 				for statType,mods in pairs(data.Values) do
 					for modId,entries in pairs(mods) do
 						for id,value in pairs(entries) do
