@@ -442,12 +442,14 @@ if not _ISCLIENT then
 	---@protected
 	---@param character Guid|EsvCharacter
 	---@param user number|string|nil Optional client to sync to if character is nil.
-	function SheetManager.Sync.EntryValues(character, user)
+	---@param deleteSession? boolean
+	function SheetManager.Sync.EntryValues(character, user, deleteSession)
 		character = GameHelpers.GetCharacter(character, "EsvCharacter")
 		if character then
 			local data = {
 				ReservedUserID = character.ReservedUserID,
 				NetID = character.NetID,
+				DeleteSession = deleteSession
 			}
 			local values = {
 				Stats = {},
@@ -585,7 +587,7 @@ else
 			assert(data.Values ~= nil, "Payload has no Values table.")
 			local character = GameHelpers.GetCharacter(data.NetID)
 			if character then
-				if data.ReservedUserID then
+				if data.DeleteSession and data.ReservedUserID then
 					SessionManager.Sessions[data.ReservedUserID] = nil
 				end
 				for statType,mods in pairs(data.Values) do

@@ -6,14 +6,22 @@ SheetManager.Save = {}
 ---Functions for data syncing.
 SheetManager.Sync = {}
 
+---@class SheetManagerSyncDataOptions
+---@field DeleteSession boolean Delete the current SessionManager session on the client.
+local _DefaultSheetManagerSyncDataOptions = {
+	DeleteSession = false
+}
+
 ---Sync all current values and available points for a specific character, or all characters if nil.
 ---@param character? Guid|EsvCharacter|EclCharacter
-function SheetManager:SyncData(character)
+---@param opts? SheetManagerSyncDataOptions
+function SheetManager:SyncData(character, opts)
+	local options = TableHelpers.SetDefaultOptions(opts, _DefaultSheetManagerSyncDataOptions)
 	if SheetManager.Loaded ~= true then
 		return false
 	end
 	if not _ISCLIENT then
-		SheetManager.Sync.EntryValues(character)
+		SheetManager.Sync.EntryValues(character, nil, options.DeleteSession == true)
 		SheetManager.Sync.CustomAvailablePoints(character)
 		if character ~= nil then
 			SessionManager:SyncSession(character)

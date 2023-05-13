@@ -17,7 +17,7 @@ SessionManager = {
 	Sessions = {},
 	HasSessionData = false,
 	---@type SheetManagerSetEntryValueOptions
-	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true, SkipListenerInvoke=false}
+	SetValuesOptions = {SkipRequest=true, SkipSessionCheck=true, SkipSync=true, SkipListenerInvoke=false, SkipValueComparison=true}
 }
 
 local self = SessionManager
@@ -244,7 +244,7 @@ function SessionManager:ApplySession(character)
 						end
 					end
 				end
-				SheetManager:SyncData(character)
+				SheetManager:SyncData(character, {DeleteSession=true})
 			else
 				fprint(LOGLEVEL.ERROR, "[SessionManager:ApplySession] Session data is missing PendingChanges for character %s", character.DisplayName)
 			end
@@ -317,8 +317,8 @@ function SessionManager.CharacterCreationDone(player, applyChanges)
 			SessionManager:ApplySession(player)
 		else
 			SessionManager:ClearSession(player, true)
+			SheetManager:SyncData(player)
 		end
-		SheetManager:SyncData(player)
 	else
 		GameHelpers.Net.PostMessageToServer("CEL_SessionManager_CharacterCreationDone", {
 			UserId = Client.Character.ID,
