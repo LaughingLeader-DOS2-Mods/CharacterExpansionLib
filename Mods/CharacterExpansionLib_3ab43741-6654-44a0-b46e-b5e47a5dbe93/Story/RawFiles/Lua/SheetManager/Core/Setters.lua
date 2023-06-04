@@ -149,6 +149,10 @@ local _DefaultSheetManagerSetEntryValueOptions = {
 ---@param value integer|boolean
 ---@param opts? SheetManagerSetEntryValueOptions
 function SheetManager:SetEntryValue(stat, character, value, opts)
+	character = GameHelpers.GetCharacter(character) --[[@as EsvCharacter|EclCharacter]]
+	if not character then
+		error(("character param ('%s' - %s) is not a valid character"):format(tostring(character), type(character)), 2)
+	end
 	local options = TableHelpers.SetDefaultOptions(opts, _DefaultSheetManagerSetEntryValueOptions)
 	local characterId = GameHelpers.GetObjectID(character)
 	local last = SheetManager:GetValueByEntry(stat, character)

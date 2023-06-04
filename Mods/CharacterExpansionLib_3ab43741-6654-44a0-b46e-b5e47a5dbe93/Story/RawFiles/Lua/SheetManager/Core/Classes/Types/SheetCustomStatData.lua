@@ -186,7 +186,7 @@ end
 ---@param character EsvCharacter|EclCharacter
 function SheetCustomStatData:UpdateLastValue(character)
 	local value = self:GetValue(character)
-	if character and value then
+	if character and character.Handle and value then
 		self.LastValue[character.Handle] = value
 	end
 end
