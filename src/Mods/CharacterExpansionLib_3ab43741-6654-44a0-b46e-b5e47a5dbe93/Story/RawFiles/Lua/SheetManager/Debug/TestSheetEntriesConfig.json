@@ -35,6 +35,14 @@
 			"Description": "This is a test stat!",
 			"StatType": "SecondaryStat",
 			"SecondaryStatType": "Info"
+		},
+		"DebugResistance1": {
+			"DisplayName": "Test Resistance",
+			"Description": "This is a test stat!",
+			"StatType": "SecondaryStat",
+			"SecondaryStatType": "Resistance",
+			"Suffix": "%",
+			"Icon": "statIcons_TrollBlood"
 		}
 	},
 	"Abilities": {

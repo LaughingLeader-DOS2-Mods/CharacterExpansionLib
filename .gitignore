@@ -4,9 +4,9 @@ SourceControlGenerator.json
 
 # Levels
 ######################
-Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
-Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Globals/*
-Editor/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
+src/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
+src/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Globals/*
+src/Editor/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
 
 # Story files        #
 ######################
@@ -14,13 +14,13 @@ Editor/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Levels/*
 !story_header.div
 *.raw
 story_orphanqueries_ignore.txt
-Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Autosave/*
-Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Recovered/*
+src/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Autosave/*
+src/Mods/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Story/Dialogs/Recovered/*
 
 # Asset Folders      #
 ######################
-Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Assets/*
-#Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/*
+src/Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/Assets/*
+#src/Public/CharacterExpansionLib_3ab43741-6654-44a0-b46e-b5e47a5dbe93/GUI/*
 
 # Editor files       #
 ######################

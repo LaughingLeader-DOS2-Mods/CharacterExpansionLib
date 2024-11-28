@@ -27,6 +27,14 @@
 			"BoostAttribute": "PhysicalResistance",
 			"Suffix": "%",
 			"SheetIcon": "statIcons_Immune_Physical"
+		},
+		"DebugResistance1": {
+			"DisplayName": "Test Resistance",
+			"Description": "This is a test stat!",
+			"StatType": "SecondaryStat",
+			"SecondaryStatType": "Resistance",
+			"Suffix": "%",
+			"Icon": "statIcons_TrollBlood"
 		}
 	},
 	"AbilityCategories": {
