@@ -1,5 +1,5 @@
 {
-    "RequiredExtensionVersion": 58,
+    "RequiredExtensionVersion": 60,
     "ModTable": "CharacterExpansionLib",
     "FeatureFlags": [
         "OsirisExtensions",

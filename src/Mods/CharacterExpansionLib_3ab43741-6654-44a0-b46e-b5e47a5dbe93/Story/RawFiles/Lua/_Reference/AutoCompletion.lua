@@ -31,4 +31,4 @@ Mods.CharacterExpansionLib = {
 ---@class SheetManagerGetVisibleBaseOptions
 ---@field IsCharacterCreation boolean
 ---@field IsGM boolean
----@field Stats CDivinityStatsCharacter 
+---@field Stats CDivinityStats_Character

@@ -70,7 +70,7 @@ Ext.Require("CharacterSheetExtended/VisualTab.lua")
 Ext.Events.SessionLoaded:Subscribe(function (e)
 	local type = type
 	local GetDamageBoostByType = Ext.Stats.Math.GetDamageBoostByType
-	--- @param character CDivinityStatsCharacter
+	--- @param character CDivinityStats_Character
 	--- @param damageType string See DamageType enum
 	Game.Math.GetDamageBoostByType = function(character, damageType)
 		if type(character) == "table" then
