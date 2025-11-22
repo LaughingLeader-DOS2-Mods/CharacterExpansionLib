@@ -23,15 +23,15 @@
 		"type": "object",
 		"properties": {
 			"DisplayName": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"} }],
 				"description": "A string or array of strings (i.e. [\"StringKeyOrHandle\", \"FallBack Text\"] to use for the name."
 			},
 			"Description": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"} }],
 				"description": "A string or array of strings (i.e. [\"StringKeyOrHandle\", \"FallBack Text\"] to use for the description."
 			},
 			"ExpandedDescription": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"} }],
 				"description": "The description to use when expanding tooltips (holding Shift)."
 			},
 			"BaseValue": {
@@ -81,21 +81,21 @@
 		}
 	},
 	"RaceTalent": {
-		"type":"object",
+		"type": "object",
 		"additionalProperties": false,
 		"properties": {
 			"ID": {
-				"type":"string",
+				"type": "string",
 				"description": "The talent GUID."
 			},
 			"Mod": {
-				"type":"string",
+				"type": "string",
 				"description": "The mod GUID."
 			}
 		}
 	},
 	"Stat": {
-		"type":"object",
+		"type": "object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"StatType": {
@@ -107,31 +107,31 @@
 				"description": "The secondary stat type (if StatType is SecondaryStat), which determines the subsection."
 			},
 			"MaxValue": {
-				"type":"number",
+				"type": "number",
 				"description": "An optional maximum value to cap this stat at. If not set, the max value will depend on the StatType, such as the attribute soft cap for PrimaryStat (40)."
 			},
 			"SheetIcon": {
-				"type":"string",
+				"type": "string",
 				"description": "The icon to use in the character sheet.",
 				"default": ""
 			},
 			"SheetIconWidth": {
-				"type":"number",
+				"type": "number",
 				"description": "The character sheet icon width.",
 				"default": 28
 			},
 			"SheetIconHeight": {
-				"type":"number",
+				"type": "number",
 				"description": "The character sheet icon height.",
 				"default": 28
 			},
 			"SpacingHeight": {
-				"type":"number",
+				"type": "number",
 				"description": "If StatType is 'Spacing', this is the amount of space.",
 				"default": 0
 			},
 			"Frame": {
-				"type":"integer",
+				"type": "integer",
 				"description": "The frame to use on the Flash side. Defaults to 0.",
 				"default": 0
 			}
@@ -142,34 +142,34 @@
 		"description": "A new ability category.",
 		"properties": {
 			"DisplayName": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "items": { "type": "string" } }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "items": { "type": "string" } }],
 				"description": "The description or string key to use."
 			},
 			"ExpandedDescription": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "items": { "type": "string" } }],
 				"description": "The description to use when expanding tooltips (holding Shift)."
 			},
 			"IsCivil": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether this is a civil (true) or combat ability (false). Defaults to false.",
 				"default": false
 			}
 		}
 	},
 	"Ability": {
-		"type":"object",
+		"type": "object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"IsCivil": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether this is a combat ability or civil ability."
 			},
 			"MaxValue": {
-				"type":"number",
+				"type": "number",
 				"description": "An optional maximum value to cap this stat at. If not set, the max value will depend on whether this ability is a 'Civil' ability or not (5 cap or 10 cap)."
 			},
 			"CategoryID": {
@@ -177,32 +177,32 @@
 				"description": "An existing vanilla category ID to use. Defaults to 'Skills'."
 			},
 			"CategoryMod": {
-				"type":"string",
+				"type": "string",
 				"description": "The mod guid to use for the ability category, if CustomCategory is set. Defaults to the mod guid from the config file itself."
 			},
 			"CustomCategory": {
-				"type":"string",
+				"type": "string",
 				"description": "An id for a custom ability category to use."
 			}
 		}
 	},
 	"Talent": {
-		"type":"object",
+		"type": "object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"IsRacial": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether this talent is tied to a specific race."
 			},
 			"Requirements": {
-				"type":"array",
-				"description": "A table of requirements to parse before a talent can be taken. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements).",
-				"allOf": [{"$ref": "#/definitions/Requirement"}]
+				"type": "array",
+				"items": {"$ref": "#/definitions/Requirement"},
+				"description": "A table of requirements to parse before a talent can be taken. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements)."
 			},
 			"IncompatibleWith": {
-				"type":"array",
-				"description": "A table of requirements to parse for blocking the ability to put a point in a talent. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements).",
-				"allOf": [{"$ref": "#/definitions/Requirement"}]
+				"type": "array",
+				"items": {"$ref": "#/definitions/Requirement"},
+				"description": "A table of requirements to parse for blocking the ability to put a point in a talent. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements)."
 			}
 		}
 	},
@@ -222,11 +222,11 @@
 		"allOf": [{"$ref": "#/definitions/EntryBase"}, {"$ref": "#/definitions/CustomStatBase"}],
 		"properties": {
 			"ShowAlways": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether to always show the stat category, even if no points are added."
 			},
 			"HideTotalPoints": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether to hide the total points from the category label."
 			}
 		}
@@ -237,15 +237,15 @@
 		"allOf": [{"$ref": "#/definitions/EntryBase"}, {"$ref": "#/definitions/CustomStatBase"}],
 		"properties": {
 			"MaxValue": {
-				"type":"number",
+				"type": "number",
 				"description": "An optional maximum value to cap this stat at."
 			},
 			"Category": {
-				"type":"string",
+				"type": "string",
 				"description": "The category ID to organize this stat under. Defaults to a 'Misc' category if not set."
 			},
 			"PointID": {
-				"type":"string",
+				"type": "string",
 				"description": "An ID to use for a common pool of available points, if players are allowed to add/respec points."
 			},
 			"DisplayMode": {
@@ -253,17 +253,17 @@
 				"description": "Alternative display modes for a stat, such as percentage display."
 			},
 			"DisplayValueInTooltip": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Whether to display the value in the tooltip.",
 				"default": false
 			},
 			"AutoAddAvailablePointsOnRemove": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "Automatically manage adding available points when this stat is reduced in the UI by a player.",
 				"default": true
 			},
 			"Create": {
-				"type":"boolean",
+				"type": "boolean",
 				"description": "If true, the custom stat is created automatically on the server, if GM custom stats are enabled."
 			}
 		}
