@@ -172,7 +172,7 @@
 	"AbilityCategory": {
 		"type": "object",
 		"description": "A new ability category.",
-		"required": ["DisplayName", "Description"],
+		"required": ["DisplayName"],
 		"properties": {
 			"DisplayName": {
 				"type": ["string", "array"],
@@ -267,7 +267,7 @@
 	"CustomStatCategory": {
 		"type": "object",
 		"description": "A category in the Extra Stats tab.",
-		"required": ["DisplayName", "Description"],
+		"required": ["DisplayName"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"ShowAlways": {
@@ -282,8 +282,8 @@
 	},
 	"CustomStat": {
 		"type": "object",
-		"description": "A category in the Extra Stats tab.",
-		"required": ["DisplayName", "Description"],
+		"description": "A stat in the Extra Stats tab.",
+		"required": ["DisplayName"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"MaxValue": {
@@ -335,32 +335,50 @@
     "Stats": {
       "type": "object",
       "description": "Stats to register.",
-	  "allOf": [{"$ref": "#/definitions/Stat"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/Stat"}]
+	  }
     },
     "AbilityCategories": {
       "type": "object",
       "description": "Ability categories to register.",
-	  "allOf": [{"$ref": "#/definitions/AbilityCategory"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/AbilityCategory"}]
+	  }
     },
     "Abilities": {
       "type": "object",
       "description": "Abilities to register.",
-	  "allOf": [{"$ref": "#/definitions/Ability"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/Ability"}]
+	  }
     },
     "Talents": {
       "type": "object",
       "description": "Talents to register.",
-	  "allOf": [{"$ref": "#/definitions/Talent"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/Talent"}]
+	  }
     },
     "CustomStatCategories": {
       "type": "object",
       "description": "Categories to register to the 'Extra Stats' tab.",
-	  "allOf": [{"$ref": "#/definitions/CustomStatCategory"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/CustomStatCategory"}]
+	  }
     },
     "CustomStats": {
       "type": "object",
       "description": "Stats to register to the 'Extra Stats' tab.",
-	  "allOf": [{"$ref": "#/definitions/CustomStat"}]
+	  "additionalProperties": {
+	  	"type" : "object",
+		"allOf": [{"$ref": "#/definitions/CustomStat"}]
+	  }
     }
   }
 }
