@@ -171,7 +171,7 @@ local function CreateTooltip(ui, call, idOrCharacter, idOrOther)
 			if not StringHelpers.IsNullOrWhitespace(data.Icon) then
 				this.tooltip_array[0] = Game.Tooltip.TooltipItemTypes.StatName
 				this.tooltip_array[1] = data:GetDisplayName(character)
-				if tooltipType == Game.Tooltip.TooltipItemTypes.Tag then
+				if tooltipType == "Tag" then
 					this.tooltip_array[2] = Game.Tooltip.TooltipItemTypes.TagDescription
 					this.tooltip_array[3] = description
 					this.tooltip_array[4] = ""

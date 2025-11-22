@@ -37,68 +37,67 @@
 		]
 	},
 	"EntryBase": {
-		"DisplayName": {
-			"type": ["string", "array"],
-			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
-			"description": "The display name or string key to use."
-		},
-		"Description": {
-			"type": ["string", "array"],
-			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
-			"description": "The description or string key to use."
-		},
-		"ExpandedDescription": {
-			"type": ["string", "array"],
-			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
-			"description": "The description to use when expanding tooltips (holding Shift)."
-		},
-		"TooltipType": {
-			"type": "string",
-			"description": ""
-		},
-		"BaseValue": {
-			"type": "number",
-			"description": "An value to override the default base value with, such as an attribute base (10)."
-		},
-		"Visible": {
-			"type": "boolean",
-			"description": "Whether the entry should be visible. Defaults to true."
-		},
-		"SortName": {
-			"type": "string",
-			"description": "If set, this is the name to use instead of DisplayName when the list of stats get sorted for display."
-		},
-		"SortValue": {
-			"type": "number",
-			"description": "If set, this is the sort value number to use when the list of entries get sorted for display."
-		},
-		"LoadStringKey": {
-			"type": "boolean",
-			"description": "Optional setting to force string key conversion for DisplayName/Description/ExpandedDescription, in case the key value doesn't have an underscore."
-		},
-		"BoostAttribute": {
-			"type": "string",
-			"description": "Advanced property that can be used to make the entry use/modify a base attribute."
-		},
-		"Suffix": {
-			"type": "string",
-			"description": "Text to append to the label for the entry, such as a percentage sign."
-		},
-		"UsePoints": {
-			"type": "boolean",
-			"description": "Whether  this entry uses character points, such as Attribute/Ability/Talent points. Defaults to true."
-		},
-		"Icon": {
-			"type": "string",
-			"description": "The icon to use in tooltips. Should be the same sort of icon id used in skills/root templates/etc."
-		},
-		"IconWidth": {
-			"type": "number",
-			"description": "The icon width in tooltips."
-		},
-		"IconHeight": {
-			"type": "number",
-			"description": "The icon height in tooltips."
+		"type": "object",
+		"properties": {
+			"DisplayName": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The display name or string key to use."
+			},
+			"Description": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description or string key to use."
+			},
+			"ExpandedDescription": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description to use when expanding tooltips (holding Shift)."
+			},
+			"BaseValue": {
+				"type": "number",
+				"description": "An value to override the default base value with, such as an attribute base (10)."
+			},
+			"Visible": {
+				"type": "boolean",
+				"description": "Whether the entry should be visible. Defaults to true."
+			},
+			"SortName": {
+				"type": "string",
+				"description": "If set, this is the name to use instead of DisplayName when the list of stats get sorted for display."
+			},
+			"SortValue": {
+				"type": "number",
+				"description": "If set, this is the sort value number to use when the list of entries get sorted for display."
+			},
+			"LoadStringKey": {
+				"type": "boolean",
+				"description": "Optional setting to force string key conversion for DisplayName/Description/ExpandedDescription, in case the key value doesn't have an underscore."
+			},
+			"BoostAttribute": {
+				"type": "string",
+				"description": "Advanced property that can be used to make the entry use/modify a base attribute."
+			},
+			"Suffix": {
+				"type": "string",
+				"description": "Text to append to the label for the entry, such as a percentage sign."
+			},
+			"UsePoints": {
+				"type": "boolean",
+				"description": "Whether this entry uses character points, such as Attribute/Ability/Talent points. Defaults to true."
+			},
+			"Icon": {
+				"type": "string",
+				"description": "The icon to use in tooltips. Should be the same sort of icon id used in skills/root templates/etc."
+			},
+			"IconWidth": {
+				"type": "number",
+				"description": "The icon width in tooltips."
+			},
+			"IconHeight": {
+				"type": "number",
+				"description": "The icon height in tooltips."
+			}
 		}
 	},
 	"RaceTalent": {
@@ -260,10 +259,20 @@
 			}
 		}
 	},
+	"CustomStatBase": {
+		"type": "object",
+		"properties": {
+			"TooltipType": {
+				"enum": ["Ability", "Tag", "Stat"],
+				"description": "Determines the style of tooltip. Defaults to 'Stat'.",
+				"default": "Ability"
+			}
+		}
+	},
 	"CustomStatCategory": {
 		"type": "object",
 		"description": "A category in the Extra Stats tab.",
-		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}, {"$ref": "#/definitions/CustomStatBase"}],
 		"properties": {
 			"ShowAlways": {
 				"type":"boolean",
@@ -278,7 +287,7 @@
 	"CustomStat": {
 		"type": "object",
 		"description": "A stat in the Extra Stats tab.",
-		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}, {"$ref": "#/definitions/CustomStatBase"}],
 		"properties": {
 			"MaxValue": {
 				"type":"number",
