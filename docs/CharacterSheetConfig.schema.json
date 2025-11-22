@@ -327,9 +327,9 @@
 			"Stats": {"$ref": "#/definitions/Stat"},
 			"AbilityCategories": {"$ref": "#/definitions/AbilityCategory"},
 			"Abilities": {"$ref": "#/definitions/Ability"},
-			"Talents": {"$ref": "#/definitions/Talents"},
+			"Talents": {"$ref": "#/definitions/Talent"},
 			"CustomStatCategories": {"$ref": "#/definitions/CustomStatCategory"},
-			"CustomStats": {"$ref": "#/definitions/CustomStats"}
+			"CustomStats": {"$ref": "#/definitions/CustomStat"}
 	  }
     },
     "Stats": {
