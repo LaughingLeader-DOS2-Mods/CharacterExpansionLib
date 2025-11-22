@@ -117,7 +117,6 @@
 	},
 	"Stat": {
 		"type":"object",
-		"required": ["DisplayName", "Description"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
@@ -172,7 +171,6 @@
 	"AbilityCategory": {
 		"type": "object",
 		"description": "A new ability category.",
-		"required": ["DisplayName"],
 		"properties": {
 			"DisplayName": {
 				"type": ["string", "array"],
@@ -198,7 +196,6 @@
 	},
 	"Ability": {
 		"type":"object",
-		"required": ["DisplayName", "Description"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
@@ -235,7 +232,6 @@
 	},
 	"Talent": {
 		"type":"object",
-		"required": ["DisplayName", "Description"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
@@ -267,7 +263,6 @@
 	"CustomStatCategory": {
 		"type": "object",
 		"description": "A category in the Extra Stats tab.",
-		"required": ["DisplayName"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"ShowAlways": {
@@ -283,7 +278,6 @@
 	"CustomStat": {
 		"type": "object",
 		"description": "A stat in the Extra Stats tab.",
-		"required": ["DisplayName"],
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"MaxValue": {
