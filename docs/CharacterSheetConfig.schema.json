@@ -1,0 +1,366 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LaughingLeader-DOS2-Mods/CharacterExpansionLib/refs/heads/master/docs/CharacterSheetConfig.schema.json",
+  "title": "CharacterSheetConfig",
+  "description": "A config for registering new character sheet entries.",
+  "type": "object",
+  "definitions": {
+	"Requirement": {
+		"type": "object",
+		"description": "A requirement entry.",
+		"properties": {
+			"Requirement": {
+				"type": "string",
+				"description": "A stat/ability/talent id, or specific Requirement keyword."
+			},
+			"Param": {
+				"type": ["number", "boolean"],
+				"description": "The value required for a given stat/ability/talent/whatever is being compared."
+			}
+		}
+	},
+	"LocaleKey": {
+		"anyOf": [
+			{
+				"type": "string"
+			}, 
+			{
+				"type": "array",
+				"minLength": 2,
+				"maxLength": 2,
+				"allOf": [
+					{
+						"type":"string"
+					}
+				]
+			}
+		]
+	},
+	"EntryBase": {
+		"DisplayName": {
+			"type": ["string", "array"],
+			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+			"description": "The display name or string key to use."
+		},
+		"Description": {
+			"type": ["string", "array"],
+			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+			"description": "The description or string key to use."
+		},
+		"ExpandedDescription": {
+			"type": ["string", "array"],
+			"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+			"description": "The description to use when expanding tooltips (holding Shift)."
+		},
+		"TooltipType": {
+			"type": "string",
+			"description": ""
+		},
+		"BaseValue": {
+			"type": "number",
+			"description": "An value to override the default base value with, such as an attribute base (10)."
+		},
+		"Visible": {
+			"type": "boolean",
+			"description": "Whether the entry should be visible. Defaults to true."
+		},
+		"SortName": {
+			"type": "string",
+			"description": "If set, this is the name to use instead of DisplayName when the list of stats get sorted for display."
+		},
+		"SortValue": {
+			"type": "number",
+			"description": "If set, this is the sort value number to use when the list of entries get sorted for display."
+		},
+		"LoadStringKey": {
+			"type": "boolean",
+			"description": "Optional setting to force string key conversion for DisplayName/Description/ExpandedDescription, in case the key value doesn't have an underscore."
+		},
+		"BoostAttribute": {
+			"type": "string",
+			"description": "Advanced property that can be used to make the entry use/modify a base attribute."
+		},
+		"Suffix": {
+			"type": "string",
+			"description": "Text to append to the label for the entry, such as a percentage sign."
+		},
+		"UsePoints": {
+			"type": "boolean",
+			"description": "Whether  this entry uses character points, such as Attribute/Ability/Talent points. Defaults to true."
+		},
+		"Icon": {
+			"type": "string",
+			"description": "The icon to use in tooltips. Should be the same sort of icon id used in skills/root templates/etc."
+		},
+		"IconWidth": {
+			"type": "number",
+			"description": "The icon width in tooltips."
+		},
+		"IconHeight": {
+			"type": "number",
+			"description": "The icon height in tooltips."
+		}
+	},
+	"RaceTalent": {
+		"type":"object",
+		"additionalProperties": false,
+		"properties": {
+			"ID": {
+				"type":"string",
+				"description": "The talent GUID."
+			},
+			"Mod": {
+				"type":"string",
+				"description": "The mod GUID."
+			}
+		}
+	},
+	"Stat": {
+		"type":"object",
+		"required": ["DisplayName", "Description"],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"properties": {
+			"DisplayName": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The display name or string key to use."
+			},
+			"Description": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description or string key to use."
+			},
+			"StatType": {
+				"enum": ["PrimaryStat", "SecondaryStat", "Spacing"],
+				"description": "The primary stat type, which determines the section for the stat."
+			},
+			"SecondaryStatType": {
+				"enum": ["Info", "Stat", "Resistance", "Experience"],
+				"description": "The secondary stat type (if StatType is SecondaryStat), which determines the subsection."
+			},
+			"MaxValue": {
+				"type":"number",
+				"description": "An optional maximum value to cap this stat at. If not set, the max value will depend on the StatType, such as the attribute soft cap for PrimaryStat (40)."
+			},
+			"SheetIcon": {
+				"type":"string",
+				"description": "The icon to use in the character sheet.",
+				"default": ""
+			},
+			"SheetIconWidth": {
+				"type":"number",
+				"description": "The character sheet icon width.",
+				"default": 28
+			},
+			"SheetIconHeight": {
+				"type":"number",
+				"description": "The character sheet icon height.",
+				"default": 28
+			},
+			"SpacingHeight": {
+				"type":"number",
+				"description": "If StatType is 'Spacing', this is the amount of space.",
+				"default": 0
+			},
+			"Frame": {
+				"type":"integer",
+				"description": "The frame to use on the Flash side. Defaults to 0.",
+				"default": 0
+			}
+		}
+	},
+	"AbilityCategory": {
+		"type": "object",
+		"description": "A new ability category.",
+		"required": ["DisplayName", "Description"],
+		"properties": {
+			"DisplayName": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The display name or string key to use."
+			},
+			"Description": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description or string key to use."
+			},
+			"ExpandedDescription": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description to use when expanding tooltips (holding Shift)."
+			},
+			"IsCivil": {
+				"type":"boolean",
+				"description": "Whether this is a civil (true) or combat ability (false). Defaults to false.",
+				"default": false
+			}
+		}
+	},
+	"Ability": {
+		"type":"object",
+		"required": ["DisplayName", "Description"],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"properties": {
+			"DisplayName": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The display name or string key to use."
+			},
+			"Description": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description or string key to use."
+			},
+			"IsCivil": {
+				"type":"boolean",
+				"description": "Whether this is a combat ability or civil ability."
+			},
+			"MaxValue": {
+				"type":"number",
+				"description": "An optional maximum value to cap this stat at. If not set, the max value will depend on whether this ability is a 'Civil' ability or not (5 cap or 10 cap)."
+			},
+			"CategoryID": {
+				"enum": ["Weapons", "Defense", "Skills", "Personality", "Craftsmanship", "NastyDeeds"],
+				"description": "An existing vanilla category ID to use. Defaults to 'Skills'."
+			},
+			"CategoryMod": {
+				"type":"string",
+				"description": "The mod guid to use for the ability category, if CustomCategory is set. Defaults to the mod guid from the config file itself."
+			},
+			"CustomCategory": {
+				"type":"string",
+				"description": "An id for a custom ability category to use."
+			}
+		}
+	},
+	"Talent": {
+		"type":"object",
+		"required": ["DisplayName", "Description"],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"properties": {
+			"DisplayName": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The display name or string key to use."
+			},
+			"Description": {
+				"type": ["string", "array"],
+				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"description": "The description or string key to use."
+			},
+			"IsRacial": {
+				"type":"boolean",
+				"description": "Whether this talent is tied to a specific race."
+			},
+			"Requirements": {
+				"type":"array",
+				"description": "A table of requirements to parse before a talent can be taken. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements).",
+				"allOf": [{"$ref": "#/definitions/Requirement"}]
+			},
+			"IncompatibleWith": {
+				"type":"array",
+				"description": "A table of requirements to parse for blocking the ability to put a point in a talent. This uses the same format as skill requirements, when parsed from stats (i.e. Ext.Stats.Get('Projectile_FireBall').Requirements).",
+				"allOf": [{"$ref": "#/definitions/Requirement"}]
+			}
+		}
+	},
+	"CustomStatCategory": {
+		"type": "object",
+		"description": "A category in the Extra Stats tab.",
+		"required": ["DisplayName", "Description"],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"properties": {
+			"ShowAlways": {
+				"type":"boolean",
+				"description": "Whether to always show the stat category, even if no points are added."
+			},
+			"HideTotalPoints": {
+				"type":"boolean",
+				"description": "Whether to hide the total points from the category label."
+			}
+		}
+	},
+	"CustomStat": {
+		"type": "object",
+		"description": "A category in the Extra Stats tab.",
+		"required": ["DisplayName", "Description"],
+		"allOf": [{"$ref": "#/definitions/EntryBase"}],
+		"properties": {
+			"MaxValue": {
+				"type":"number",
+				"description": "An optional maximum value to cap this stat at."
+			},
+			"Category": {
+				"type":"string",
+				"description": "The category ID to organize this stat under. Defaults to a 'Misc' category if not set."
+			},
+			"PointID": {
+				"type":"string",
+				"description": "An ID to use for a common pool of available points, if players are allowed to add/respec points."
+			},
+			"DisplayMode": {
+				"enum": ["Integer", "Percentage"],
+				"description": "Alternative display modes for a stat, such as percentage display."
+			},
+			"DisplayValueInTooltip": {
+				"type":"boolean",
+				"description": "Whether to display the value in the tooltip.",
+				"default": false
+			},
+			"AutoAddAvailablePointsOnRemove": {
+				"type":"boolean",
+				"description": "Automatically manage adding available points when this stat is reduced in the UI by a player.",
+				"default": true
+			},
+			"Create": {
+				"type":"boolean",
+				"description": "If true, the custom stat is created automatically on the server, if GM custom stats are enabled."
+			}
+		}
+	}
+  },
+  "properties": {
+    "Defaults": {
+      "type": "object",
+      "description": "Default properties to apply to various entry types",
+	  "properties": {
+			"Stats": {"$ref": "#/definitions/Stat"},
+			"AbilityCategories": {"$ref": "#/definitions/AbilityCategory"},
+			"Abilities": {"$ref": "#/definitions/Ability"},
+			"Talents": {"$ref": "#/definitions/Talents"},
+			"CustomStatCategories": {"$ref": "#/definitions/CustomStatCategory"},
+			"CustomStats": {"$ref": "#/definitions/CustomStats"}
+	  }
+    },
+    "Stats": {
+      "type": "object",
+      "description": "Stats to register.",
+	  "allOf": [{"$ref": "#/definitions/Stat"}]
+    },
+    "AbilityCategories": {
+      "type": "object",
+      "description": "Ability categories to register.",
+	  "allOf": [{"$ref": "#/definitions/AbilityCategory"}]
+    },
+    "Abilities": {
+      "type": "object",
+      "description": "Abilities to register.",
+	  "allOf": [{"$ref": "#/definitions/Ability"}]
+    },
+    "Talents": {
+      "type": "object",
+      "description": "Talents to register.",
+	  "allOf": [{"$ref": "#/definitions/Talent"}]
+    },
+    "CustomStatCategories": {
+      "type": "object",
+      "description": "Categories to register to the 'Extra Stats' tab.",
+	  "allOf": [{"$ref": "#/definitions/CustomStatCategory"}]
+    },
+    "CustomStats": {
+      "type": "object",
+      "description": "Stats to register to the 'Extra Stats' tab.",
+	  "allOf": [{"$ref": "#/definitions/CustomStat"}]
+    }
+  }
+}
