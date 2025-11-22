@@ -19,39 +19,19 @@
 			}
 		}
 	},
-	"LocaleKey": {
-		"anyOf": [
-			{
-				"type": "string"
-			}, 
-			{
-				"type": "array",
-				"minLength": 2,
-				"maxLength": 2,
-				"allOf": [
-					{
-						"type":"string"
-					}
-				]
-			}
-		]
-	},
 	"EntryBase": {
 		"type": "object",
 		"properties": {
 			"DisplayName": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
 				"description": "The description or string key to use."
 			},
 			"ExpandedDescription": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
 				"description": "The description to use when expanding tooltips (holding Shift)."
 			},
 			"BaseValue": {
@@ -119,13 +99,11 @@
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The description or string key to use."
 			},
 			"StatType": {
@@ -172,18 +150,15 @@
 		"description": "A new ability category.",
 		"properties": {
 			"DisplayName": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The description or string key to use."
 			},
 			"ExpandedDescription": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The description to use when expanding tooltips (holding Shift)."
 			},
 			"IsCivil": {
@@ -198,13 +173,11 @@
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The description or string key to use."
 			},
 			"IsCivil": {
@@ -234,13 +207,11 @@
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
 			"DisplayName": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The display name or string key to use."
 			},
 			"Description": {
-				"type": ["string", "array"],
-				"allOf": [{"$ref": "#/definitions/LocaleKey"}],
+				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
 				"description": "The description or string key to use."
 			},
 			"IsRacial": {
