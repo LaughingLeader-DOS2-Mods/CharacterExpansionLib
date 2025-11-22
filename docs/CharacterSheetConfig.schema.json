@@ -24,11 +24,11 @@
 		"properties": {
 			"DisplayName": {
 				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
-				"description": "The display name or string key to use."
+				"description": "A string or array of strings (i.e. [\"StringKeyOrHandle\", \"FallBack Text\"] to use for the name."
 			},
 			"Description": {
 				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
-				"description": "The description or string key to use."
+				"description": "A string or array of strings (i.e. [\"StringKeyOrHandle\", \"FallBack Text\"] to use for the description."
 			},
 			"ExpandedDescription": {
 				"anyOf": [{ "type": "string" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": {"type":"string"} }],
@@ -98,14 +98,6 @@
 		"type":"object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
-			"DisplayName": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The display name or string key to use."
-			},
-			"Description": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The description or string key to use."
-			},
 			"StatType": {
 				"enum": ["PrimaryStat", "SecondaryStat", "Spacing"],
 				"description": "The primary stat type, which determines the section for the stat."
@@ -172,14 +164,6 @@
 		"type":"object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
-			"DisplayName": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The display name or string key to use."
-			},
-			"Description": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The description or string key to use."
-			},
 			"IsCivil": {
 				"type":"boolean",
 				"description": "Whether this is a combat ability or civil ability."
@@ -206,14 +190,6 @@
 		"type":"object",
 		"allOf": [{"$ref": "#/definitions/EntryBase"}],
 		"properties": {
-			"DisplayName": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The display name or string key to use."
-			},
-			"Description": {
-				"anyOf": [{ "type": "string" }, { "type": "array", "minLength": 2, "maxLength": 2, "allOf": [{"type":"string"}] }],
-				"description": "The description or string key to use."
-			},
 			"IsRacial": {
 				"type":"boolean",
 				"description": "Whether this talent is tied to a specific race."
